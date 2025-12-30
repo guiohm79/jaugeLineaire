@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Linear Gauge Card Dev</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 40px;
+      background-color: #f0f0f0;
+      font-family: sans-serif;
+    }
+
+    /* Fake HA variables */
+    body {
+      --primary-text-color: #212121;
+      --secondary-background-color: #e0e0e0;
+      --primary-color: #03a9f4;
+      --card-background-color: #ffffff;
+    }
+
+    linear-gauge-card {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Container for our card -->
+  <linear-gauge-card></linear-gauge-card>
+
+  <script type="module" src="/src/linear-gauge-card.js"></script>
+  <script>
+    (async () => {
+      console.log('Waiting for custom element...');
+      await customElements.whenDefined('linear-gauge-card');
+      console.log('Custom element defined!');
+
+      const card = document.querySelector('linear-gauge-card');
+      if (!card) {
+        console.error('Card element not found in DOM');
+        return;
+      }
+
+      const mockHass = {
+        states: {
+          'sensor.temperature': {
+            state: '22.5',
+            attributes: { friendly_name: 'Salon', unit_of_measurement: '°C' }
+          },
+          'sensor.humidity': {
+            state: '45',
+            attributes: { friendly_name: 'Humidité', unit_of_measurement: '%' }
+          },
+          'sensor.cpu': {
+            state: '80',
+            attributes: { friendly_name: 'CPU Load', unit_of_measurement: '%' }
+          }
+        }
+      };
+
+      const mockConfig = {
+        type: 'custom:linear-gauge-card',
+        title: 'Ma Maison',
+        min: 0,
+        max: 100,
+        colors: ["#43a047", "#fdd835", "#e53935"],
+        entities: [
+          { entity: 'sensor.temperature', min: -10, max: 40, name: 'Living Room Temp' },
+          'sensor.humidity',
+          { entity: 'sensor.cpu', name: 'Server Load' }
+        ]
+      };
+
+      try {
+        console.log('Setting config...');
+        card.setConfig(mockConfig);
+        console.log('Config set.');
+
+        console.log('Setting hass...');
+        card.hass = mockHass;
+        console.log('Hass set.');
+      } catch (e) {
+        console.error('Error initializing card:', e);
+      }
+
+      // Simulate state changes
+      setInterval(() => {
+        const temp = (20 + Math.random() * 5).toFixed(1);
+        const cpu = (Math.random() * 100).toFixed(0);
+
+        mockHass.states['sensor.temperature'] = { ...mockHass.states['sensor.temperature'], state: temp };
+        mockHass.states['sensor.cpu'] = { ...mockHass.states['sensor.cpu'], state: cpu };
+
+        card.hass = { ...mockHass }; // Trigger update
+      }, 2000);
+    })();
+  </script>
+</body>
+
+</html>
