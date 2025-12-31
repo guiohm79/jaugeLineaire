@@ -5,7 +5,14 @@ class LinearGaugeCard extends LitElement {
     return {
       hass: { attribute: false },
       _config: { state: true },
+      _history: { state: true },
     };
+  }
+
+  constructor() {
+    super();
+    this._history = {};
+    this._historyFetched = new Set();
   }
 
   setConfig(config) {
@@ -13,6 +20,68 @@ class LinearGaugeCard extends LitElement {
       throw new Error('You must define "entities"');
     }
     this._config = config;
+  }
+
+  updated(changedProps) {
+    if (changedProps.has('hass') && this.hass && this._config?.show_min_max) {
+      this._fetchHistoryIfNeeded();
+    }
+  }
+
+  async _fetchHistoryIfNeeded() {
+    if (!this.hass || !this._config.entities) return;
+
+    const entities = this._config.entities.map(e => (typeof e === 'string' ? e : e.entity));
+    const now = new Date();
+
+    // Simple fetch logic: fetch if not already fetched for this session
+    if (this._fetching) return;
+
+    const toFetch = entities.filter(id => !this._historyFetched.has(id));
+    if (toFetch.length === 0) return;
+
+    this._fetching = true;
+    try {
+      const endTime = now.toISOString();
+      const startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+
+      const ids = toFetch.join(',');
+      const history = await this.hass.callApi(
+        'GET',
+        `history/period/${startTime}?end_time=${endTime}&filter_entity_id=${ids}&minimal_response`
+      );
+
+      const newHistory = { ...this._history };
+
+      if (Array.isArray(history)) {
+        history.forEach(entityHistory => {
+          if (entityHistory && entityHistory.length > 0) {
+            const entityId = entityHistory[0].entity_id;
+            let min = parseFloat(entityHistory[0].state);
+            let max = min;
+
+            entityHistory.forEach(state => {
+              const val = parseFloat(state.state);
+              if (!isNaN(val)) {
+                if (val < min) min = val;
+                if (val > max) max = val;
+              }
+            });
+
+            if (!isNaN(min) && !isNaN(max)) {
+              newHistory[entityId] = { min, max };
+              this._historyFetched.add(entityId);
+            }
+          }
+        });
+      }
+
+      this._history = newHistory;
+    } catch (e) {
+      console.error("Error fetching history for linear-gauge-card:", e);
+    } finally {
+      this._fetching = false;
+    }
   }
 
   static get styles() {
@@ -73,6 +142,16 @@ class LinearGaugeCard extends LitElement {
         padding: 8px;
         border-radius: 12px;
         animation: fadeIn 0.5s ease-out backwards;
+      }
+
+      .gauge-container.pulsing {
+        animation: pulse-red 2s infinite;
+      }
+
+      @keyframes pulse-red {
+        0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
       }
       
       /* Horizontal Gauge Container adjustments */
@@ -137,6 +216,18 @@ class LinearGaugeCard extends LitElement {
         text-align: center;
       }
 
+      .entity-info-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        max-width: 65%;
+      }
+
+      .entity-icon {
+        color: var(--paper-item-icon-color);
+        --mdc-icon-size: 20px;
+      }
+
       .entity-name {
         font-weight: 500;
         color: var(--primary-text-color);
@@ -148,7 +239,6 @@ class LinearGaugeCard extends LitElement {
       
       .entities-wrapper.horizontal .entity-name {
         margin-right: 8px;
-        max-width: 65%;
       }
       
       .entities-wrapper.vertical .entity-name {
@@ -186,9 +276,9 @@ class LinearGaugeCard extends LitElement {
       /* Vertical Bar Dimensions */
       .entities-wrapper.vertical .bar-bg {
         width: 16px; 
-        height: 120px; /* Default height for vertical bars */
+        height: 120px; 
         display: flex;
-        align-items: flex-end; /* Grow from bottom */
+        align-items: flex-end; 
       }
 
       .bar-fill {
@@ -196,7 +286,41 @@ class LinearGaugeCard extends LitElement {
         transition: all 1s cubic-bezier(0.2, 0.8, 0.2, 1);
         position: relative;
         box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        overflow: hidden; /* CRITICAL: Prevent shimmer from leaking outside the filled part */
+        overflow: hidden; 
+      }
+
+      .target-marker {
+        position: absolute;
+        background-color: var(--primary-text-color);
+        opacity: 0.8;
+        pointer-events: none;
+        z-index: 2;
+        box-shadow: 0 0 2px rgba(0,0,0,0.5);
+      }
+      .entities-wrapper.horizontal .target-marker {
+        width: 2px;
+        height: 100%;
+        top: 0;
+      }
+      .entities-wrapper.vertical .target-marker {
+        height: 2px;
+        width: 100%;
+        left: 0;
+      }
+
+      .min-max-range {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.15);
+        pointer-events: none;
+        z-index: 1;
+      }
+      .entities-wrapper.horizontal .min-max-range {
+        height: 100%;
+        top: 0;
+      }
+      .entities-wrapper.vertical .min-max-range {
+        width: 100%;
+        left: 0;
       }
 
       /* Horizontal Fill */
@@ -211,7 +335,6 @@ class LinearGaugeCard extends LitElement {
         min-height: 8px;
       }
       
-      /* Glowing effect & Shimmer */
       .bar-fill::before {
         content: '';
         position: absolute;
@@ -251,7 +374,7 @@ class LinearGaugeCard extends LitElement {
     }
 
     const title = this._config.title;
-    const layout = this._config.layout || 'horizontal'; // 'horizontal' | 'vertical'
+    const layout = this._config.layout || 'horizontal';
 
     return html`
       <ha-card>
@@ -281,6 +404,7 @@ class LinearGaugeCard extends LitElement {
     const name = conf.name || stateObj.attributes.friendly_name || entityId;
     const value = parseFloat(stateObj.state);
     const unit = conf.unit || stateObj.attributes.unit_of_measurement || '';
+    const icon = conf.icon || stateObj.attributes.icon;
 
     const min = conf.min ?? this._config.min ?? 0;
     const max = conf.max ?? this._config.max ?? 100;
@@ -293,7 +417,29 @@ class LinearGaugeCard extends LitElement {
 
     const color = this._computeColor(value, conf, layout);
 
-    // Style logic based on layout
+    // Pulse Logic
+    let isPulsing = false;
+
+    // 1. Explicit Pulse Configuration
+    const pulseConf = conf.pulse || this._config.pulse;
+    if (pulseConf && typeof pulseConf === 'object') {
+      const threshold = parseFloat(pulseConf.value);
+      const condition = pulseConf.condition || 'above';
+
+      if (!isNaN(threshold)) {
+        if (condition === 'above' && value >= threshold) isPulsing = true;
+        else if (condition === 'below' && value <= threshold) isPulsing = true;
+      }
+    }
+
+    // 2. Severity-based Pulse (Fallback/Additive)
+    if (!isPulsing) {
+      const severityMatch = this._getSeverityMatch(value, conf.severity || this._config.severity);
+      if (severityMatch && severityMatch.pulse) {
+        isPulsing = true;
+      }
+    }
+
     let barStyle = '';
     if (layout === 'vertical') {
       barStyle = `height: ${percent}%; background: ${color}; box-shadow: 0 0 10px ${color};`;
@@ -301,46 +447,108 @@ class LinearGaugeCard extends LitElement {
       barStyle = `width: ${percent}%; background: ${color}; box-shadow: 0 0 10px ${color};`;
     }
 
+    let targetMarker = html``;
+    if (conf.target !== undefined) {
+      let targetVal = conf.target;
+      if (typeof targetVal === 'string' && isNaN(parseFloat(targetVal))) {
+        const targetState = this.hass.states[targetVal];
+        if (targetState) {
+          targetVal = parseFloat(targetState.state);
+        }
+      }
+
+      targetVal = parseFloat(targetVal);
+      if (!isNaN(targetVal)) {
+        const clampedTarget = Math.max(min, Math.min(targetVal, max));
+        const targetPercent = ((clampedTarget - min) / (max - min)) * 100;
+        const style = layout === 'vertical'
+          ? `bottom: ${targetPercent}%`
+          : `left: ${targetPercent}%`;
+        targetMarker = html`<div class="target-marker" style="${style}"></div>`;
+      }
+    }
+
+    let minMaxMarker = html``;
+    if (this._config.show_min_max && this._history[entityId]) {
+      const hMin = this._history[entityId].min;
+      const hMax = this._history[entityId].max;
+
+      if (hMin !== undefined && hMax !== undefined) {
+        const clampedMin = Math.max(min, Math.min(hMin, max));
+        const clampedMax = Math.max(min, Math.min(hMax, max));
+
+        const minPct = ((clampedMin - min) / (max - min)) * 100;
+        const maxPct = ((clampedMax - min) / (max - min)) * 100;
+        const rangeSize = maxPct - minPct;
+
+        let style = '';
+        if (layout === 'vertical') {
+          style = `bottom: ${minPct}%; height: ${rangeSize}%;`;
+        } else {
+          style = `left: ${minPct}%; width: ${rangeSize}%;`;
+        }
+        minMaxMarker = html`<div class="min-max-range" style="${style}"></div>`;
+      }
+    }
+
     return html`
-      <div class="gauge-container" @click=${() => this._handleEntityClick(entityId)}>
+      <div class="gauge-container ${isPulsing ? 'pulsing' : ''}" 
+           @click=${(e) => this._handleAction(e, conf, entityId)}>
         <div class="entity-row">
-          <span class="entity-name" title="${name}">${name}</span>
+          <div class="entity-info-group">
+            ${icon ? html`<ha-icon class="entity-icon" .icon="${icon}"></ha-icon>` : ''}
+            <span class="entity-name" title="${name}">${name}</span>
+          </div>
           <span class="entity-state">${isNaN(value) ? stateObj.state : `${value} ${unit}`}</span>
         </div>
         <div class="bar-bg">
+          ${minMaxMarker}
           <div class="bar-fill" style="${barStyle}"></div>
+          ${targetMarker}
         </div>
       </div>
     `;
   }
 
-  _handleEntityClick(entityId) {
-    const event = new CustomEvent('hass-more-info', {
-      detail: { entityId },
-      bubbles: true,
-      composed: true,
-    });
-    this.dispatchEvent(event);
+  _handleAction(e, conf, entityId) {
+    e.stopPropagation();
+
+    const config = conf.tap_action || this._config.tap_action || { action: 'more-info' };
+    const action = config.action;
+
+    if (action === 'more-info') {
+      const event = new CustomEvent('hass-more-info', {
+        detail: { entityId },
+        bubbles: true,
+        composed: true,
+      });
+      this.dispatchEvent(event);
+    } else if (action === 'toggle') {
+      this.hass.callService('homeassistant', 'toggle', { entity_id: entityId });
+    } else if (action === 'navigate' && config.navigation_path) {
+      history.pushState(null, '', config.navigation_path);
+      const event = new Event('location-changed', { bubbles: true, composed: true });
+      window.dispatchEvent(event);
+    } else if (action === 'url' && config.url_path) {
+      window.open(config.url_path);
+    } else if (action === 'call-service' && config.service) {
+      const [domain, service] = config.service.split('.');
+      const serviceData = { entity_id: entityId, ...config.data };
+      this.hass.callService(domain, service, serviceData);
+    }
   }
 
   _computeColor(value, entityConf, layout) {
     if (isNaN(value)) return 'var(--primary-color, #44739e)';
 
-    // Helper to format gradient based on layout
     const makeGradient = (colors) => {
-      const direction = (layout === 'vertical') ? '0deg' : '90deg'; // 0deg = to top, 90deg = to right
+      const direction = (layout === 'vertical') ? '0deg' : '90deg';
       return `linear-gradient(${direction}, ${colors.join(', ')})`;
     };
 
-    // 1. Entity specific color
     if (entityConf.color) return entityConf.color;
-    // 2. Entity specific ramp
     if (entityConf.severity) return this._computeSeverity(value, entityConf.severity);
-
-    // 3. Global ramp
     if (this._config.severity) return this._computeSeverity(value, this._config.severity);
-
-    // 4. Global gradient
     if (Array.isArray(this._config.colors) && this._config.colors.length > 0) {
       return makeGradient(this._config.colors);
     }
@@ -348,10 +556,14 @@ class LinearGaugeCard extends LitElement {
     return this._config.color || 'var(--primary-color, #03a9f4)';
   }
 
-  _computeSeverity(value, severity) {
-    if (!Array.isArray(severity)) return 'var(--primary-color)';
+  _getSeverityMatch(value, severity) {
+    if (!Array.isArray(severity)) return null;
     const sorted = [...severity].sort((a, b) => b.from - a.from);
-    const match = sorted.find(item => value >= item.from);
+    return sorted.find(item => value >= item.from);
+  }
+
+  _computeSeverity(value, severity) {
+    const match = this._getSeverityMatch(value, severity);
     return match ? match.color : 'var(--primary-color)';
   }
 }
