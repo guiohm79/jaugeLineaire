@@ -365,6 +365,26 @@ class LinearGaugeCard extends LitElement {
         50% { transform: translateY(-150%); }
         100% { transform: translateY(-150%); }
       }
+      /* LED Effect Styles */
+      .bar-bg.effect-led {
+        border-radius: 0;
+        background-color: rgba(0, 0, 0, 0.3);
+      }
+      
+      .bar-fill.effect-led {
+        border-radius: 0;
+        mask-image: linear-gradient(to right, black 2px, transparent 2px, transparent 3px, black 3px);
+        mask-size: 3px 100%;
+        -webkit-mask-image: linear-gradient(to right, black 2px, transparent 2px, transparent 3px, black 3px);
+        -webkit-mask-size: 3px 100%;
+      }
+
+      .entities-wrapper.vertical .bar-fill.effect-led {
+        mask-image: linear-gradient(to bottom, black 2px, transparent 2px, transparent 3px, black 3px);
+        mask-size: 100% 3px;
+        -webkit-mask-image: linear-gradient(to bottom, black 2px, transparent 2px, transparent 3px, black 3px);
+        -webkit-mask-size: 100% 3px;
+      }
     `;
   }
 
@@ -408,6 +428,10 @@ class LinearGaugeCard extends LitElement {
 
     const min = conf.min ?? this._config.min ?? 0;
     const max = conf.max ?? this._config.max ?? 100;
+
+    // Effect Logic
+    const effect = conf.effect || this._config.effect || 'default';
+    const effectClass = effect === 'led' ? 'effect-led' : '';
 
     let percent = 0;
     if (!isNaN(value)) {
@@ -501,9 +525,9 @@ class LinearGaugeCard extends LitElement {
           </div>
           <span class="entity-state">${isNaN(value) ? stateObj.state : `${value} ${unit}`}</span>
         </div>
-        <div class="bar-bg">
+        <div class="bar-bg ${effectClass}">
           ${minMaxMarker}
-          <div class="bar-fill" style="${barStyle}"></div>
+          <div class="bar-fill ${effectClass}" style="${barStyle}"></div>
           ${targetMarker}
         </div>
       </div>

@@ -2,24 +2,25 @@
 
 Une carte personnalisée moderne et interactive pour afficher vos entités sous forme de jauges linéaires. Profitez d'un design "Glassmorphism" premium, d'animations fluides et d'une grande flexibilité d'affichage.
 
-## ✨ Fonctionnalités
-- 🎨 **Design Glassmorphism** : Look moderne avec effets de flou (backdrop-filter) et de translucidité.
-- 👆 **Actions Interactives** : Support complet des `tap_action` (toggle, navigation, call-service, URL).
-- 🖼️ **Icônes** : Support des icônes Material Design.
-- 🎯 **Cibles** : Affichage d'un marqueur de cible (valeur fixe ou entité).
-- 🚨 **Alertes Visuelles** : Animation de pulsation pour les états critiques.
-- 📈 **Min/Max 24h** : Visualisation de la plage des valeurs sur les dernières 24h.
-- ↕️ **Layout Flexible** : Choisissez entre un affichage horizontal (liste) ou vertical (colonnes).
-- 🌈 **Dégradés Intelligents** : Les dégradés s'adaptent automatiquement à l'orientation des jauges.
+## Fonctionnalités
+-  **Design Glassmorphism** : Look moderne avec effets de flou (backdrop-filter) et de translucidité.
+-  **Actions Interactives** : Support complet des `tap_action` (toggle, navigation, call-service, URL).
+-  **Icônes** : Support des icônes Material Design.
+-  **Cibles** : Affichage d'un marqueur de cible (valeur fixe ou entité).
+-  **Alertes Visuelles** : Animation de pulsation pour les états critiques.
+-  **Min/Max 24h** : Visualisation de la plage des valeurs sur les dernières 24h.
+-  **Layout Flexible** : Choisissez entre un affichage horizontal (liste) ou vertical (colonnes).
+-  **Dégradés Intelligents** : Les dégradés s'adaptent automatiquement à l'orientation des jauges.
+-  **Effet LED** : Mode d'affichage segmenté et rectangulaire pour un style "pixel" moderne.
 
-## 🚀 Installation
+##  Installation
 
 1. Copiez le fichier `dist/linear-gauge-card.mjs` dans le dossier `www` de votre configuration Home Assistant (ex: `config/www/linear-gauge-card.js`).
 2. Ajoutez la ressource dans votre tableau de bord Lovelace :
    - URL: `/local/linear-gauge-card.js`
    - Type: `Module JavaScript`
 
-## ⚙️ Configuration
+##  Configuration
 
 Type: `custom:linear-gauge-card`
 
@@ -33,6 +34,7 @@ Type: `custom:linear-gauge-card`
 | `show_min_max` | boolean | Afficher les marqueurs min/max des dernières 24h (défaut: false) |
 | `colors` | list | Liste de couleurs pour un dégradé global |
 | `severity` | list | Configuration de sévérité globale |
+| `effect` | string | `default` ou `led` pour un effet de segments rectangulaires |
 | `tap_action` | object | Action par défaut au clic (ex: toggle) |
 
 ### Configuration d'Entité
@@ -48,6 +50,7 @@ Chaque entité de la liste peut être configurée individuellement :
 | `min` / `max` | number | Limites spécifiques à cette entité |
 | `color` | string | Couleur fixe pour cette jauge |
 | `severity` | list | Paliers de couleurs spécifiques |
+| `effect` | string | Override de l'effet (`default` ou `led`) |
 | `pulse` | object | Configuration d'alerte pulsation (voir ci-dessous) |
 | `tap_action` | object | Action spécifique au clic |
 
@@ -73,7 +76,7 @@ tap_action:
     brightness: 255
 ```
 
-## 📝 Exemples
+##  Exemples
 
 ### Exemple Complet
 ```yaml
@@ -96,6 +99,16 @@ entities:
     target: sensor.target_temp # Marqueur dynamique
     tap_action:
       action: more-info
+```
+
+### Style LED
+```yaml
+type: custom:linear-gauge-card
+title: Batterie
+effect: led
+entities:
+  - entity: sensor.battery_level
+    name: Niveau
 ```
 
 ### Mode Vertical (Colonnes)
