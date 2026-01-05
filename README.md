@@ -8,9 +8,9 @@
 ![stars][github-stars]
 ![downloads-latest][github-latest-downloads]
 
-[github-downloads]: https://img.shields.io/github/downloads/guiohm79/jaugeLineaire/total?style=flat
-[github-latest-downloads]: https://img.shields.io/github/downloads/guiohm79/jaugeLineaire/latest/total?style=flat
-[github-stars]: https://img.shields.io/github/stars/guiohm79/jaugeLineaire?style=flat
+[github-downloads]: https://img.shields.io/github/downloads/guiohm79/jaugeLineaire/total.svg?style=flat
+[github-latest-downloads]: https://img.shields.io/github/downloads/guiohm79/jaugeLineaire/latest/total.svg?style=flat
+[github-stars]: https://img.shields.io/github/stars/guiohm79/jaugeLineaire.svg?style=flat
 
 
 A modern and interactive custom card to display your entities as linear gauges. Enjoy a premium Glassmorphism design, smooth animations, and high display flexibility.
@@ -38,7 +38,7 @@ A modern and interactive custom card to display your entities as linear gauges. 
 
 ### Via HACS (Recommended)
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=guiohm79&repository=custom-gauge-card&category=plugin)
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=guiohm79&repository=jaugeLineaire&category=plugin)
 
 1. Open HACS in Home Assistant
 2. Go to "Frontend"
