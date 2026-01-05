@@ -241,6 +241,10 @@ class LinearGaugeCard extends LitElement {
         margin-right: 8px;
       }
       
+      .entities-wrapper.vertical .entity-info-group {
+        max-width: 100%;
+      }
+
       .entities-wrapper.vertical .entity-name {
         max-width: 100%;
         font-size: 0.9em;
