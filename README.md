@@ -1,6 +1,27 @@
 # Linear Gauge Card for Home Assistant
 
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
+[![GitHub Release](https://img.shields.io/github/release/guiohm79/jaugeLineaire.svg)](https://github.com/guiohm79/jaugeLineaire/releases)
+[![License](https://img.shields.io/github/license/guiohm79/jaugeLineaire.svg)](LICENSE)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=flat-square&logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/guiohm79)
+![downloads-total][github-downloads]
+![stars][github-stars]
+![downloads-latest][github-latest-downloads]
+
+[github-downloads]: https://img.shields.io/github/downloads/guiohm79/jaugeLineaire/total?style=flat
+[github-latest-downloads]: https://img.shields.io/github/downloads/guiohm79/jaugeLineaire/latest/total?style=flat
+[github-stars]: https://img.shields.io/github/stars/guiohm79/jaugeLineaire?style=flat
+
+
 A modern and interactive custom card to display your entities as linear gauges. Enjoy a premium Glassmorphism design, smooth animations, and high display flexibility.
+
+
+### Exemples d'utilisation
+<p align="center">
+  <img src="https://raw.githubusercontent.com/guiohm79/jaugeLineaire/main/captures/exemple1.png" width="350" alt="Exemple 1">
+  <img src="https://raw.githubusercontent.com/guiohm79/jaugeLineaire/main/captures/exemple2.png" width="350" alt="Exemple 2">
+    <img src="https://raw.githubusercontent.com/guiohm79/jaugeLineaire/main/captures/exemple3.png" width="350" alt="Exemple 3">
+</p>
 
 ## Features
 - **Glassmorphism Design**: Modern look with blur effects (backdrop-filter) and translucency.
@@ -15,10 +36,30 @@ A modern and interactive custom card to display your entities as linear gauges. 
 
 ## Installation
 
-1. Copy the `dist/linear-gauge-card.mjs` file into the `www` folder of your Home Assistant configuration (e.g., `config/www/linear-gauge-card.js`).
-2. Add the resource in your Lovelace dashboard:
-   - URL: `/local/linear-gauge-card.js`
-   - Type: `JavaScript Module`
+### Via HACS (Recommended)
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=guiohm79&repository=custom-gauge-card&category=plugin)
+
+1. Open HACS in Home Assistant
+2. Go to "Frontend"
+3. Click on the menu (⋮) in the top right
+4. Select "Custom repositories"
+5. Add the URL: `https://github.com/guiohm79/jaugeLineaire`
+6. Select category "Lovelace"
+7. Click "Install"
+8. Restart Home Assistant
+
+### Manual Installation
+
+1. Download the `linear-gauge-card.mjs` file
+2. Copy it to `config/www/linear-gauge-card.mjs`
+3. Add the resource in Home Assistant:
+   - Go to **Settings** → **Dashboards** → **Resources**
+   - Click **+ Add Resource**
+   - URL: `/local/linear-gauge-card.mjs`
+   - Type: **JavaScript Module**
+4. Restart Home Assistant
+
 
 ## Configuration
 
