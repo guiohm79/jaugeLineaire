@@ -51,12 +51,12 @@ A modern and interactive custom card to display your entities as linear gauges. 
 
 ### Manual Installation
 
-1. Download the `linear-gauge-card.mjs` file
-2. Copy it to `config/www/linear-gauge-card.mjs`
+1. Download the `linear-gauge-card.js` file
+2. Copy it to `config/www/linear-gauge-card.js`
 3. Add the resource in Home Assistant:
    - Go to **Settings** → **Dashboards** → **Resources**
    - Click **+ Add Resource**
-   - URL: `/local/linear-gauge-card.mjs`
+   - URL: `/local/linear-gauge-card.js`
    - Type: **JavaScript Module**
 4. Restart Home Assistant
 
