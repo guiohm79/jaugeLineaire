@@ -5,7 +5,7 @@ export default defineConfig({
     lib: {
       entry: 'src/linear-gauge-card.js',
       formats: ['es'],
-      fileName: 'linear-gauge-card',
+      fileName: (format, entryName) => 'linear-gauge-card.js',
     },
     outDir: 'dist',
     rollupOptions: {

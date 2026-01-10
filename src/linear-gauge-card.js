@@ -376,8 +376,13 @@ class LinearGaugeCard extends LitElement {
     const title = this._config.title;
     const layout = this._config.layout || 'horizontal';
 
+    const transparent = this._config.transparent_card_background || this._config.transparent || false;
+    const cardStyle = transparent
+      ? 'background: none !important; background-color: transparent !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;'
+      : '';
+
     return html`
-      <ha-card>
+      <ha-card style="${cardStyle}">
         ${title ? html`<div class="card-header">${title}</div>` : ''}
         <div class="entities-wrapper ${layout}">
           ${this._config.entities.map(ent => this.renderEntity(ent, layout))}
