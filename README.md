@@ -24,14 +24,16 @@ A modern and interactive custom card to display your entities as linear gauges. 
 </p>
 
 ## Features
+- **Visual Editor**: Fully configurable via the Home Assistant UI.
 - **Glassmorphism Design**: Modern look with blur effects (backdrop-filter) and translucency.
-- **Interactive Actions**: Full support for `tap_action` (toggle, navigation, call-service, URL).
+- **Interactive Actions**: Full support for `tap_action` on each entity (toggle, navigation, call-service, URL).
+- **Target Entity**: Actions can target a different entity than the one displayed.
 - **Icons**: Material Design icons support.
 - **Targets**: Display a target marker (fixed value or entity).
 - **Visual Alerts**: Pulse animation for critical states.
 - **24h Min/Max**: Visualization of the value range over the last 24 hours.
 - **Flexible Layout**: Choose between horizontal (list) or vertical (columns) display.
-- **Smart Gradients**: Gradients automatically adapt to gauge orientation.
+- **Smart Gradients**: Define a global gradient or specific colors per entity.
 - **LED Effect**: Segmented and rectangular display mode for a modern "pixel" style.
 
 ## Installation
@@ -63,6 +65,8 @@ A modern and interactive custom card to display your entities as linear gauges. 
 
 ## Configuration
 
+The card can be configured entirely via the Visual Editor.
+
 Type: `custom:linear-gauge-card`
 
 | Option | Type | Description |
@@ -89,7 +93,7 @@ Each entity in the list can be configured individually:
 | `icon` | string | Icon (e.g., `mdi:thermometer`) |
 | `target` | number/string | Target value or target entity ID |
 | `min` / `max` | number | Specific limits for this entity |
-| `color` | string | Fixed color for this gauge |
+| `color` | string | Fixed color for this gauge (overrides global gradient) |
 | `severity` | list | Specific color thresholds |
 | `effect` | string | Effect override (`default` or `led`) |
 | `pulse` | object | Pulse alert configuration (see below) |
@@ -109,6 +113,7 @@ Standard Home Assistant configuration:
 ```yaml
 tap_action:
   action: toggle # or more-info, call-service, navigate, url
+  target_entity: light.bureau # Optional: Action targets this entity instead
   # for navigate:
   navigation_path: /lovelace/0
   # for call-service:
@@ -124,22 +129,25 @@ tap_action:
 type: custom:linear-gauge-card
 title: Server
 show_min_max: true
+colors:
+  - "#4caf50"
+  - "#ffeb3b"
+  - "#f44336"
 entities:
   - entity: sensor.cpu_load
     name: CPU
     icon: mdi:cpu-64-bit
     target: 80 # Marker at 80%
     severity:
-      - from: 0
-        color: "#4caf50"
-      - from: 80
-        color: "#f44336"
+      - from: 90
+        color: "#d32f2f"
         pulse: true # Activates pulse animation
   - entity: sensor.temperature
     icon: mdi:thermometer
     target: sensor.target_temp # Dynamic marker
     tap_action:
-      action: more-info
+      action: toggle
+      target_entity: switch.fan_cooler
 ```
 
 ### LED Style

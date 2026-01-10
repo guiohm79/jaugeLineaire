@@ -1,5 +1,10 @@
 import { LitElement, html, css } from 'lit';
 
+const ICON_CLOSE = "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z";
+const ICON_CHEVRON_DOWN = "M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z";
+const ICON_CHEVRON_UP = "M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z";
+const ICON_PLUS = "M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z";
+
 class LinearGaugeCard extends LitElement {
   static get properties() {
     return {
@@ -34,7 +39,6 @@ class LinearGaugeCard extends LitElement {
     const entities = this._config.entities.map(e => (typeof e === 'string' ? e : e.entity));
     const now = new Date();
 
-    // Simple fetch logic: fetch if not already fetched for this session
     if (this._fetching) return;
 
     const toFetch = entities.filter(id => !this._historyFetched.has(id));
@@ -116,18 +120,15 @@ class LinearGaugeCard extends LitElement {
         text-shadow: 0 2px 4px rgba(0,0,0,0.1);
       }
       
-      /* Layout Container */
       .entities-wrapper {
         display: flex;
         gap: 20px;
       }
       
-      /* Horizontal Layout (Default) */
       .entities-wrapper.horizontal {
         flex-direction: column;
       }
 
-      /* Vertical Layout */
       .entities-wrapper.vertical {
         flex-direction: row;
         justify-content: space-around;
@@ -154,12 +155,10 @@ class LinearGaugeCard extends LitElement {
         100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
       }
       
-      /* Horizontal Gauge Container adjustments */
       .entities-wrapper.horizontal .gauge-container {
         display: block;
       }
       
-      /* Vertical Gauge Container adjustments */
       .entities-wrapper.vertical .gauge-container {
         display: flex;
         flex-direction: column;
@@ -173,7 +172,6 @@ class LinearGaugeCard extends LitElement {
         background: rgba(255, 255, 255, 0.05);
       }
 
-      /* Staggered animation */
       .gauge-container:nth-child(1) { animation-delay: 0.1s; }
       .gauge-container:nth-child(2) { animation-delay: 0.15s; }
       .gauge-container:nth-child(3) { animation-delay: 0.2s; }
@@ -198,7 +196,6 @@ class LinearGaugeCard extends LitElement {
         line-height: normal;
       }
       
-      /* Horizontal Layout Entity Row */
       .entities-wrapper.horizontal .entity-row {
         justify-content: space-between;
         align-items: center;
@@ -206,7 +203,6 @@ class LinearGaugeCard extends LitElement {
         width: 100%;
       }
       
-      /* Vertical Layout Entity Row: Stacked text above bar */
       .entities-wrapper.vertical .entity-row {
         flex-direction: column;
         align-items: center;
@@ -271,13 +267,11 @@ class LinearGaugeCard extends LitElement {
         box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
       }
 
-      /* Horizontal Bar Dimensions */
       .entities-wrapper.horizontal .bar-bg {
         width: 100%;
         height: 12px;
       }
 
-      /* Vertical Bar Dimensions */
       .entities-wrapper.vertical .bar-bg {
         width: 16px; 
         height: 120px; 
@@ -327,13 +321,11 @@ class LinearGaugeCard extends LitElement {
         left: 0;
       }
 
-      /* Horizontal Fill */
       .entities-wrapper.horizontal .bar-fill {
         height: 100%;
         min-width: 8px;
       }
 
-      /* Vertical Fill */
       .entities-wrapper.vertical .bar-fill {
         width: 100%;
         min-height: 8px;
@@ -369,7 +361,7 @@ class LinearGaugeCard extends LitElement {
         50% { transform: translateY(-150%); }
         100% { transform: translateY(-150%); }
       }
-      /* LED Effect Styles */
+      
       .bar-bg.effect-led {
         border-radius: 0;
         background-color: rgba(0, 0, 0, 0.3);
@@ -438,7 +430,6 @@ class LinearGaugeCard extends LitElement {
     const min = conf.min ?? this._config.min ?? 0;
     const max = conf.max ?? this._config.max ?? 100;
 
-    // Effect Logic
     const effect = conf.effect || this._config.effect || 'default';
     const effectClass = effect === 'led' ? 'effect-led' : '';
 
@@ -450,10 +441,7 @@ class LinearGaugeCard extends LitElement {
 
     const color = this._computeColor(value, conf, layout);
 
-    // Pulse Logic
     let isPulsing = false;
-
-    // 1. Explicit Pulse Configuration
     const pulseConf = conf.pulse || this._config.pulse;
     if (pulseConf && typeof pulseConf === 'object') {
       const threshold = parseFloat(pulseConf.value);
@@ -465,7 +453,6 @@ class LinearGaugeCard extends LitElement {
       }
     }
 
-    // 2. Severity-based Pulse (Fallback/Additive)
     if (!isPulsing) {
       const severityMatch = this._getSeverityMatch(value, conf.severity || this._config.severity);
       if (severityMatch && severityMatch.pulse) {
@@ -544,20 +531,27 @@ class LinearGaugeCard extends LitElement {
   }
 
   _handleAction(e, conf, entityId) {
+    if (conf.tap_action && conf.tap_action.action === 'none') {
+      return;
+    }
+
     e.stopPropagation();
 
     const config = conf.tap_action || this._config.tap_action || { action: 'more-info' };
     const action = config.action;
 
+    // Allow action to target a different entity
+    const targetEntityId = config.target_entity || entityId;
+
     if (action === 'more-info') {
       const event = new CustomEvent('hass-more-info', {
-        detail: { entityId },
+        detail: { entityId: targetEntityId },
         bubbles: true,
         composed: true,
       });
       this.dispatchEvent(event);
     } else if (action === 'toggle') {
-      this.hass.callService('homeassistant', 'toggle', { entity_id: entityId });
+      this.hass.callService('homeassistant', 'toggle', { entity_id: targetEntityId });
     } else if (action === 'navigate' && config.navigation_path) {
       history.pushState(null, '', config.navigation_path);
       const event = new Event('location-changed', { bubbles: true, composed: true });
@@ -566,7 +560,10 @@ class LinearGaugeCard extends LitElement {
       window.open(config.url_path);
     } else if (action === 'call-service' && config.service) {
       const [domain, service] = config.service.split('.');
-      const serviceData = { entity_id: entityId, ...config.data };
+      const serviceData = { ...config.data };
+      if (!serviceData.entity_id) {
+        serviceData.entity_id = targetEntityId;
+      }
       this.hass.callService(domain, service, serviceData);
     }
   }
@@ -579,8 +576,13 @@ class LinearGaugeCard extends LitElement {
       return `linear-gradient(${direction}, ${colors.join(', ')})`;
     };
 
+    // Severity priority
+    if (entityConf.severity) {
+      const match = this._getSeverityMatch(value, entityConf.severity);
+      if (match) return match.color;
+    }
+
     if (entityConf.color) return entityConf.color;
-    if (entityConf.severity) return this._computeSeverity(value, entityConf.severity);
     if (this._config.severity) return this._computeSeverity(value, this._config.severity);
     if (Array.isArray(this._config.colors) && this._config.colors.length > 0) {
       return makeGradient(this._config.colors);
@@ -591,8 +593,24 @@ class LinearGaugeCard extends LitElement {
 
   _getSeverityMatch(value, severity) {
     if (!Array.isArray(severity)) return null;
-    const sorted = [...severity].sort((a, b) => b.from - a.from);
-    return sorted.find(item => value >= item.from);
+    const val = parseFloat(value);
+    // Ensure accurate number comparison by strictly parsing 'from'
+    const sorted = [...severity].sort((a, b) => parseFloat(b.from) - parseFloat(a.from));
+    return sorted.find(item => val >= parseFloat(item.from));
+  }
+
+  static getConfigElement() {
+    return document.createElement('linear-gauge-card-editor');
+  }
+
+  static getStubConfig() {
+    return {
+      title: 'My Gauge',
+      layout: 'horizontal',
+      min: 0,
+      max: 100,
+      entities: [{ entity: 'sensor.example' }]
+    };
   }
 
   _computeSeverity(value, severity) {
@@ -601,4 +619,669 @@ class LinearGaugeCard extends LitElement {
   }
 }
 
+class LinearGaugeCardEditor extends LitElement {
+  static get properties() {
+    return {
+      hass: { attribute: false },
+      _config: { state: true },
+      _expandedEntities: { state: true },
+    };
+  }
+
+  constructor() {
+    super();
+    this._expandedEntities = new Set();
+  }
+
+  setConfig(config) {
+    this._config = config;
+  }
+
+  static get styles() {
+    return css`
+      .card-config {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px;
+      }
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        gap: 8px;
+      }
+      .entities-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .entity-row {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        background: var(--secondary-background-color, rgba(0,0,0,0.05));
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid var(--divider-color, rgba(0,0,0,0.1));
+      }
+      .entity-header {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        width: 100%;
+      }
+      .entity-details {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding-top: 8px;
+        border-top: 1px solid var(--divider-color, rgba(0,0,0,0.1));
+        margin-top: 4px;
+      }
+      ha-textfield, ha-selector {
+        width: 100%;
+        display: block;
+      }
+      ha-icon-button {
+        color: var(--secondary-text-color);
+        cursor: pointer;
+      }
+      ha-icon-button.delete {
+        color: var(--error-color);
+      }
+      .add-button {
+        margin-top: 8px;
+      }
+      .section-title {
+        font-weight: 500;
+        margin-bottom: 4px;
+        color: var(--primary-text-color);
+        font-size: 0.9em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.8;
+      }
+      .severity-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+      .sub-header {
+          font-weight: 500;
+          margin-top: 8px;
+          margin-bottom: 4px;
+      }
+      .color-bubble {
+        width: 24px;
+        height: 24px;
+        border-radius: 12px;
+        border: 2px solid #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        cursor: pointer;
+      }
+      .colors-list {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+      .entity-color-toggle {
+          font-size: 0.8em;
+          opacity: 0.8;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 4px;
+      }
+    `;
+  }
+
+  render() {
+    if (!this.hass || !this._config) {
+      return html``;
+    }
+
+    const startSelector = {
+      select: {
+        options: [
+          { value: 'horizontal', label: 'Horizontal' },
+          { value: 'vertical', label: 'Vertical' }
+        ]
+      }
+    };
+
+    const effectSelector = {
+      select: {
+        options: [
+          { value: 'default', label: 'Default' },
+          { value: 'led', label: 'LED' }
+        ]
+      }
+    };
+
+    // Schema for ha-selector
+    const sensorSelector = { entity: { domain: "sensor" } };
+
+    const globalColors = this._config.colors || [];
+
+    return html`
+      <div class="card-config">
+        
+        <ha-textfield
+          label="Title"
+          .value=${this._config.title || ''}
+          .configValue=${'title'}
+          @input=${this._valueChanged}
+        ></ha-textfield>
+
+        <div class="row">
+          <ha-selector
+            label="Layout"
+            .hass=${this.hass}
+            .selector=${startSelector}
+            .value=${this._config.layout || 'horizontal'}
+            .configValue=${'layout'}
+            @value-changed=${this._valueChanged}
+          ></ha-selector>
+
+          <ha-selector
+            label="Effect"
+            .hass=${this.hass}
+            .selector=${effectSelector}
+            .value=${this._config.effect || 'default'}
+            .configValue=${'effect'}
+            @value-changed=${this._valueChanged}
+          ></ha-selector>
+        </div>
+
+        <div class="row">
+           <ha-textfield
+             label="Min"
+             type="number"
+             .value=${this._config.min ?? 0}
+             .configValue=${'min'}
+             @input=${this._valueChanged}
+           ></ha-textfield>
+           
+           <ha-textfield
+             label="Max"
+             type="number"
+             .value=${this._config.max ?? 100}
+             .configValue=${'max'}
+             @input=${this._valueChanged}
+           ></ha-textfield>
+        </div>
+        
+        <div class="row">
+           <div style="flex: 1;">
+               <div class="section-title">Gradient Colors (Global)</div>
+               <div class="colors-list">
+                    ${globalColors.map((color, idx) => html`
+                        <div style="position: relative;">
+                             <input type="color" 
+                                .value=${color} 
+                                @input=${(e) => this._globalColorChanged(e, idx)}
+                                style="width: 40px; height: 40px; border: none; padding: 0; background: none; cursor: pointer;"
+                             >
+                             <ha-icon-button
+                                .path=${ICON_CLOSE}
+                                style="position: absolute; top: -14px; right: -14px; color: grey; --mdc-icon-button-size: 24px;"
+                                @click=${() => this._removeGlobalColor(idx)}
+                             ></ha-icon-button>
+                        </div>
+                    `)}
+                    <ha-icon-button
+                        .path=${ICON_PLUS}
+                        style="background: rgba(255,255,255,0.1); border-radius: 50%; width: 40px; height: 40px;"
+                        @click=${this._addGlobalColor}
+                    ></ha-icon-button>
+               </div>
+               ${globalColors.length === 0 ? html`<div style="font-size: 0.8em; opacity: 0.6; margin-top: 4px;">Use "+" to add colors. If empty, default blue is used.</div>` : ''}
+           </div>
+        </div>
+
+        <div class="row">
+          <span>Show Min/Max (History)</span>
+          <ha-switch
+            .checked=${this._config.show_min_max || false}
+            .configValue=${'show_min_max'}
+            @change=${this._valueChanged}
+          ></ha-switch>
+        </div>
+
+        <div class="row">
+          <span>Transparent Background</span>
+          <ha-switch
+            .checked=${this._config.transparent || false}
+            .configValue=${'transparent'}
+            @change=${this._valueChanged}
+          ></ha-switch>
+        </div>
+
+        <div class="entities-section">
+          <h3>Entities</h3>
+          <div class="entities-list">
+            ${(this._config.entities || []).map((entity, index) => this._renderEntityRow(entity, index, sensorSelector))}
+          </div>
+          <mwc-button class="add-button" outlined @click=${this._addEntity}>
+            Add Entity
+          </mwc-button>
+        </div>
+
+      </div>
+    `;
+  }
+
+  _renderEntityRow(entity, index, sensorSelector) {
+    const entityId = typeof entity === 'string' ? entity : entity.entity;
+    const color = typeof entity === 'object' ? entity.color : undefined;
+    const useCustomColor = typeof color === 'string' && color !== '';
+    const isExpanded = this._expandedEntities.has(index);
+    const entityObj = typeof entity === 'object' ? entity : { entity: entity };
+
+    return html`
+      <div class="entity-row">
+        <div class="entity-header">
+          <div style="flex: 1;">
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${sensorSelector}
+                .value=${entityId}
+                @value-changed=${(e) => this._entityChanged(e, index, 'entity')}
+              ></ha-selector>
+          </div>
+          
+           <ha-icon-button
+            .path=${isExpanded ? ICON_CHEVRON_UP : ICON_CHEVRON_DOWN}
+            @click=${() => this._toggleExpand(index)}
+          ></ha-icon-button>
+
+          <ha-icon-button
+            class="delete"
+            .path=${ICON_CLOSE}
+            @click=${() => this._removeEntity(index)}
+          ></ha-icon-button>
+        </div>
+
+        ${isExpanded ? this._renderEntityDetails(entityObj, index, color, useCustomColor) : ''}
+      </div>
+    `;
+  }
+
+  _renderEntityDetails(entity, index, color, useCustomColor) {
+    const pulse = entity.pulse || {};
+    const severity = entity.severity || [];
+    const tapAction = entity.tap_action || { action: 'more-info' };
+
+    const actionOptions = [
+      { value: 'more-info', label: 'More Info' },
+      { value: 'toggle', label: 'Toggle' },
+      { value: 'navigate', label: 'Navigate' },
+      { value: 'url', label: 'Open URL' },
+      { value: 'call-service', label: 'Call Service' },
+      { value: 'none', label: 'None' },
+    ];
+
+    return html`
+        <div class="entity-details">
+            <div class="row">
+                <ha-textfield
+                    label="Name (optional)"
+                    .value=${entity.name || ''}
+                    @input=${(e) => this._entityChanged(e, index, 'name')}
+                ></ha-textfield>
+                <ha-textfield
+                    label="Target"
+                    type="number"
+                    .value=${entity.target || ''}
+                    @input=${(e) => this._entityChanged(e, index, 'target')}
+                ></ha-textfield>
+            </div>
+            
+            <div>
+                 <div class="entity-color-toggle">
+                    <span>Custom Color (override global)</span>
+                    <ha-switch
+                      .checked=${useCustomColor}
+                      @change=${(e) => this._toggleEntityColor(e, index)}
+                    ></ha-switch>
+                 </div>
+                 ${useCustomColor ? html`
+                    <div style="display: flex; align-items: center; justify-content: flex-end;">
+                         <input
+                            type="color"
+                            .value=${color || '#03a9f4'}
+                            @input=${(e) => this._entityChanged(e, index, 'color')}
+                            style="height: 40px; width: 100%; padding: 0; border: none; background: none; cursor: pointer;"
+                         >
+                    </div>
+                 ` : ''}
+            </div>
+
+            <div>
+                 <div class="section-title">Tap Action</div>
+                 <ha-selector
+                    .hass=${this.hass}
+                    .selector=${{ select: { options: actionOptions } }}
+                    .value=${tapAction.action}
+                    @value-changed=${(e) => this._tapActionChanged(e, index, 'action')}
+                 ></ha-selector>
+                 
+                 <ha-selector
+                    label="Target Entity (Optional)"
+                    .hass=${this.hass}
+                    .selector=${{ entity: {} }}
+                    .value=${tapAction.target_entity}
+                    @value-changed=${(e) => this._tapActionChanged(e, index, 'target_entity')}
+                 ></ha-selector>
+
+                 ${tapAction.action === 'navigate' ? html`
+                    <ha-textfield
+                        label="Navigation Path"
+                        .value=${tapAction.navigation_path || ''}
+                        @input=${(e) => this._tapActionChanged(e, index, 'navigation_path')}
+                        style="margin-top: 8px;"
+                    ></ha-textfield>
+                 ` : ''}
+
+                 ${tapAction.action === 'url' ? html`
+                    <ha-textfield
+                        label="URL"
+                        .value=${tapAction.url_path || ''}
+                        @input=${(e) => this._tapActionChanged(e, index, 'url_path')}
+                        style="margin-top: 8px;"
+                    ></ha-textfield>
+                 ` : ''}
+                 
+                 ${tapAction.action === 'call-service' ? html`
+                    <ha-textfield
+                        label="Service (e.g., light.turn_on)"
+                        .value=${tapAction.service || ''}
+                        @input=${(e) => this._tapActionChanged(e, index, 'service')}
+                        style="margin-top: 8px;"
+                    ></ha-textfield>
+                 ` : ''}
+            </div>
+
+            <div>
+                <div class="section-title">Pulse (Animation)</div>
+                <div class="row">
+                     <ha-textfield
+                        label="Threshold"
+                        type="number"
+                        .value=${pulse.value || ''}
+                        @input=${(e) => this._pulseChanged(e, index, 'value')}
+                    ></ha-textfield>
+                    <ha-selector
+                        label="Condition"
+                        .hass=${this.hass}
+                        .selector=${{ select: { options: [{ value: 'above', label: '> Above' }, { value: 'below', label: '< Below' }] } }}
+                        .value=${pulse.condition || 'above'}
+                        @value-changed=${(e) => this._pulseChanged(e, index, 'condition')}
+                    ></ha-selector>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-title">Severity (Local Gradient)</div>
+                ${severity.map((band, bandIndex) => html`
+                    <div class="severity-row">
+                        <ha-textfield
+                             label="From"
+                             type="number"
+                             .value=${band.from ?? 0}
+                             @input=${(e) => this._severityChanged(e, index, bandIndex, 'from')}
+                             style="width: 80px;"
+                        ></ha-textfield>
+                         <input
+                            type="color"
+                            .value=${band.color || '#00ff00'}
+                            @input=${(e) => this._severityChanged(e, index, bandIndex, 'color')}
+                            style="flex: 1; height: 40px; border: none; background: none; cursor: pointer;"
+                         >
+                         <ha-icon-button
+                            class="delete"
+                            .path=${ICON_CLOSE}
+                            @click=${() => this._removeSeverityBand(index, bandIndex)}
+                         ></ha-icon-button>
+                    </div>
+                `)}
+                <mwc-button outlined @click=${() => this._addSeverityBand(index)}>
+                    <ha-icon .icon="mdi:plus" style="margin-right: 8px;"></ha-icon> Add Band
+                </mwc-button>
+            </div>
+
+        </div>
+      `;
+  }
+
+  _valueChanged(e) {
+    if (!this._config || !this.hass) return;
+
+    // Support both standard events and ha-selector events
+    const target = e.target;
+    let value = target.value;
+    let configValue = target.configValue;
+
+    if (e.detail && e.detail.value !== undefined) {
+      value = e.detail.value;
+    }
+
+    // For ha-switch
+    if (target.tagName === 'HA-SWITCH') {
+      value = target.checked;
+    }
+
+    if (!configValue && target.configValue) {
+      configValue = target.configValue;
+    }
+
+    if (configValue === 'min' || configValue === 'max') {
+      value = parseFloat(value);
+    }
+
+    if (configValue) {
+      this._config = {
+        ...this._config,
+        [configValue]: value,
+      };
+      this._fireChangedEvent();
+    }
+  }
+
+  _globalColorChanged(e, index) {
+    const newColors = [...(this._config.colors || [])];
+    newColors[index] = e.target.value;
+    this._config = { ...this._config, colors: newColors };
+    this._fireChangedEvent();
+  }
+
+  _addGlobalColor() {
+    const newColors = [...(this._config.colors || [])];
+    newColors.push('#ffeb3b');
+    this._config = { ...this._config, colors: newColors };
+    this._fireChangedEvent();
+  }
+
+  _removeGlobalColor(index) {
+    const newColors = [...(this._config.colors || [])];
+    newColors.splice(index, 1);
+    this._config = { ...this._config, colors: newColors };
+    this._fireChangedEvent();
+  }
+
+  _entityChanged(e, index, field) {
+    const newEntities = [...(this._config.entities || [])];
+    let currentValue = newEntities[index];
+
+    // Normalize to object if string
+    if (typeof currentValue === 'string') {
+      currentValue = { entity: currentValue };
+    } else {
+      currentValue = { ...currentValue };
+    }
+
+    // Get value depends on event type
+    let newValue;
+    if (e.detail && e.detail.value !== undefined) {
+      newValue = e.detail.value;
+    } else {
+      newValue = e.target.value;
+    }
+
+    if (field === 'target') newValue = parseFloat(newValue);
+
+    currentValue[field] = newValue;
+
+    newEntities[index] = currentValue;
+    this._config = { ...this._config, entities: newEntities };
+    this._fireChangedEvent();
+  }
+
+  _toggleEntityColor(e, index) {
+    const newEntities = [...(this._config.entities || [])];
+    let row = { ...(typeof newEntities[index] === 'string' ? { entity: newEntities[index] } : newEntities[index]) };
+
+    if (e.target.checked) {
+      row.color = '#03a9f4';
+    } else {
+      delete row.color;
+    }
+
+    newEntities[index] = row;
+    this._config = { ...this._config, entities: newEntities };
+    this._fireChangedEvent();
+  }
+
+  _tapActionChanged(e, index, field) {
+    const newEntities = [...(this._config.entities || [])];
+    let row = { ...(typeof newEntities[index] === 'string' ? { entity: newEntities[index] } : newEntities[index]) };
+
+    let tapAction = { ...(row.tap_action || { action: 'more-info' }) };
+
+    let newValue;
+    if (e.detail && e.detail.value !== undefined) {
+      newValue = e.detail.value;
+    } else {
+      newValue = e.target.value;
+    }
+
+    tapAction[field] = newValue;
+    row.tap_action = tapAction;
+
+    newEntities[index] = row;
+    this._config = { ...this._config, entities: newEntities };
+    this._fireChangedEvent();
+  }
+
+  _pulseChanged(e, index, field) {
+    const newEntities = [...(this._config.entities || [])];
+    let row = { ...(typeof newEntities[index] === 'string' ? { entity: newEntities[index] } : newEntities[index]) };
+
+    let pulse = { ...(row.pulse || {}) };
+
+    let newValue;
+    if (e.detail && e.detail.value !== undefined) {
+      newValue = e.detail.value;
+    } else {
+      newValue = e.target.value;
+    }
+
+    pulse[field] = field === 'value' ? parseFloat(newValue) : newValue;
+    row.pulse = pulse;
+
+    newEntities[index] = row;
+    this._config = { ...this._config, entities: newEntities };
+    this._fireChangedEvent();
+  }
+
+  _severityChanged(e, index, bandIndex, field) {
+    const newEntities = [...(this._config.entities || [])];
+    let row = { ...(typeof newEntities[index] === 'string' ? { entity: newEntities[index] } : newEntities[index]) };
+
+    let severity = [...(row.severity || [])];
+    let band = { ...severity[bandIndex] };
+
+    let newValue = e.target.value;
+
+    band[field] = field === 'from' ? parseFloat(newValue) : newValue;
+    severity[bandIndex] = band;
+    row.severity = severity;
+
+    newEntities[index] = row;
+    this._config = { ...this._config, entities: newEntities };
+    this._fireChangedEvent();
+  }
+
+  _addSeverityBand(index) {
+    const newEntities = [...(this._config.entities || [])];
+    let row = { ...(typeof newEntities[index] === 'string' ? { entity: newEntities[index] } : newEntities[index]) };
+    let severity = [...(row.severity || [])];
+
+    severity.push({ from: 0, color: '#00ff00' });
+    row.severity = severity;
+
+    newEntities[index] = row;
+    this._config = { ...this._config, entities: newEntities };
+    this._fireChangedEvent();
+  }
+
+  _removeSeverityBand(index, bandIndex) {
+    const newEntities = [...(this._config.entities || [])];
+    let row = { ...(typeof newEntities[index] === 'string' ? { entity: newEntities[index] } : newEntities[index]) };
+    let severity = [...(row.severity || [])];
+
+    severity.splice(bandIndex, 1);
+    row.severity = severity;
+
+    newEntities[index] = row;
+    this._config = { ...this._config, entities: newEntities };
+    this._fireChangedEvent();
+  }
+
+  _addEntity() {
+    const newEntities = [...(this._config.entities || [])];
+    newEntities.push({ entity: '', color: '' });
+    this._config = { ...this._config, entities: newEntities };
+    this._fireChangedEvent();
+  }
+
+  _removeEntity(index) {
+    const newEntities = [...(this._config.entities || [])];
+    newEntities.splice(index, 1);
+    this._config = { ...this._config, entities: newEntities };
+    this._fireChangedEvent();
+  }
+
+  _toggleExpand(index) {
+    const newExpanded = new Set(this._expandedEntities);
+    if (newExpanded.has(index)) {
+      newExpanded.delete(index);
+    } else {
+      newExpanded.add(index);
+    }
+    this._expandedEntities = newExpanded;
+    this.requestUpdate();
+  }
+
+  _fireChangedEvent() {
+    const event = new CustomEvent('config-changed', {
+      detail: { config: this._config },
+      bubbles: true,
+      composed: true,
+    });
+    this.dispatchEvent(event);
+  }
+}
+
+customElements.define('linear-gauge-card-editor', LinearGaugeCardEditor);
 customElements.define('linear-gauge-card', LinearGaugeCard);
