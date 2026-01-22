@@ -273,7 +273,7 @@ class LinearGaugeCard extends LitElement {
       }
 
       .entities-wrapper.vertical .bar-bg {
-        width: 16px; 
+        width: var(--lgc-vertical-width, 16px); 
         height: var(--lgc-vertical-height, 120px); 
         display: flex;
         align-items: flex-end; 
@@ -395,11 +395,13 @@ class LinearGaugeCard extends LitElement {
     const transparent = this._config.transparent_card_background || this._config.transparent || false;
     const thickness = this._config.bar_thickness || 12;
     const verticalHeight = this._config.vertical_height || 120;
+    const verticalWidth = this._config.vertical_width || 16;
 
     // We bind CSS variables to the host style
     const cardStyle = `
       --lgc-bar-thickness: ${thickness}px;
       --lgc-vertical-height: ${verticalHeight}px;
+      --lgc-vertical-width: ${verticalWidth}px;
       ${transparent ? 'background: none !important; background-color: transparent !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;' : ''}
     `;
 
@@ -843,6 +845,14 @@ class LinearGaugeCardEditor extends LitElement {
              .configValue=${'vertical_height'}
              @input=${this._valueChanged}
            ></ha-textfield>
+
+           <ha-textfield
+             label="Vertical Width (px)"
+             type="number"
+             .value=${this._config.vertical_width ?? 16}
+             .configValue=${'vertical_width'}
+             @input=${this._valueChanged}
+           ></ha-textfield>
         </div>
         
         <div class="row">
@@ -1109,7 +1119,7 @@ class LinearGaugeCardEditor extends LitElement {
       configValue = target.configValue;
     }
 
-    if (configValue === 'min' || configValue === 'max' || configValue === 'bar_thickness' || configValue === 'vertical_height') {
+    if (configValue === 'min' || configValue === 'max' || configValue === 'bar_thickness' || configValue === 'vertical_height' || configValue === 'vertical_width') {
       value = parseFloat(value);
     }
 
