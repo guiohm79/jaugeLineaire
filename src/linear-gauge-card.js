@@ -269,12 +269,12 @@ class LinearGaugeCard extends LitElement {
 
       .entities-wrapper.horizontal .bar-bg {
         width: 100%;
-        height: 12px;
+        height: var(--lgc-bar-thickness, 12px);
       }
 
       .entities-wrapper.vertical .bar-bg {
         width: 16px; 
-        height: 120px; 
+        height: var(--lgc-vertical-height, 120px); 
         display: flex;
         align-items: flex-end; 
       }
@@ -393,9 +393,15 @@ class LinearGaugeCard extends LitElement {
     const layout = this._config.layout || 'horizontal';
 
     const transparent = this._config.transparent_card_background || this._config.transparent || false;
-    const cardStyle = transparent
-      ? 'background: none !important; background-color: transparent !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;'
-      : '';
+    const thickness = this._config.bar_thickness || 12;
+    const verticalHeight = this._config.vertical_height || 120;
+
+    // We bind CSS variables to the host style
+    const cardStyle = `
+      --lgc-bar-thickness: ${thickness}px;
+      --lgc-vertical-height: ${verticalHeight}px;
+      ${transparent ? 'background: none !important; background-color: transparent !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;' : ''}
+    `;
 
     return html`
       <ha-card style="${cardStyle}">
@@ -820,6 +826,24 @@ class LinearGaugeCardEditor extends LitElement {
              @input=${this._valueChanged}
            ></ha-textfield>
         </div>
+
+        <div class="row">
+           <ha-textfield
+             label="Bar Thickness (px)"
+             type="number"
+             .value=${this._config.bar_thickness ?? 12}
+             .configValue=${'bar_thickness'}
+             @input=${this._valueChanged}
+           ></ha-textfield>
+           
+           <ha-textfield
+             label="Vertical Height (px)"
+             type="number"
+             .value=${this._config.vertical_height ?? 120}
+             .configValue=${'vertical_height'}
+             @input=${this._valueChanged}
+           ></ha-textfield>
+        </div>
         
         <div class="row">
            <div style="flex: 1;">
@@ -1085,7 +1109,7 @@ class LinearGaugeCardEditor extends LitElement {
       configValue = target.configValue;
     }
 
-    if (configValue === 'min' || configValue === 'max') {
+    if (configValue === 'min' || configValue === 'max' || configValue === 'bar_thickness' || configValue === 'vertical_height') {
       value = parseFloat(value);
     }
 
