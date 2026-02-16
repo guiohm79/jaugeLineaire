@@ -95,19 +95,17 @@ class LinearGaugeCard extends LitElement {
       }
       
       ha-card {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: var(--lgc-card-background, var(--ha-card-background, var(--card-background-color, #fff)));
         color: var(--primary-text-color);
         padding: 16px;
-        border-radius: var(--ha-card-border-radius, 16px);
+        border-radius: var(--ha-card-border-radius, 12px);
+        border: none;
+        box-shadow: var(--ha-card-box-shadow, var(--shadow-elevation-2dp, none));
         transition: transform 0.3s ease, box-shadow 0.3s ease;
       }
 
       ha-card:hover {
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        box-shadow: var(--ha-card-box-shadow, var(--shadow-elevation-4dp, var(--shadow-elevation-2dp, none)));
         transform: translateY(-2px);
       }
       
@@ -259,6 +257,61 @@ class LinearGaugeCard extends LitElement {
         border: 1px solid rgba(255,255,255,0.1);
       }
 
+      /* Compact mode styles */
+      .gauge-container.compact {
+        padding: 4px;
+      }
+      
+      .entity-row.compact {
+        justify-content: center;
+        margin-bottom: 4px;
+      }
+      
+      .compact-label {
+        font-size: 0.75em;
+        text-align: center;
+        margin-top: 4px;
+        opacity: 0.8;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+      }
+      
+      .entities-wrapper.vertical .compact-label {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        margin-top: 8px;
+      }
+
+      /* Value in bar styles */
+      .bar-value {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 0.75em;
+        font-weight: 700;
+        color: #fff;
+        text-shadow: 
+          0 0 4px rgba(0,0,0,0.9),
+          0 0 8px rgba(0,0,0,0.7),
+          0 1px 2px rgba(0,0,0,1);
+        white-space: nowrap;
+        z-index: 3;
+        pointer-events: none;
+        letter-spacing: 0.5px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: rgba(0,0,0,0.3);
+      }
+      
+      .entities-wrapper.vertical .bar-value {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        transform: translate(-50%, -50%) rotate(180deg);
+      }
+
       .bar-bg {
         background-color: rgba(0, 0, 0, 0.1);
         border-radius: 6px;
@@ -350,6 +403,11 @@ class LinearGaugeCard extends LitElement {
         animation: shimmer-vertical 3s infinite linear;
       }
 
+      /* Disable shimmer effect */
+      .bar-fill.no-shimmer::before {
+        display: none;
+      }
+
       @keyframes shimmer-horizontal {
         0% { transform: skewX(-20deg) translateX(-150%); }
         50% { transform: skewX(-20deg) translateX(150%); }
@@ -396,14 +454,20 @@ class LinearGaugeCard extends LitElement {
     const thickness = this._config.bar_thickness || 12;
     const verticalHeight = this._config.vertical_height || 120;
     const verticalWidth = this._config.vertical_width || 16;
+    const cardBackground = this._config.card_background;
 
     // We bind CSS variables to the host style
-    const cardStyle = `
+    let cardStyle = `
       --lgc-bar-thickness: ${thickness}px;
       --lgc-vertical-height: ${verticalHeight}px;
       --lgc-vertical-width: ${verticalWidth}px;
-      ${transparent ? 'background: none !important; background-color: transparent !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;' : ''}
     `;
+    
+    if (transparent) {
+      cardStyle += 'background: none !important; background-color: transparent !important; border: none !important; box-shadow: none !important;';
+    } else if (cardBackground) {
+      cardStyle += `--lgc-card-background: ${cardBackground};`;
+    }
 
     return html`
       <ha-card style="${cardStyle}">
@@ -519,21 +583,34 @@ class LinearGaugeCard extends LitElement {
       }
     }
 
+    const compactMode = conf.compact_mode || this._config.compact_mode || false;
+    const showValueInBar = conf.show_value_in_bar || this._config.show_value_in_bar || false;
+    const disableShimmer = conf.disable_shimmer || this._config.disable_shimmer || false;
+    const displayValue = isNaN(value) ? stateObj.state : `${value} ${unit}`;
+
     return html`
-      <div class="gauge-container ${isPulsing ? 'pulsing' : ''}" 
+      <div class="gauge-container ${isPulsing ? 'pulsing' : ''} ${compactMode ? 'compact' : ''} ${showValueInBar ? 'value-in-bar' : ''}" 
            @click=${(e) => this._handleAction(e, conf, entityId)}>
+        ${!compactMode ? html`
         <div class="entity-row">
           <div class="entity-info-group">
             ${icon ? html`<ha-icon class="entity-icon" .icon="${icon}"></ha-icon>` : ''}
             <span class="entity-name" title="${name}">${name}</span>
           </div>
-          <span class="entity-state">${isNaN(value) ? stateObj.state : `${value} ${unit}`}</span>
+          ${!showValueInBar ? html`<span class="entity-state">${displayValue}</span>` : ''}
         </div>
+        ` : html`
+        <div class="entity-row compact">
+          ${icon ? html`<ha-icon class="entity-icon" .icon="${icon}"></ha-icon>` : ''}
+        </div>
+        `}
         <div class="bar-bg ${effectClass}">
           ${minMaxMarker}
-          <div class="bar-fill ${effectClass}" style="${barStyle}"></div>
+          <div class="bar-fill ${effectClass} ${disableShimmer ? 'no-shimmer' : ''}" style="${barStyle}"></div>
           ${targetMarker}
+          ${showValueInBar ? html`<span class="bar-value">${displayValue}</span>` : ''}
         </div>
+        ${compactMode && !icon ? html`<span class="compact-label">${name}</span>` : ''}
       </div>
     `;
   }
@@ -584,19 +661,28 @@ class LinearGaugeCard extends LitElement {
       return `linear-gradient(${direction}, ${colors.join(', ')})`;
     };
 
-    // Severity priority
+    // Severity priority (highest)
     if (entityConf.severity) {
       const match = this._getSeverityMatch(value, entityConf.severity);
       if (match) return match.color;
     }
 
+    // Entity fixed color
     if (entityConf.color) return entityConf.color;
+    
+    // Global severity
     if (this._config.severity) return this._computeSeverity(value, this._config.severity);
+    
+    // Global fixed color (NEW: priority over gradient)
+    if (this._config.color) return this._config.color;
+    
+    // Global gradient colors
     if (Array.isArray(this._config.colors) && this._config.colors.length > 0) {
       return makeGradient(this._config.colors);
     }
 
-    return this._config.color || 'var(--primary-color, #03a9f4)';
+    // Default fallback
+    return 'var(--primary-color, #03a9f4)';
   }
 
   _getSeverityMatch(value, severity) {
@@ -901,6 +987,51 @@ class LinearGaugeCardEditor extends LitElement {
           ></ha-switch>
         </div>
 
+        ${!this._config.transparent ? html`
+        <div class="row" style="align-items: flex-start;">
+          <div style="flex: 1;">
+            <div class="section-title">Card Background Color (optional)</div>
+            <div style="font-size: 0.8em; opacity: 0.6; margin-bottom: 8px;">Leave empty to use theme default</div>
+            ${this._renderColorWithAlpha('card_background', this._config.card_background)}
+          </div>
+        </div>
+        ` : ''}
+
+        <div class="row" style="align-items: flex-start;">
+          <div style="flex: 1;">
+            <div class="section-title">Global Fixed Color (optional)</div>
+            <div style="font-size: 0.8em; opacity: 0.6; margin-bottom: 8px;">Overrides gradient colors. Leave empty to use gradient.</div>
+            ${this._renderColorWithAlpha('color', this._config.color)}
+          </div>
+        </div>
+
+        <div class="row">
+          <span>Compact Mode</span>
+          <ha-switch
+            .checked=${this._config.compact_mode || false}
+            .configValue=${'compact_mode'}
+            @change=${this._valueChanged}
+          ></ha-switch>
+        </div>
+
+        <div class="row">
+          <span>Show Value in Bar</span>
+          <ha-switch
+            .checked=${this._config.show_value_in_bar || false}
+            .configValue=${'show_value_in_bar'}
+            @change=${this._valueChanged}
+          ></ha-switch>
+        </div>
+
+        <div class="row">
+          <span>Disable Shimmer Effect</span>
+          <ha-switch
+            .checked=${this._config.disable_shimmer || false}
+            .configValue=${'disable_shimmer'}
+            @change=${this._valueChanged}
+          ></ha-switch>
+        </div>
+
         <div class="entities-section">
           <h3>Entities</h3>
           <div class="entities-list">
@@ -951,6 +1082,118 @@ class LinearGaugeCardEditor extends LitElement {
     `;
   }
 
+  _renderColorWithAlpha(configKey, currentValue) {
+    // Parse current color value
+    let hexColor = '#ffffff';
+    let alpha = 1;
+    
+    if (currentValue) {
+      if (currentValue.startsWith('rgba')) {
+        const match = currentValue.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+        if (match) {
+          const r = parseInt(match[1]);
+          const g = parseInt(match[2]);
+          const b = parseInt(match[3]);
+          alpha = match[4] !== undefined ? parseFloat(match[4]) : 1;
+          hexColor = '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+        }
+      } else if (currentValue.startsWith('rgb')) {
+        const match = currentValue.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if (match) {
+          const r = parseInt(match[1]);
+          const g = parseInt(match[2]);
+          const b = parseInt(match[3]);
+          hexColor = '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+        }
+      } else if (currentValue.startsWith('#')) {
+        hexColor = currentValue.substring(0, 7);
+        // Check for 8-digit hex (#RRGGBBAA)
+        if (currentValue.length === 9) {
+          alpha = parseInt(currentValue.substring(7, 9), 16) / 255;
+        }
+      }
+    }
+    
+    const alphaPercent = Math.round(alpha * 100);
+    
+    return html`
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="position: relative; width: 50px; height: 40px; border-radius: 4px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+            <!-- Checkerboard pattern for transparency preview -->
+            <div style="position: absolute; inset: 0; background: 
+              repeating-conic-gradient(#808080 0% 25%, transparent 0% 50%) 50% / 8px 8px;"></div>
+            <!-- Color preview -->
+            <div style="position: absolute; inset: 0; background: ${currentValue || 'transparent'};"></div>
+            <input
+              type="color"
+              .value=${hexColor}
+              @input=${(e) => this._updateColorWithAlpha(e.target.value, alpha, configKey)}
+              style="position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;"
+            >
+          </div>
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+              <span style="font-size: 0.85em; opacity: 0.8;">Opacity: ${alphaPercent}%</span>
+              ${currentValue ? html`
+                <ha-icon-button
+                  .path=${ICON_CLOSE}
+                  style="color: var(--error-color); --mdc-icon-button-size: 32px;"
+                  @click=${() => this._clearColorValue(configKey)}
+                ></ha-icon-button>
+              ` : ''}
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              .value=${alphaPercent}
+              @input=${(e) => this._updateColorWithAlpha(hexColor, parseInt(e.target.value) / 100, configKey)}
+              style="width: 100%; height: 6px; cursor: pointer;"
+            >
+          </div>
+        </div>
+        <ha-textfield
+          label="CSS Color"
+          .value=${currentValue || ''}
+          .configValue=${configKey}
+          @input=${this._valueChanged}
+          style="width: 100%;"
+        ></ha-textfield>
+      </div>
+    `;
+  }
+
+  _updateColorWithAlpha(hexColor, alpha, configKey) {
+    if (!this._config) return;
+    
+    // Convert hex to rgb
+    const r = parseInt(hexColor.substring(1, 3), 16);
+    const g = parseInt(hexColor.substring(3, 5), 16);
+    const b = parseInt(hexColor.substring(5, 7), 16);
+    
+    // Round alpha to 2 decimal places
+    alpha = Math.round(alpha * 100) / 100;
+    
+    const rgbaValue = alpha === 1 
+      ? hexColor 
+      : `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    
+    this._config = {
+      ...this._config,
+      [configKey]: rgbaValue,
+    };
+    this._fireChangedEvent();
+  }
+
+  _clearColorValue(configKey) {
+    if (!this._config) return;
+    const newConfig = { ...this._config };
+    delete newConfig[configKey];
+    this._config = newConfig;
+    this._fireChangedEvent();
+  }
+
   _renderEntityDetails(entity, index, color, useCustomColor) {
     const pulse = entity.pulse || {};
     const severity = entity.severity || [];
@@ -965,6 +1208,11 @@ class LinearGaugeCardEditor extends LitElement {
       { value: 'none', label: 'None' },
     ];
 
+    const effectOptions = [
+      { value: 'default', label: 'Default' },
+      { value: 'led', label: 'LED' }
+    ];
+
     return html`
         <div class="entity-details">
             <div class="row">
@@ -974,11 +1222,65 @@ class LinearGaugeCardEditor extends LitElement {
                     @input=${(e) => this._entityChanged(e, index, 'name')}
                 ></ha-textfield>
                 <ha-textfield
+                    label="Icon (e.g., mdi:thermometer)"
+                    .value=${entity.icon || ''}
+                    @input=${(e) => this._entityChanged(e, index, 'icon')}
+                ></ha-textfield>
+            </div>
+            <div class="row">
+                <ha-textfield
+                    label="Min"
+                    type="number"
+                    .value=${entity.min ?? ''}
+                    placeholder=${this._config.min ?? 0}
+                    @input=${(e) => this._entityChanged(e, index, 'min')}
+                ></ha-textfield>
+                <ha-textfield
+                    label="Max"
+                    type="number"
+                    .value=${entity.max ?? ''}
+                    placeholder=${this._config.max ?? 100}
+                    @input=${(e) => this._entityChanged(e, index, 'max')}
+                ></ha-textfield>
+                <ha-textfield
                     label="Target"
                     type="number"
                     .value=${entity.target || ''}
                     @input=${(e) => this._entityChanged(e, index, 'target')}
                 ></ha-textfield>
+            </div>
+            <div class="row">
+                <ha-selector
+                    label="Effect"
+                    .hass=${this.hass}
+                    .selector=${{ select: { options: effectOptions } }}
+                    .value=${entity.effect || 'default'}
+                    @value-changed=${(e) => this._entityChanged(e, index, 'effect')}
+                ></ha-selector>
+            </div>
+            
+            <div class="row">
+                <span>Compact Mode</span>
+                <ha-switch
+                    .checked=${entity.compact_mode || false}
+                    @change=${(e) => this._entityChanged(e, index, 'compact_mode')}
+                ></ha-switch>
+            </div>
+            
+            <div class="row">
+                <span>Show Value in Bar</span>
+                <ha-switch
+                    .checked=${entity.show_value_in_bar || false}
+                    @change=${(e) => this._entityChanged(e, index, 'show_value_in_bar')}
+                ></ha-switch>
+            </div>
+            
+            <div class="row">
+                <span>Disable Shimmer Effect</span>
+                <ha-switch
+                    .checked=${entity.disable_shimmer || false}
+                    @change=${(e) => this._entityChanged(e, index, 'disable_shimmer')}
+                ></ha-switch>
             </div>
             
             <div>
@@ -1132,6 +1434,16 @@ class LinearGaugeCardEditor extends LitElement {
     }
   }
 
+  _colorValueChanged(e, configValue) {
+    if (!this._config || !this.hass) return;
+    const value = e.target.value;
+    this._config = {
+      ...this._config,
+      [configValue]: value,
+    };
+    this._fireChangedEvent();
+  }
+
   _globalColorChanged(e, index) {
     const newColors = [...(this._config.colors || [])];
     newColors[index] = e.target.value;
@@ -1172,9 +1484,30 @@ class LinearGaugeCardEditor extends LitElement {
       newValue = e.target.value;
     }
 
+    // Handle switch/checkbox events
+    if (e.target && e.target.tagName === 'HA-SWITCH') {
+      newValue = e.target.checked;
+    }
+    
     if (field === 'target') newValue = parseFloat(newValue);
-
-    currentValue[field] = newValue;
+    
+    // Handle min/max - if empty, delete to use global value
+    if (field === 'min' || field === 'max') {
+      if (newValue === '' || newValue === undefined || newValue === null) {
+        delete currentValue[field];
+      } else {
+        newValue = parseFloat(newValue);
+        currentValue[field] = newValue;
+      }
+    } else if (field === 'effect' && newValue === 'default') {
+      // Don't save 'default' effect, use global or let it be undefined
+      delete currentValue[field];
+    } else if ((field === 'compact_mode' || field === 'show_value_in_bar' || field === 'disable_shimmer') && !newValue) {
+      // Delete boolean fields when false to keep config clean
+      delete currentValue[field];
+    } else {
+      currentValue[field] = newValue;
+    }
 
     newEntities[index] = currentValue;
     this._config = { ...this._config, entities: newEntities };
