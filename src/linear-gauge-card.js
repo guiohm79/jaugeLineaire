@@ -506,12 +506,22 @@ class LinearGaugeCard extends LitElement {
     const effectClass = effect === 'led' ? 'effect-led' : '';
 
     let percent = 0;
+    let clampedValue = value;
     if (!isNaN(value)) {
-      const clampedValue = Math.max(min, Math.min(value, max));
-      percent = ((clampedValue - min) / (max - min)) * 100;
+      clampedValue = Math.max(min, Math.min(value, max));
+      // Protection contre la division par zéro si min === max
+      if (max !== min) {
+        percent = ((clampedValue - min) / (max - min)) * 100;
+      } else {
+        percent = 0;
+      }
+      // S'assurer que le pourcentage est entre 0 et 100
+      percent = Math.max(0, Math.min(100, percent));
     }
 
-    const color = this._computeColor(value, conf, layout);
+    const centerZero = conf.center_zero ?? this._config.center_zero ?? false;
+
+    const color = this._computeColor(value, conf, layout, centerZero);
 
     let isPulsing = false;
     const pulseConf = conf.pulse || this._config.pulse;
@@ -533,7 +543,23 @@ class LinearGaugeCard extends LitElement {
     }
 
     let barStyle = '';
-    if (layout === 'vertical') {
+    if (centerZero && !isNaN(value) && min < 0 && max > 0) {
+      const zeroPercent = ((0 - min) / (max - min)) * 100;
+      const endPercent = ((clampedValue - min) / (max - min)) * 100;
+      if (layout === 'vertical') {
+        if (value >= 0) {
+          barStyle = `bottom: ${zeroPercent}%; height: ${endPercent - zeroPercent}%; background: ${color}; box-shadow: 0 0 10px ${color};`;
+        } else {
+          barStyle = `bottom: ${endPercent}%; height: ${zeroPercent - endPercent}%; background: ${color}; box-shadow: 0 0 10px ${color};`;
+        }
+      } else {
+        if (value >= 0) {
+          barStyle = `left: ${zeroPercent}%; width: ${endPercent - zeroPercent}%; background: ${color}; box-shadow: 0 0 10px ${color};`;
+        } else {
+          barStyle = `left: ${endPercent}%; width: ${zeroPercent - endPercent}%; background: ${color}; box-shadow: 0 0 10px ${color};`;
+        }
+      }
+    } else if (layout === 'vertical') {
       barStyle = `height: ${percent}%; background: ${color}; box-shadow: 0 0 10px ${color};`;
     } else {
       barStyle = `width: ${percent}%; background: ${color}; box-shadow: 0 0 10px ${color};`;
@@ -550,7 +576,7 @@ class LinearGaugeCard extends LitElement {
       }
 
       targetVal = parseFloat(targetVal);
-      if (!isNaN(targetVal)) {
+      if (!isNaN(targetVal) && max !== min) {
         const clampedTarget = Math.max(min, Math.min(targetVal, max));
         const targetPercent = ((clampedTarget - min) / (max - min)) * 100;
         const style = layout === 'vertical'
@@ -565,7 +591,7 @@ class LinearGaugeCard extends LitElement {
       const hMin = this._history[entityId].min;
       const hMax = this._history[entityId].max;
 
-      if (hMin !== undefined && hMax !== undefined) {
+      if (hMin !== undefined && hMax !== undefined && max !== min) {
         const clampedMin = Math.max(min, Math.min(hMin, max));
         const clampedMax = Math.max(min, Math.min(hMax, max));
 
@@ -653,29 +679,40 @@ class LinearGaugeCard extends LitElement {
     }
   }
 
-  _computeColor(value, entityConf, layout) {
+  _computeColor(value, entityConf, layout, isCenterZero = false) {
     if (isNaN(value)) return 'var(--primary-color, #44739e)';
 
+    // Negative color override for center_zero mode
+    if (isCenterZero && value < 0) {
+      if (entityConf.color_negative) return entityConf.color_negative;
+      if (this._config.color_negative) return this._config.color_negative;
+    }
+
+    const evalValue = (isCenterZero && value < 0) ? Math.abs(value) : value;
+
     const makeGradient = (colors) => {
-      const direction = (layout === 'vertical') ? '0deg' : '90deg';
+      let direction = (layout === 'vertical') ? '0deg' : '90deg';
+      if (isCenterZero && value < 0) {
+        direction = (layout === 'vertical') ? '180deg' : '270deg';
+      }
       return `linear-gradient(${direction}, ${colors.join(', ')})`;
     };
 
     // Severity priority (highest)
     if (entityConf.severity) {
-      const match = this._getSeverityMatch(value, entityConf.severity);
+      const match = this._getSeverityMatch(evalValue, entityConf.severity);
       if (match) return match.color;
     }
 
     // Entity fixed color
     if (entityConf.color) return entityConf.color;
-    
+
     // Global severity
-    if (this._config.severity) return this._computeSeverity(value, this._config.severity);
-    
+    if (this._config.severity) return this._computeSeverity(evalValue, this._config.severity);
+
     // Global fixed color (NEW: priority over gradient)
     if (this._config.color) return this._config.color;
-    
+
     // Global gradient colors
     if (Array.isArray(this._config.colors) && this._config.colors.length > 0) {
       return makeGradient(this._config.colors);
@@ -1005,6 +1042,14 @@ class LinearGaugeCardEditor extends LitElement {
           </div>
         </div>
 
+        <div class="row" style="align-items: flex-start;">
+          <div style="flex: 1;">
+            <div class="section-title">Global Negative Color (optional)</div>
+            <div style="font-size: 0.8em; opacity: 0.6; margin-bottom: 8px;">Used when Center Zero is active and value is negative. Leave empty to use symmetric colors.</div>
+            ${this._renderColorWithAlpha('color_negative', this._config.color_negative)}
+          </div>
+        </div>
+
         <div class="row">
           <span>Compact Mode</span>
           <ha-switch
@@ -1028,6 +1073,15 @@ class LinearGaugeCardEditor extends LitElement {
           <ha-switch
             .checked=${this._config.disable_shimmer || false}
             .configValue=${'disable_shimmer'}
+            @change=${this._valueChanged}
+          ></ha-switch>
+        </div>
+
+        <div class="row">
+          <span>Center Zero</span>
+          <ha-switch
+            .checked=${this._config.center_zero || false}
+            .configValue=${'center_zero'}
             @change=${this._valueChanged}
           ></ha-switch>
         </div>
@@ -1283,6 +1337,14 @@ class LinearGaugeCardEditor extends LitElement {
                 ></ha-switch>
             </div>
             
+            <div class="row">
+                <span>Center Zero</span>
+                <ha-switch
+                    .checked=${entity.center_zero || false}
+                    @change=${(e) => this._entityChanged(e, index, 'center_zero')}
+                ></ha-switch>
+            </div>
+            
             <div>
                  <div class="entity-color-toggle">
                     <span>Custom Color (override global)</span>
@@ -1297,6 +1359,26 @@ class LinearGaugeCardEditor extends LitElement {
                             type="color"
                             .value=${color || '#03a9f4'}
                             @input=${(e) => this._entityChanged(e, index, 'color')}
+                            style="height: 40px; width: 100%; padding: 0; border: none; background: none; cursor: pointer;"
+                         >
+                    </div>
+                 ` : ''}
+            </div>
+
+            <div>
+                 <div class="entity-color-toggle">
+                    <span>Custom Negative Color (center zero)</span>
+                    <ha-switch
+                      .checked=${!!entity.color_negative}
+                      @change=${(e) => this._toggleEntityNegativeColor(e, index)}
+                    ></ha-switch>
+                 </div>
+                 ${entity.color_negative ? html`
+                    <div style="display: flex; align-items: center; justify-content: flex-end;">
+                         <input
+                            type="color"
+                            .value=${entity.color_negative || '#f44336'}
+                            @input=${(e) => this._entityChanged(e, index, 'color_negative')}
                             style="height: 40px; width: 100%; padding: 0; border: none; background: none; cursor: pointer;"
                          >
                     </div>
@@ -1502,8 +1584,10 @@ class LinearGaugeCardEditor extends LitElement {
     } else if (field === 'effect' && newValue === 'default') {
       // Don't save 'default' effect, use global or let it be undefined
       delete currentValue[field];
-    } else if ((field === 'compact_mode' || field === 'show_value_in_bar' || field === 'disable_shimmer') && !newValue) {
+    } else if ((field === 'compact_mode' || field === 'show_value_in_bar' || field === 'disable_shimmer' || field === 'center_zero') && !newValue) {
       // Delete boolean fields when false to keep config clean
+      delete currentValue[field];
+    } else if (field === 'color_negative' && (!newValue || newValue === '')) {
       delete currentValue[field];
     } else {
       currentValue[field] = newValue;
@@ -1522,6 +1606,21 @@ class LinearGaugeCardEditor extends LitElement {
       row.color = '#03a9f4';
     } else {
       delete row.color;
+    }
+
+    newEntities[index] = row;
+    this._config = { ...this._config, entities: newEntities };
+    this._fireChangedEvent();
+  }
+
+  _toggleEntityNegativeColor(e, index) {
+    const newEntities = [...(this._config.entities || [])];
+    let row = { ...(typeof newEntities[index] === 'string' ? { entity: newEntities[index] } : newEntities[index]) };
+
+    if (e.target.checked) {
+      row.color_negative = '#f44336';
+    } else {
+      delete row.color_negative;
     }
 
     newEntities[index] = row;

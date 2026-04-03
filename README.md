@@ -86,6 +86,7 @@ Type: `custom:linear-gauge-card`
 | `show_min_max` | boolean | Show 24h min/max markers (default: false) |
 | `colors` | list | List of colors for a global gradient |
 | `color` | string | Global fixed color (overrides gradient) |
+| `color_negative` | string | Global fixed color for negative values when `center_zero` is active |
 | `severity` | list | Global severity configuration |
 | `effect` | string | `default` or `led` for a rectangular segmented effect |
 | `tap_action` | object | Default action on click (e.g., toggle) |
@@ -94,6 +95,7 @@ Type: `custom:linear-gauge-card`
 | `compact_mode` | boolean | Compact display mode (default: false) |
 | `show_value_in_bar` | boolean | Show value inside the bar, hides value next to name (default: false) |
 | `disable_shimmer` | boolean | Disable the shimmer animation effect (default: false) |
+| `center_zero` | boolean | Start the bar at the zero point. Negative values extend left/bottom, positive extend right/top (default: false) |
 | `bar_thickness` | number | Bar thickness in pixels (default: 12) |
 | `vertical_height` | number | Vertical bar height in pixels (default: 120) |
 | `vertical_width` | number | Vertical bar width in pixels (default: 16) |
@@ -110,6 +112,7 @@ Each entity in the list can be configured individually:
 | `target` | number/string | Target value or target entity ID |
 | `min` / `max` | number | Specific limits for this entity |
 | `color` | string | Fixed color for this gauge (overrides global) |
+| `color_negative` | string | Fixed color for negative values when `center_zero` is active |
 | `severity` | list | Specific color thresholds |
 | `effect` | string | Effect override (`default` or `led`) |
 | `pulse` | object | Pulse alert configuration (see below) |
@@ -117,6 +120,7 @@ Each entity in the list can be configured individually:
 | `compact_mode` | boolean | Compact mode for this entity |
 | `show_value_in_bar` | boolean | Show value in bar for this entity |
 | `disable_shimmer` | boolean | Disable shimmer for this entity |
+| `center_zero` | boolean | Center zero mode for this entity |
 
 ### Severity Configuration
 
