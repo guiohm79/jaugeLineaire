@@ -18,6 +18,8 @@ A modern and interactive custom card to display your entities as linear gauges. 
 
 ### Exemples d'utilisation
 <p align="center">
+  <img src="https://raw.githubusercontent.com/guiohm79/jaugeLineaire/main/image5.png" width="350" alt="center 0">
+  <img src="https://raw.githubusercontent.com/guiohm79/jaugeLineaire/main/image6.png" width="350" alt="center 0">
   <img src="https://raw.githubusercontent.com/guiohm79/jaugeLineaire/main/exemple1.png" width="350" alt="Exemple 1">
   <img src="https://raw.githubusercontent.com/guiohm79/jaugeLineaire/main/exemple2.png" width="350" alt="Exemple 2">
   <img src="https://raw.githubusercontent.com/guiohm79/jaugeLineaire/main/exemple3.png" width="350" alt="Exemple 3">

@@ -1751,3 +1751,12 @@ class LinearGaugeCardEditor extends LitElement {
 
 customElements.define('linear-gauge-card-editor', LinearGaugeCardEditor);
 customElements.define('linear-gauge-card', LinearGaugeCard);
+
+window.customCards = window.customCards || [];
+window.customCards.push({
+  type: 'linear-gauge-card',
+  name: 'Linear Gauge Card',
+  description: 'A linear gauge card for Home Assistant',
+  preview: true,
+  documentationURL: 'https://github.com/guiohm79/jaugeLineaire'
+});
