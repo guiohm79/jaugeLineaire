@@ -97,11 +97,27 @@ class LinearGaugeCard extends LitElement {
       ha-card {
         background: var(--lgc-card-background, var(--ha-card-background, var(--card-background-color, #fff)));
         color: var(--primary-text-color);
-        padding: 16px;
+        padding: var(--lgc-card-padding, 16px);
         border-radius: var(--ha-card-border-radius, 12px);
         border: none;
         box-shadow: var(--ha-card-box-shadow, var(--shadow-elevation-2dp, none));
         transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      
+      ha-card.compact-vertical {
+        --lgc-card-padding: 8px;
+      }
+      
+      ha-card.compact-vertical .entities-wrapper.vertical {
+        gap: var(--lgc-compact-gap, 4px);
+      }
+      
+      ha-card.compact-vertical .gauge-container {
+        padding: 2px;
+      }
+      
+      ha-card.compact-vertical .entity-row {
+        margin-bottom: 2px;
       }
 
       ha-card:hover {
@@ -112,15 +128,20 @@ class LinearGaugeCard extends LitElement {
       .card-header {
         font-size: 20px;
         font-weight: 600;
-        margin-bottom: 24px;
+        margin-bottom: var(--lgc-header-margin, 24px);
         color: var(--ha-card-header-color, var(--primary-text-color));
         letter-spacing: 0.5px;
         text-shadow: 0 2px 4px rgba(0,0,0,0.1);
       }
       
+      ha-card.compact-vertical .card-header {
+        --lgc-header-margin: 4px;
+        font-size: 14px;
+      }
+      
       .entities-wrapper {
         display: flex;
-        gap: 20px;
+        gap: var(--lgc-entities-gap, 20px);
       }
       
       .entities-wrapper.horizontal {
@@ -129,7 +150,7 @@ class LinearGaugeCard extends LitElement {
 
       .entities-wrapper.vertical {
         flex-direction: row;
-        justify-content: space-around;
+        justify-content: center;
         align-items: flex-end;
         flex-wrap: wrap;
       }
@@ -163,6 +184,11 @@ class LinearGaugeCard extends LitElement {
         align-items: center;
         flex: 1;
         min-width: 60px;
+      }
+      
+      /* When entities_gap is set, don't stretch containers */
+      .entities-wrapper.vertical.has-custom-gap .gauge-container {
+        flex: 0 0 auto;
       }
 
       .gauge-container:hover {
@@ -376,12 +402,18 @@ class LinearGaugeCard extends LitElement {
 
       .entities-wrapper.horizontal .bar-fill {
         height: 100%;
-        min-width: 8px;
+        min-width: var(--lgc-bar-min-size, 2px);
       }
 
       .entities-wrapper.vertical .bar-fill {
         width: 100%;
-        min-height: 8px;
+        min-height: var(--lgc-bar-min-size, 2px);
+      }
+      
+      /* When hide_zero_bar is enabled and value is 0, hide the bar completely */
+      .bar-fill.hide-at-zero {
+        min-width: 0 !important;
+        min-height: 0 !important;
       }
       
       .bar-fill::before {
@@ -455,12 +487,15 @@ class LinearGaugeCard extends LitElement {
     const verticalHeight = this._config.vertical_height || 120;
     const verticalWidth = this._config.vertical_width || 16;
     const cardBackground = this._config.card_background;
+    const compactMode = this._config.compact_mode || false;
+    const entitiesGap = this._config.entities_gap;
 
     // We bind CSS variables to the host style
     let cardStyle = `
       --lgc-bar-thickness: ${thickness}px;
       --lgc-vertical-height: ${verticalHeight}px;
       --lgc-vertical-width: ${verticalWidth}px;
+      ${entitiesGap !== undefined ? `--lgc-entities-gap: ${entitiesGap}px;` : ''}
     `;
     
     if (transparent) {
@@ -469,10 +504,13 @@ class LinearGaugeCard extends LitElement {
       cardStyle += `--lgc-card-background: ${cardBackground};`;
     }
 
+    const cardClass = compactMode ? 'compact-mode' : '';
+    const hasCustomGap = entitiesGap !== undefined;
+    
     return html`
-      <ha-card style="${cardStyle}">
+      <ha-card class="${cardClass}" style="${cardStyle}">
         ${title ? html`<div class="card-header">${title}</div>` : ''}
-        <div class="entities-wrapper ${layout}">
+        <div class="entities-wrapper ${layout} ${hasCustomGap ? 'has-custom-gap' : ''}">
           ${this._config.entities.map(ent => this.renderEntity(ent, layout))}
         </div>
       </ha-card>
@@ -612,6 +650,9 @@ class LinearGaugeCard extends LitElement {
     const compactMode = conf.compact_mode || this._config.compact_mode || false;
     const showValueInBar = conf.show_value_in_bar || this._config.show_value_in_bar || false;
     const disableShimmer = conf.disable_shimmer || this._config.disable_shimmer || false;
+    const hideIcon = conf.hide_icon || this._config.hide_icon || false;
+    const hideZeroBar = conf.hide_zero_bar || this._config.hide_zero_bar || false;
+    const isZero = !isNaN(value) && value <= min;
     const displayValue = isNaN(value) ? stateObj.state : `${value} ${unit}`;
 
     return html`
@@ -620,19 +661,19 @@ class LinearGaugeCard extends LitElement {
         ${!compactMode ? html`
         <div class="entity-row">
           <div class="entity-info-group">
-            ${icon ? html`<ha-icon class="entity-icon" .icon="${icon}"></ha-icon>` : ''}
+            ${icon && !hideIcon ? html`<ha-icon class="entity-icon" .icon="${icon}"></ha-icon>` : ''}
             <span class="entity-name" title="${name}">${name}</span>
           </div>
           ${!showValueInBar ? html`<span class="entity-state">${displayValue}</span>` : ''}
         </div>
         ` : html`
         <div class="entity-row compact">
-          ${icon ? html`<ha-icon class="entity-icon" .icon="${icon}"></ha-icon>` : ''}
+          ${icon && !hideIcon ? html`<ha-icon class="entity-icon" .icon="${icon}"></ha-icon>` : ''}
         </div>
         `}
         <div class="bar-bg ${effectClass}">
           ${minMaxMarker}
-          <div class="bar-fill ${effectClass} ${disableShimmer ? 'no-shimmer' : ''}" style="${barStyle}"></div>
+          <div class="bar-fill ${effectClass} ${disableShimmer ? 'no-shimmer' : ''} ${hideZeroBar && isZero ? 'hide-at-zero' : ''}" style="${barStyle}"></div>
           ${targetMarker}
           ${showValueInBar ? html`<span class="bar-value">${displayValue}</span>` : ''}
         </div>
@@ -977,7 +1018,19 @@ class LinearGaugeCardEditor extends LitElement {
              @input=${this._valueChanged}
            ></ha-textfield>
         </div>
-        
+
+        <div class="row">
+           <ha-textfield
+             label="Gap between entities (px)"
+             type="number"
+             .value=${this._config.entities_gap ?? ''}
+             placeholder="20"
+             .configValue=${'entities_gap'}
+             @input=${this._valueChanged}
+             style="max-width: 200px;"
+           ></ha-textfield>
+        </div>
+
         <div class="row">
            <div style="flex: 1;">
                <div class="section-title">Gradient Colors (Global)</div>
@@ -1055,6 +1108,24 @@ class LinearGaugeCardEditor extends LitElement {
           <ha-switch
             .checked=${this._config.compact_mode || false}
             .configValue=${'compact_mode'}
+            @change=${this._valueChanged}
+          ></ha-switch>
+        </div>
+
+        <div class="row">
+          <span>Hide Icon</span>
+          <ha-switch
+            .checked=${this._config.hide_icon || false}
+            .configValue=${'hide_icon'}
+            @change=${this._valueChanged}
+          ></ha-switch>
+        </div>
+
+        <div class="row">
+          <span>Hide Bar at Zero</span>
+          <ha-switch
+            .checked=${this._config.hide_zero_bar || false}
+            .configValue=${'hide_zero_bar'}
             @change=${this._valueChanged}
           ></ha-switch>
         </div>
@@ -1322,6 +1393,22 @@ class LinearGaugeCardEditor extends LitElement {
             </div>
             
             <div class="row">
+                <span>Hide Icon</span>
+                <ha-switch
+                    .checked=${entity.hide_icon || false}
+                    @change=${(e) => this._entityChanged(e, index, 'hide_icon')}
+                ></ha-switch>
+            </div>
+            
+            <div class="row">
+                <span>Hide Bar at Zero</span>
+                <ha-switch
+                    .checked=${entity.hide_zero_bar || false}
+                    @change=${(e) => this._entityChanged(e, index, 'hide_zero_bar')}
+                ></ha-switch>
+            </div>
+            
+            <div class="row">
                 <span>Show Value in Bar</span>
                 <ha-switch
                     .checked=${entity.show_value_in_bar || false}
@@ -1503,8 +1590,17 @@ class LinearGaugeCardEditor extends LitElement {
       configValue = target.configValue;
     }
 
-    if (configValue === 'min' || configValue === 'max' || configValue === 'bar_thickness' || configValue === 'vertical_height' || configValue === 'vertical_width') {
+    if (configValue === 'min' || configValue === 'max' || configValue === 'bar_thickness' || configValue === 'vertical_height' || configValue === 'vertical_width' || configValue === 'entities_gap') {
       value = parseFloat(value);
+    }
+    
+    // Handle empty values for optional numeric fields
+    if (configValue === 'entities_gap' && (isNaN(value) || target.value === '')) {
+      const newConfig = { ...this._config };
+      delete newConfig[configValue];
+      this._config = newConfig;
+      this._fireChangedEvent();
+      return;
     }
 
     if (configValue) {
@@ -1584,7 +1680,7 @@ class LinearGaugeCardEditor extends LitElement {
     } else if (field === 'effect' && newValue === 'default') {
       // Don't save 'default' effect, use global or let it be undefined
       delete currentValue[field];
-    } else if ((field === 'compact_mode' || field === 'show_value_in_bar' || field === 'disable_shimmer' || field === 'center_zero') && !newValue) {
+    } else if ((field === 'compact_mode' || field === 'show_value_in_bar' || field === 'disable_shimmer' || field === 'center_zero' || field === 'hide_icon' || field === 'hide_zero_bar') && !newValue) {
       // Delete boolean fields when false to keep config clean
       delete currentValue[field];
     } else if (field === 'color_negative' && (!newValue || newValue === '')) {
