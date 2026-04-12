@@ -653,7 +653,7 @@ class LinearGaugeCard extends LitElement {
     const hideIcon = conf.hide_icon || this._config.hide_icon || false;
     const hideZeroBar = conf.hide_zero_bar || this._config.hide_zero_bar || false;
     const isZero = !isNaN(value) && value <= min;
-    const displayValue = isNaN(value) ? stateObj.state : `${value} ${unit}`;
+    const displayValue = isNaN(value) ? stateObj.state : `${value.toFixed(conf.value_precision ?? this._config.value_precision ?? 1)} ${unit}`;
 
     return html`
       <div class="gauge-container ${isPulsing ? 'pulsing' : ''} ${compactMode ? 'compact' : ''} ${showValueInBar ? 'value-in-bar' : ''}" 
@@ -995,27 +995,22 @@ class LinearGaugeCardEditor extends LitElement {
 
         <div class="row">
            <ha-textfield
-             label="Bar Thickness (px)"
-             type="number"
-             .value=${this._config.bar_thickness ?? 12}
-             .configValue=${'bar_thickness'}
-             @input=${this._valueChanged}
-           ></ha-textfield>
-           
-           <ha-textfield
-             label="Vertical Height (px)"
-             type="number"
-             .value=${this._config.vertical_height ?? 120}
-             .configValue=${'vertical_height'}
-             @input=${this._valueChanged}
-           ></ha-textfield>
-
-           <ha-textfield
              label="Vertical Width (px)"
              type="number"
              .value=${this._config.vertical_width ?? 16}
              .configValue=${'vertical_width'}
              @input=${this._valueChanged}
+           ></ha-textfield>
+        </div>
+
+        <div class="row">
+           <ha-textfield
+             label="Value Precision (decimals)"
+             type="number"
+             .value=${this._config.value_precision ?? 1}
+             .configValue=${'value_precision'}
+             @input=${this._valueChanged}
+             style="max-width: 180px;"
            ></ha-textfield>
         </div>
 
@@ -1373,6 +1368,13 @@ class LinearGaugeCardEditor extends LitElement {
                     .value=${entity.target || ''}
                     @input=${(e) => this._entityChanged(e, index, 'target')}
                 ></ha-textfield>
+                <ha-textfield
+                    label="Precision"
+                    type="number"
+                    .value=${entity.value_precision ?? ''}
+                    placeholder=${this._config.value_precision ?? 1}
+                    @input=${(e) => this._entityChanged(e, index, 'value_precision')}
+                ></ha-textfield>
             </div>
             <div class="row">
                 <ha-selector
@@ -1594,6 +1596,10 @@ class LinearGaugeCardEditor extends LitElement {
       value = parseFloat(value);
     }
     
+    if (configValue === 'value_precision') {
+      value = parseInt(value);
+    }
+    
     // Handle empty values for optional numeric fields
     if (configValue === 'entities_gap' && (isNaN(value) || target.value === '')) {
       const newConfig = { ...this._config };
@@ -1669,6 +1675,15 @@ class LinearGaugeCardEditor extends LitElement {
     
     if (field === 'target') newValue = parseFloat(newValue);
     
+    // Handle value_precision - if empty, delete to use global value
+    if (field === 'value_precision') {
+      if (newValue === '' || newValue === undefined || newValue === null || isNaN(newValue)) {
+        delete currentValue[field];
+      } else {
+        newValue = parseInt(newValue);
+        currentValue[field] = newValue;
+      }
+    } else
     // Handle min/max - if empty, delete to use global value
     if (field === 'min' || field === 'max') {
       if (newValue === '' || newValue === undefined || newValue === null) {
