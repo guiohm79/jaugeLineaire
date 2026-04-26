@@ -995,6 +995,26 @@ class LinearGaugeCardEditor extends LitElement {
 
         <div class="row">
            <ha-textfield
+             label="Bar Thickness (px)"
+             type="number"
+             .value=${this._config.bar_thickness ?? 12}
+             .configValue=${'bar_thickness'}
+             @input=${this._valueChanged}
+           ></ha-textfield>
+        </div>
+
+        <div class="row">
+           <ha-textfield
+             label="Vertical Height (px)"
+             type="number"
+             .value=${this._config.vertical_height ?? 120}
+             .configValue=${'vertical_height'}
+             @input=${this._valueChanged}
+           ></ha-textfield>
+        </div>
+
+        <div class="row">
+           <ha-textfield
              label="Vertical Width (px)"
              type="number"
              .value=${this._config.vertical_width ?? 16}

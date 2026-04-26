@@ -22,14 +22,14 @@ let xt = class {
     return this.cssText;
   }
 };
-const Lt = (l) => new xt(typeof l == "string" ? l : l + "", void 0, st), Ct = (l, ...t) => {
+const Ht = (l) => new xt(typeof l == "string" ? l : l + "", void 0, st), Ct = (l, ...t) => {
   const e = l.length === 1 ? l[0] : t.reduce((i, s, n) => i + ((a) => {
     if (a._$cssResult$ === !0) return a.cssText;
     if (typeof a == "number") return a;
     throw Error("Value passed to 'css' function must be a 'css' function result: " + a + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
   })(s) + l[n + 1], l[0]);
   return new xt(e, l, st);
-}, Ht = (l, t) => {
+}, Lt = (l, t) => {
   if (it) l.adoptedStyleSheets = t.map((e) => e instanceof CSSStyleSheet ? e : e.styleSheet);
   else for (const e of t) {
     const i = document.createElement("style"), s = D.litNonce;
@@ -38,14 +38,14 @@ const Lt = (l) => new xt(typeof l == "string" ? l : l + "", void 0, st), Ct = (l
 }, pt = it ? (l) => l : (l) => l instanceof CSSStyleSheet ? ((t) => {
   let e = "";
   for (const i of t.cssRules) e += i.cssText;
-  return Lt(e);
+  return Ht(e);
 })(l) : l;
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const { is: Ot, defineProperty: Ut, getOwnPropertyDescriptor: Tt, getOwnPropertyNames: It, getOwnPropertySymbols: Vt, getPrototypeOf: Rt } = Object, y = globalThis, gt = y.trustedTypes, jt = gt ? gt.emptyScript : "", J = y.reactiveElementPolyfillSupport, L = (l, t) => l, et = { toAttribute(l, t) {
+const { is: Ot, defineProperty: Ut, getOwnPropertyDescriptor: Tt, getOwnPropertyNames: Vt, getOwnPropertySymbols: It, getPrototypeOf: Rt } = Object, y = globalThis, gt = y.trustedTypes, jt = gt ? gt.emptyScript : "", J = y.reactiveElementPolyfillSupport, H = (l, t) => l, et = { toAttribute(l, t) {
   switch (t) {
     case Boolean:
       l = l ? jt : null;
@@ -103,14 +103,14 @@ let k = class extends HTMLElement {
     return this.elementProperties.get(t) ?? ft;
   }
   static _$Ei() {
-    if (this.hasOwnProperty(L("elementProperties"))) return;
+    if (this.hasOwnProperty(H("elementProperties"))) return;
     const t = Rt(this);
     t.finalize(), t.l !== void 0 && (this.l = [...t.l]), this.elementProperties = new Map(t.elementProperties);
   }
   static finalize() {
-    if (this.hasOwnProperty(L("finalized"))) return;
-    if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(L("properties"))) {
-      const e = this.properties, i = [...It(e), ...Vt(e)];
+    if (this.hasOwnProperty(H("finalized"))) return;
+    if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(H("properties"))) {
+      const e = this.properties, i = [...Vt(e), ...It(e)];
       for (const s of i) this.createProperty(s, e[s]);
     }
     const t = this[Symbol.metadata];
@@ -159,7 +159,7 @@ let k = class extends HTMLElement {
   }
   createRenderRoot() {
     const t = this.shadowRoot ?? this.attachShadow(this.constructor.shadowRootOptions);
-    return Ht(t, this.constructor.elementStyles), t;
+    return Lt(t, this.constructor.elementStyles), t;
   }
   connectedCallback() {
     var t;
@@ -278,13 +278,13 @@ let k = class extends HTMLElement {
   firstUpdated(t) {
   }
 };
-k.elementStyles = [], k.shadowRootOptions = { mode: "open" }, k[L("elementProperties")] = /* @__PURE__ */ new Map(), k[L("finalized")] = /* @__PURE__ */ new Map(), J == null || J({ ReactiveElement: k }), (y.reactiveElementVersions ?? (y.reactiveElementVersions = [])).push("2.1.2");
+k.elementStyles = [], k.shadowRootOptions = { mode: "open" }, k[H("elementProperties")] = /* @__PURE__ */ new Map(), k[H("finalized")] = /* @__PURE__ */ new Map(), J == null || J({ ReactiveElement: k }), (y.reactiveElementVersions ?? (y.reactiveElementVersions = [])).push("2.1.2");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const H = globalThis, ut = (l) => l, B = H.trustedTypes, vt = B ? B.createPolicy("lit-html", { createHTML: (l) => l }) : void 0, Et = "$lit$", b = `lit$${Math.random().toFixed(9).slice(2)}$`, kt = "?" + b, Dt = `<${kt}>`, E = document, O = () => E.createComment(""), U = (l) => l === null || typeof l != "object" && typeof l != "function", at = Array.isArray, Bt = (l) => at(l) || typeof (l == null ? void 0 : l[Symbol.iterator]) == "function", Q = `[ 	
+const L = globalThis, ut = (l) => l, B = L.trustedTypes, vt = B ? B.createPolicy("lit-html", { createHTML: (l) => l }) : void 0, Et = "$lit$", b = `lit$${Math.random().toFixed(9).slice(2)}$`, kt = "?" + b, Dt = `<${kt}>`, E = document, O = () => E.createComment(""), U = (l) => l === null || typeof l != "object" && typeof l != "function", at = Array.isArray, Bt = (l) => at(l) || typeof (l == null ? void 0 : l[Symbol.iterator]) == "function", Q = `[ 	
 \f\r]`, P = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, _t = /-->/g, mt = />/g, x = RegExp(`>|${Q}(?:([^\\s"'>=/]+)(${Q}*=${Q}*(?:[^ 	
 \f\r"'\`<>=]|("|')|))|$)`, "g"), $t = /'/g, bt = /"/g, St = /^(?:script|style|textarea|title)$/i, Ft = (l) => (t, ...e) => ({ _$litType$: l, strings: t, values: e }), p = Ft(1), z = Symbol.for("lit-noChange"), u = Symbol.for("lit-nothing"), yt = /* @__PURE__ */ new WeakMap(), C = E.createTreeWalker(E, 129);
 function zt(l, t) {
@@ -364,7 +364,7 @@ class Gt {
     for (; c !== void 0; ) {
       if (a === c.index) {
         let h;
-        c.type === 2 ? h = new I(n, n.nextSibling, this, t) : c.type === 1 ? h = new c.ctor(n, c.name, c.strings, this, t) : c.type === 6 && (h = new qt(n, this, t)), this._$AV.push(h), c = i[++r];
+        c.type === 2 ? h = new V(n, n.nextSibling, this, t) : c.type === 1 ? h = new c.ctor(n, c.name, c.strings, this, t) : c.type === 6 && (h = new qt(n, this, t)), this._$AV.push(h), c = i[++r];
       }
       a !== (c == null ? void 0 : c.index) && (n = C.nextNode(), a++);
     }
@@ -375,7 +375,7 @@ class Gt {
     for (const i of this._$AV) i !== void 0 && (i.strings !== void 0 ? (i._$AI(t, i, e), e += i.strings.length - 2) : i._$AI(t[e])), e++;
   }
 }
-class I {
+class V {
   get _$AU() {
     var t;
     return ((t = this._$AM) == null ? void 0 : t._$AU) ?? this._$Cv;
@@ -423,7 +423,7 @@ class I {
     at(this._$AH) || (this._$AH = [], this._$AR());
     const e = this._$AH;
     let i, s = 0;
-    for (const n of t) s === e.length ? e.push(i = new I(this.O(O()), this.O(O()), this, this.options)) : i = e[s], i._$AI(n), s++;
+    for (const n of t) s === e.length ? e.push(i = new V(this.O(O()), this.O(O()), this, this.options)) : i = e[s], i._$AI(n), s++;
     s < e.length && (this._$AR(i && i._$AB.nextSibling, s), e.length = s);
   }
   _$AR(t = this._$AA.nextSibling, e) {
@@ -504,14 +504,14 @@ class qt {
     N(this, t);
   }
 }
-const K = H.litHtmlPolyfillSupport;
-K == null || K(T, I), (H.litHtmlVersions ?? (H.litHtmlVersions = [])).push("3.3.2");
+const K = L.litHtmlPolyfillSupport;
+K == null || K(T, V), (L.litHtmlVersions ?? (L.litHtmlVersions = [])).push("3.3.2");
 const Jt = (l, t, e) => {
   const i = (e == null ? void 0 : e.renderBefore) ?? t;
   let s = i._$litPart$;
   if (s === void 0) {
     const n = (e == null ? void 0 : e.renderBefore) ?? null;
-    i._$litPart$ = s = new I(t.insertBefore(O(), n), n, void 0, e ?? {});
+    i._$litPart$ = s = new V(t.insertBefore(O(), n), n, void 0, e ?? {});
   }
   return s._$AI(l), s;
 };
@@ -1022,9 +1022,9 @@ class ee extends S {
     isNaN(r) || (W = Math.max(o, Math.min(r, d)), d !== o ? v = (W - o) / (d - o) * 100 : v = 0, v = Math.max(0, Math.min(100, v)));
     const nt = i.center_zero ?? this._config.center_zero ?? !1, $ = this._computeColor(r, i, e, nt);
     let M = !1;
-    const V = i.pulse || this._config.pulse;
-    if (V && typeof V == "object") {
-      const g = parseFloat(V.value), _ = V.condition || "above";
+    const I = i.pulse || this._config.pulse;
+    if (I && typeof I == "object") {
+      const g = parseFloat(I.value), _ = I.condition || "above";
       isNaN(g) || (_ === "above" && r >= g || _ === "below" && r <= g) && (M = !0);
     }
     if (!M) {
@@ -1330,6 +1330,26 @@ class ie extends S {
              type="number"
              .value=${this._config.max ?? 100}
              .configValue=${"max"}
+             @input=${this._valueChanged}
+           ></ha-textfield>
+        </div>
+
+        <div class="row">
+           <ha-textfield
+             label="Bar Thickness (px)"
+             type="number"
+             .value=${this._config.bar_thickness ?? 12}
+             .configValue=${"bar_thickness"}
+             @input=${this._valueChanged}
+           ></ha-textfield>
+        </div>
+
+        <div class="row">
+           <ha-textfield
+             label="Vertical Height (px)"
+             type="number"
+             .value=${this._config.vertical_height ?? 120}
+             .configValue=${"vertical_height"}
              @input=${this._valueChanged}
            ></ha-textfield>
         </div>
