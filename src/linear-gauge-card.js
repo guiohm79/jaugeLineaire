@@ -677,7 +677,6 @@ class LinearGaugeCard extends LitElement {
           ${targetMarker}
           ${showValueInBar ? html`<span class="bar-value">${displayValue}</span>` : ''}
         </div>
-        ${compactMode && !icon ? html`<span class="compact-label">${name}</span>` : ''}
       </div>
     `;
   }
@@ -914,6 +913,30 @@ class LinearGaugeCardEditor extends LitElement {
           justify-content: space-between;
           margin-bottom: 4px;
       }
+      .text-input-group {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          width: 100%;
+      }
+      .text-input-group label {
+          font-size: 0.85em;
+          color: var(--secondary-text-color, #888);
+      }
+      .text-input-group input.plain-input {
+          width: 100%;
+          box-sizing: border-box;
+          padding: 8px 10px;
+          font-size: 1em;
+          color: var(--primary-text-color, #fff);
+          background: var(--primary-background-color, rgba(255,255,255,0.05));
+          border: 1px solid var(--divider-color, rgba(255,255,255,0.2));
+          border-radius: 4px;
+          outline: none;
+      }
+      .text-input-group input.plain-input:focus {
+          border-color: var(--primary-color, #03a9f4);
+      }
     `;
   }
 
@@ -947,13 +970,18 @@ class LinearGaugeCardEditor extends LitElement {
 
     return html`
       <div class="card-config">
-        
-        <ha-textfield
-          label="Title"
-          .value=${this._config.title || ''}
-          .configValue=${'title'}
-          @input=${this._valueChanged}
-        ></ha-textfield>
+
+        <div class="section-title">Card Settings</div>
+        <div class="text-input-group">
+          <label>Card Title</label>
+          <input
+            class="plain-input"
+            type="text"
+            placeholder="Optional title shown at the top of the card"
+            .value=${this._config.title || ''}
+            @input=${(e) => this._plainValueChanged(e, 'title')}
+          />
+        </div>
 
         <div class="row">
           <ha-selector
@@ -975,75 +1003,81 @@ class LinearGaugeCardEditor extends LitElement {
           ></ha-selector>
         </div>
 
+        <div class="section-title">Gauge Size & Range</div>
         <div class="row">
-           <ha-textfield
-             label="Min"
-             type="number"
-             .value=${this._config.min ?? 0}
-             .configValue=${'min'}
-             @input=${this._valueChanged}
-           ></ha-textfield>
-           
-           <ha-textfield
-             label="Max"
-             type="number"
-             .value=${this._config.max ?? 100}
-             .configValue=${'max'}
-             @input=${this._valueChanged}
-           ></ha-textfield>
+          <div class="text-input-group">
+            <label>Min</label>
+            <input
+              class="plain-input"
+              type="number"
+              .value=${this._config.min ?? 0}
+              @input=${(e) => this._plainNumberChanged(e, 'min', 'float')}
+            />
+          </div>
+          <div class="text-input-group">
+            <label>Max</label>
+            <input
+              class="plain-input"
+              type="number"
+              .value=${this._config.max ?? 100}
+              @input=${(e) => this._plainNumberChanged(e, 'max', 'float')}
+            />
+          </div>
         </div>
 
         <div class="row">
-           <ha-textfield
-             label="Bar Thickness (px)"
-             type="number"
-             .value=${this._config.bar_thickness ?? 12}
-             .configValue=${'bar_thickness'}
-             @input=${this._valueChanged}
-           ></ha-textfield>
+          <div class="text-input-group">
+            <label>Bar Thickness (px)</label>
+            <input
+              class="plain-input"
+              type="number"
+              .value=${this._config.bar_thickness ?? 12}
+              @input=${(e) => this._plainNumberChanged(e, 'bar_thickness', 'float')}
+            />
+          </div>
+          <div class="text-input-group">
+            <label>Value Precision (decimals)</label>
+            <input
+              class="plain-input"
+              type="number"
+              .value=${this._config.value_precision ?? 1}
+              @input=${(e) => this._plainNumberChanged(e, 'value_precision', 'int')}
+            />
+          </div>
         </div>
 
         <div class="row">
-           <ha-textfield
-             label="Vertical Height (px)"
-             type="number"
-             .value=${this._config.vertical_height ?? 120}
-             .configValue=${'vertical_height'}
-             @input=${this._valueChanged}
-           ></ha-textfield>
+          <div class="text-input-group">
+            <label>Vertical Height (px)</label>
+            <input
+              class="plain-input"
+              type="number"
+              .value=${this._config.vertical_height ?? 120}
+              @input=${(e) => this._plainNumberChanged(e, 'vertical_height', 'float')}
+            />
+          </div>
+          <div class="text-input-group">
+            <label>Vertical Width (px)</label>
+            <input
+              class="plain-input"
+              type="number"
+              .value=${this._config.vertical_width ?? 16}
+              @input=${(e) => this._plainNumberChanged(e, 'vertical_width', 'float')}
+            />
+          </div>
         </div>
 
         <div class="row">
-           <ha-textfield
-             label="Vertical Width (px)"
-             type="number"
-             .value=${this._config.vertical_width ?? 16}
-             .configValue=${'vertical_width'}
-             @input=${this._valueChanged}
-           ></ha-textfield>
-        </div>
-
-        <div class="row">
-           <ha-textfield
-             label="Value Precision (decimals)"
-             type="number"
-             .value=${this._config.value_precision ?? 1}
-             .configValue=${'value_precision'}
-             @input=${this._valueChanged}
-             style="max-width: 180px;"
-           ></ha-textfield>
-        </div>
-
-        <div class="row">
-           <ha-textfield
-             label="Gap between entities (px)"
-             type="number"
-             .value=${this._config.entities_gap ?? ''}
-             placeholder="20"
-             .configValue=${'entities_gap'}
-             @input=${this._valueChanged}
-             style="max-width: 200px;"
-           ></ha-textfield>
+          <div class="text-input-group">
+            <label>Gap between entities (px)</label>
+            <input
+              class="plain-input"
+              type="number"
+              placeholder="20"
+              .value=${this._config.entities_gap ?? ''}
+              @input=${(e) => this._plainNumberChanged(e, 'entities_gap', 'float')}
+            />
+          </div>
         </div>
 
         <div class="row">
@@ -1204,7 +1238,7 @@ class LinearGaugeCardEditor extends LitElement {
                 @value-changed=${(e) => this._entityChanged(e, index, 'entity')}
               ></ha-selector>
           </div>
-          
+
            <ha-icon-button
             .path=${isExpanded ? ICON_CHEVRON_UP : ICON_CHEVRON_DOWN}
             @click=${() => this._toggleExpand(index)}
@@ -1215,6 +1249,17 @@ class LinearGaugeCardEditor extends LitElement {
             .path=${ICON_CLOSE}
             @click=${() => this._removeEntity(index)}
           ></ha-icon-button>
+        </div>
+
+        <div class="text-input-group">
+          <label>Display name (optional)</label>
+          <input
+            class="plain-input"
+            type="text"
+            placeholder="Override the entity friendly name"
+            .value=${entityObj.name || ''}
+            @input=${(e) => this._entityPlainChanged(e, index, 'name')}
+          />
         </div>
 
         ${isExpanded ? this._renderEntityDetails(entityObj, index, color, useCustomColor) : ''}
@@ -1356,11 +1401,6 @@ class LinearGaugeCardEditor extends LitElement {
     return html`
         <div class="entity-details">
             <div class="row">
-                <ha-textfield
-                    label="Name (optional)"
-                    .value=${entity.name || ''}
-                    @input=${(e) => this._entityChanged(e, index, 'name')}
-                ></ha-textfield>
                 <ha-textfield
                     label="Icon (e.g., mdi:thermometer)"
                     .value=${entity.icon || ''}
@@ -1636,6 +1676,54 @@ class LinearGaugeCardEditor extends LitElement {
       };
       this._fireChangedEvent();
     }
+  }
+
+  _plainNumberChanged(e, configKey, parseMode) {
+    if (!this._config) return;
+    const raw = e.target.value;
+    if (raw === '' || raw === undefined || raw === null) {
+      const newConfig = { ...this._config };
+      delete newConfig[configKey];
+      this._config = newConfig;
+      this._fireChangedEvent();
+      return;
+    }
+    const parsed = parseMode === 'int' ? parseInt(raw) : parseFloat(raw);
+    if (isNaN(parsed)) return;
+    this._config = { ...this._config, [configKey]: parsed };
+    this._fireChangedEvent();
+  }
+
+  _plainValueChanged(e, configKey) {
+    if (!this._config) return;
+    const value = e.target.value;
+    if (value === '' || value === undefined || value === null) {
+      const newConfig = { ...this._config };
+      delete newConfig[configKey];
+      this._config = newConfig;
+    } else {
+      this._config = { ...this._config, [configKey]: value };
+    }
+    this._fireChangedEvent();
+  }
+
+  _entityPlainChanged(e, index, field) {
+    const newEntities = [...(this._config.entities || [])];
+    let currentValue = newEntities[index];
+    if (typeof currentValue === 'string') {
+      currentValue = { entity: currentValue };
+    } else {
+      currentValue = { ...currentValue };
+    }
+    const newValue = e.target.value;
+    if (newValue === '' || newValue === undefined || newValue === null) {
+      delete currentValue[field];
+    } else {
+      currentValue[field] = newValue;
+    }
+    newEntities[index] = currentValue;
+    this._config = { ...this._config, entities: newEntities };
+    this._fireChangedEvent();
   }
 
   _colorValueChanged(e, configValue) {
