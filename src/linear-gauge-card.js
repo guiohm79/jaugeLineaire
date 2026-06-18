@@ -5,6 +5,26 @@ const ICON_CHEVRON_DOWN = "M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,
 const ICON_CHEVRON_UP = "M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z";
 const ICON_PLUS = "M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z";
 
+// Default gradient palette used by the gradient-track / segments / cursor styles
+const LGC_DEFAULT_GRAD = ['#f44336', '#ff9800', '#ffd23f', '#7cb342', '#4caf50'];
+
+// Sample a hex-color array at position t (0..1) -> 'rgb(r,g,b)'. Non-hex stops
+// (rgb/rgba) are returned as-is without interpolation.
+function lgcSample(colors, t) {
+  t = Math.max(0, Math.min(1, t));
+  if (!colors || colors.length === 0) return 'var(--primary-color, #03a9f4)';
+  if (colors.length === 1) return colors[0];
+  const seg = t * (colors.length - 1);
+  const i = Math.min(colors.length - 2, Math.floor(seg));
+  const f = seg - i;
+  const a = colors[i], b = colors[i + 1];
+  if (typeof a !== 'string' || typeof b !== 'string' || a[0] !== '#' || b[0] !== '#') return a;
+  const hx = (h) => { let s = h.slice(1); if (s.length === 3) s = s.split('').map(c => c + c).join(''); const n = parseInt(s.slice(0, 6), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+  const ca = hx(a), cb = hx(b);
+  const m = (k) => Math.round(ca[k] + (cb[k] - ca[k]) * f);
+  return `rgb(${m(0)},${m(1)},${m(2)})`;
+}
+
 class LinearGaugeCard extends LitElement {
   static get properties() {
     return {
@@ -28,7 +48,7 @@ class LinearGaugeCard extends LitElement {
   }
 
   updated(changedProps) {
-    if (changedProps.has('hass') && this.hass && this._config?.show_min_max) {
+    if (changedProps.has('hass') && this.hass && (this._config?.show_min_max || this._usesSparkline())) {
       this._fetchHistoryIfNeeded();
     }
   }
@@ -73,7 +93,16 @@ class LinearGaugeCard extends LitElement {
             });
 
             if (!isNaN(min) && !isNaN(max)) {
-              newHistory[entityId] = { min, max };
+              // Downsampled numeric series for the sparkline style
+              const vals = entityHistory.map(s => parseFloat(s.state)).filter(v => !isNaN(v));
+              let series = vals;
+              const MAXP = 60;
+              if (vals.length > MAXP) {
+                series = [];
+                const step = vals.length / MAXP;
+                for (let k = 0; k < MAXP; k++) series.push(vals[Math.floor(k * step)]);
+              }
+              newHistory[entityId] = { min, max, series };
               this._historyFetched.add(entityId);
             }
           }
@@ -165,13 +194,28 @@ class LinearGaugeCard extends LitElement {
       }
 
       .gauge-container.pulsing {
-        animation: pulse-red 2s infinite;
+        animation: pulse-red 1.4s infinite;
       }
 
       @keyframes pulse-red {
-        0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.4); }
-        70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+        0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.5); }
+        70% { box-shadow: 0 0 0 8px rgba(255, 0, 0, 0); }
         100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+      }
+
+      /* Pulse: make the active fill itself blink so it's visible on every style */
+      .gauge-container.pulsing .bar-fill,
+      .gauge-container.pulsing .grad-track-bg,
+      .gauge-container.pulsing .cursor-fill,
+      .gauge-container.pulsing .cursor-thumb,
+      .gauge-container.pulsing .seg,
+      .gauge-container.pulsing .tick-target {
+        animation: lgc-pulse-blink 1.1s ease-in-out infinite;
+      }
+
+      @keyframes lgc-pulse-blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
       }
       
       .entities-wrapper.horizontal .gauge-container {
@@ -471,6 +515,133 @@ class LinearGaugeCard extends LitElement {
         -webkit-mask-image: linear-gradient(to bottom, black 2px, transparent 2px, transparent 3px, black 3px);
         -webkit-mask-size: 100% 3px;
       }
+
+      /* ---- Accessibility: keyboard focus + reduced motion ---- */
+      .gauge-container:focus-visible {
+        outline: 2px solid var(--primary-color, #03a9f4);
+        outline-offset: 2px;
+        background: rgba(127, 127, 127, 0.08);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .gauge-container { animation: none !important; }
+        .gauge-container.pulsing { animation: none !important; }
+        .gauge-container.pulsing .bar-fill,
+        .gauge-container.pulsing .grad-track-bg,
+        .gauge-container.pulsing .cursor-fill,
+        .gauge-container.pulsing .cursor-thumb,
+        .gauge-container.pulsing .seg,
+        .gauge-container.pulsing .tick-target { animation: none !important; }
+        .bar-fill::before { animation: none !important; display: none !important; }
+        ha-card, .gauge-container { transition: none !important; }
+      }
+
+      /* ---- Gauge style: gradient track ---- */
+      .bar-bg.grad-track { position: relative; }
+      .grad-track-bg { position: absolute; inset: 0; opacity: 0.45; pointer-events: none; }
+
+      /* ---- Gauge style: segments (LED, adjustable count) ---- */
+      .seg-track {
+        display: flex;
+        gap: var(--lgc-segment-gap, 3px);
+        width: 100%;
+        height: var(--lgc-bar-thickness, 12px);
+      }
+      .seg-track.vertical {
+        flex-direction: column-reverse;
+        width: var(--lgc-vertical-width, 16px);
+        height: var(--lgc-vertical-height, 120px);
+        margin: 0 auto;
+      }
+      .seg {
+        flex: 1 1 0;
+        border-radius: 3px;
+        background: rgba(127, 127, 127, 0.18);
+        transition: background 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      /* ---- Gauge style: ticks / graduations ---- */
+      .ticks-wrap { position: relative; padding-top: 4px; }
+      .ticks-bar { width: 100%; height: var(--lgc-bar-thickness, 10px); }
+      .ticks { position: relative; height: 16px; margin-top: 3px; }
+      .tick { position: absolute; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; }
+      .tick-mark { width: 1px; height: 4px; background: var(--secondary-text-color, rgba(127,127,127,0.6)); opacity: 0.7; }
+      .tick-label { font-size: 9.5px; font-family: var(--code-font-family, monospace); color: var(--secondary-text-color); margin-top: 2px; font-feature-settings: "tnum"; }
+      .tick-target { position: absolute; top: -12px; transform: translateX(-50%); font-size: 10px; white-space: nowrap; color: var(--secondary-text-color); }
+      .ticks-value {
+        position: absolute; top: -13px; transform: translateX(-50%);
+        font-size: 10.5px; font-weight: 600; white-space: nowrap;
+        color: var(--primary-text-color); font-feature-settings: "tnum";
+        padding: 0 4px; border-radius: 4px;
+        background: var(--lgc-card-background, var(--card-background-color, rgba(0,0,0,0.5)));
+      }
+
+      /* ---- Gauge style: cursor ---- */
+      .cursor-wrap { position: relative; height: 22px; margin-top: 16px; }
+      .cursor-track { position: absolute; top: 9px; left: 0; right: 0; height: 4px; border-radius: 2px; opacity: 0.32; }
+      .cursor-fill { position: absolute; top: 9px; left: 0; height: 4px; border-radius: 2px; }
+      .cursor-thumb {
+        position: absolute; top: 2px; width: 18px; height: 18px; border-radius: 50%;
+        transform: translateX(-50%);
+        background: var(--lgc-card-background, var(--card-background-color, #fff));
+        border: 3px solid var(--lgc-thumb-color, var(--primary-color));
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+      }
+      /* Cursor thumb shapes */
+      .cursor-thumb.shape-line {
+        top: 0; width: 4px; height: 22px; border-radius: 2px; border: none;
+        background: var(--lgc-thumb-color, var(--primary-color));
+      }
+      .cursor-thumb.shape-bar {
+        top: 2px; width: 11px; height: 18px; border-radius: 3px; border: none;
+        background: var(--lgc-thumb-color, var(--primary-color));
+      }
+      .cursor-thumb.shape-diamond {
+        top: 4px; width: 14px; height: 14px; border-radius: 2px; border: none;
+        background: var(--lgc-thumb-color, var(--primary-color));
+        transform: translateX(-50%) rotate(45deg);
+      }
+      .cursor-thumb.shape-arrow {
+        top: 3px; width: 0; height: 0; border-radius: 0;
+        background: none; box-shadow: none;
+        border-left: 7px solid transparent;
+        border-right: 7px solid transparent;
+        border-top: 11px solid var(--lgc-thumb-color, var(--primary-color));
+      }
+      .cursor-label {
+        position: absolute; top: -16px; transform: translateX(-50%);
+        font-size: 11px; font-weight: 600; white-space: nowrap;
+        color: var(--primary-text-color); font-feature-settings: "tnum";
+      }
+
+      /* Cursor style: vertical variant */
+      .cursor-wrap.vertical {
+        position: relative; margin: 0 auto;
+        width: var(--lgc-vertical-width, 16px);
+        height: var(--lgc-vertical-height, 120px);
+      }
+      .cursor-wrap.vertical .cursor-track {
+        top: 0; bottom: 0; left: 50%; right: auto;
+        width: 4px; height: auto; transform: translateX(-50%);
+      }
+      .cursor-wrap.vertical .cursor-fill {
+        top: auto; bottom: 0; left: 50%; right: auto;
+        width: 4px; height: 0; transform: translateX(-50%);
+      }
+      .cursor-wrap.vertical .cursor-thumb {
+        top: auto; left: 50%; transform: translate(-50%, 50%);
+      }
+      .cursor-wrap.vertical .cursor-thumb.shape-diamond {
+        transform: translate(-50%, 50%) rotate(45deg);
+      }
+
+      /* ---- Gauge style: sparkline 24h ---- */
+      .spark-wrap { width: 100%; }
+      .spark-wrap svg { display: block; width: 100%; height: 46px; }
+      .spark-meta {
+        display: flex; justify-content: space-between;
+        font-size: 10.5px; font-family: var(--code-font-family, monospace);
+        color: var(--secondary-text-color); margin-top: 2px; font-feature-settings: "tnum";
+      }
     `;
   }
 
@@ -604,8 +775,13 @@ class LinearGaugeCard extends LitElement {
     }
 
     let targetMarker = html``;
-    if (conf.target !== undefined) {
-      let targetVal = conf.target;
+    // Marker source: target_entity (dynamic, from an entity state) takes priority
+    // over the fixed numeric target.
+    const targetSource = (conf.target_entity !== undefined && conf.target_entity !== '')
+      ? conf.target_entity
+      : conf.target;
+    if (targetSource !== undefined && targetSource !== '') {
+      let targetVal = targetSource;
       if (typeof targetVal === 'string' && isNaN(parseFloat(targetVal))) {
         const targetState = this.hass.states[targetVal];
         if (targetState) {
@@ -655,8 +831,23 @@ class LinearGaugeCard extends LitElement {
     const isZero = !isNaN(value) && value <= min;
     const displayValue = isNaN(value) ? stateObj.state : `${value.toFixed(conf.value_precision ?? this._config.value_precision ?? 1)} ${unit}`;
 
+    const gaugeStyle = this._gaugeStyle(conf);
+    const segmentCount = Math.max(3, Math.min(120, parseInt(conf.segment_count ?? this._config.segment_count ?? 20, 10) || 20));
+    const tapConf = conf.tap_action || this._config.tap_action || { action: 'more-info' };
+    const interactive = tapConf.action !== 'none';
+
+    const visual = this._renderVisual(gaugeStyle, {
+      layout, percent, color, barStyle, targetMarker, minMaxMarker,
+      displayValue, showValueInBar, disableShimmer, hideZeroBar, isZero,
+      value, min, max, clampedValue, entityId, conf, segmentCount,
+    });
+
     return html`
-      <div class="gauge-container ${isPulsing ? 'pulsing' : ''} ${compactMode ? 'compact' : ''} ${showValueInBar ? 'value-in-bar' : ''}" 
+      <div class="gauge-container ${isPulsing ? 'pulsing' : ''} ${compactMode ? 'compact' : ''} ${showValueInBar ? 'value-in-bar' : ''}"
+           role="${interactive ? 'button' : 'img'}"
+           tabindex="${interactive ? '0' : '-1'}"
+           aria-label="${name}: ${displayValue}"
+           @keydown=${(e) => this._handleKey(e, conf, entityId)}
            @click=${(e) => this._handleAction(e, conf, entityId)}>
         ${!compactMode ? html`
         <div class="entity-row">
@@ -671,14 +862,210 @@ class LinearGaugeCard extends LitElement {
           ${icon && !hideIcon ? html`<ha-icon class="entity-icon" .icon="${icon}"></ha-icon>` : ''}
         </div>
         `}
-        <div class="bar-bg ${effectClass}">
-          ${minMaxMarker}
-          <div class="bar-fill ${effectClass} ${disableShimmer ? 'no-shimmer' : ''} ${hideZeroBar && isZero ? 'hide-at-zero' : ''}" style="${barStyle}"></div>
-          ${targetMarker}
-          ${showValueInBar ? html`<span class="bar-value">${displayValue}</span>` : ''}
-        </div>
+        ${visual}
       </div>
     `;
+  }
+
+  // Resolve the effective gauge style (per-entity > global), keeping the
+  // legacy `effect: led` working by mapping it to the new segments style.
+  _gaugeStyle(conf) {
+    const s = conf.gauge_style || this._config.gauge_style;
+    if (s) return s;
+    const eff = conf.effect || this._config.effect;
+    if (eff === 'led') return 'segments';
+    return 'bar';
+  }
+
+  _usesSparkline() {
+    if (!this._config || !this._config.entities) return false;
+    if (this._config.gauge_style === 'sparkline') return true;
+    return this._config.entities.some(e => typeof e === 'object' && e && e.gauge_style === 'sparkline');
+  }
+
+  _gradientColors() {
+    return (Array.isArray(this._config.colors) && this._config.colors.length > 0)
+      ? this._config.colors
+      : LGC_DEFAULT_GRAD;
+  }
+
+  _gradientCssFor(layout) {
+    const dir = layout === 'vertical' ? '0deg' : '90deg';
+    return `linear-gradient(${dir}, ${this._gradientColors().join(', ')})`;
+  }
+
+  // Solid colour for thumbs / strokes: if the computed colour is a gradient
+  // string, sample the palette at the current fraction instead.
+  _solidColor(color, frac) {
+    if (typeof color === 'string' && color.indexOf('gradient') === -1) return color;
+    return lgcSample(this._gradientColors(), frac);
+  }
+
+  _resolveTarget(conf) {
+    // target_entity (dynamic) takes priority over the numeric target.
+    let t = (conf.target_entity !== undefined && conf.target_entity !== '')
+      ? conf.target_entity
+      : conf.target;
+    if (t === undefined || t === '') return null;
+    if (typeof t === 'string' && isNaN(parseFloat(t))) {
+      const s = this.hass.states[t];
+      if (s) t = parseFloat(s.state);
+    }
+    t = parseFloat(t);
+    return isNaN(t) ? null : t;
+  }
+
+  _handleKey(e, conf, entityId) {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+      e.preventDefault();
+      this._handleAction(e, conf, entityId);
+    }
+  }
+
+  _renderVisual(style, p) {
+    let s = style;
+    // Sparkline & ticks are horizontal concepts — fall back to a bar vertically.
+    if (p.layout === 'vertical' && (s === 'sparkline' || s === 'ticks')) s = 'bar';
+    switch (s) {
+      case 'gradient_track': return this._visualGradientTrack(p);
+      case 'segments':       return this._visualSegments(p);
+      case 'ticks':          return this._visualTicks(p);
+      case 'cursor':         return this._visualCursor(p);
+      case 'sparkline':      return this._visualSparkline(p);
+      default:               return this._visualBar(p);
+    }
+  }
+
+  _visualBar(p) {
+    const { minMaxMarker, disableShimmer, hideZeroBar, isZero, barStyle, targetMarker, showValueInBar, displayValue } = p;
+    return html`
+      <div class="bar-bg">
+        ${minMaxMarker}
+        <div class="bar-fill ${disableShimmer ? 'no-shimmer' : ''} ${hideZeroBar && isZero ? 'hide-at-zero' : ''}" style="${barStyle}"></div>
+        ${targetMarker}
+        ${showValueInBar ? html`<span class="bar-value">${displayValue}</span>` : ''}
+      </div>`;
+  }
+
+  _visualGradientTrack(p) {
+    const { layout, percent, targetMarker, minMaxMarker, showValueInBar, displayValue } = p;
+    const grad = this._gradientCssFor(layout);
+    const pct = Math.max(0.0001, percent);
+    const fillStyle = layout === 'vertical'
+      ? `height: ${percent}%; background-image: ${grad}; background-size: 100% ${10000 / pct}%; background-repeat: no-repeat; background-position: bottom; box-shadow: none;`
+      : `width: ${percent}%; background-image: ${grad}; background-size: ${10000 / pct}% 100%; background-repeat: no-repeat; box-shadow: none;`;
+    return html`
+      <div class="bar-bg grad-track">
+        <div class="grad-track-bg" style="background-image: ${grad};"></div>
+        ${minMaxMarker}
+        <div class="bar-fill no-shimmer" style="${fillStyle}"></div>
+        ${targetMarker}
+        ${showValueInBar ? html`<span class="bar-value">${displayValue}</span>` : ''}
+      </div>`;
+  }
+
+  _visualSegments(p) {
+    const { layout, percent, segmentCount, conf, color } = p;
+    const colors = this._gradientColors();
+    const fixed = !!(conf.color || conf.severity || this._config.color || this._config.severity);
+    const lit = Math.round((percent / 100) * segmentCount);
+    const segs = [];
+    for (let i = 0; i < segmentCount; i++) {
+      const on = i < lit;
+      const c = fixed ? color : lgcSample(colors, (i + 0.5) / segmentCount);
+      segs.push(html`<div class="seg" style="${on ? `background: ${c}; box-shadow: 0 0 6px ${c}66;` : ''}"></div>`);
+    }
+    return html`<div class="seg-track ${layout === 'vertical' ? 'vertical' : ''}">${segs}</div>`;
+  }
+
+  _visualTicks(p) {
+    const { percent, color, min, max, conf, showValueInBar, displayValue } = p;
+    // tick_count = number of labelled graduations (including both ends), min 2.
+    const count = Math.max(2, Math.min(21, parseInt(conf.tick_count ?? this._config.tick_count ?? 5, 10) || 5));
+    const ticks = [];
+    for (let i = 0; i < count; i++) ticks.push((i / (count - 1)) * 100);
+    const tv = this._resolveTarget(conf);
+    let targetFlag = html``;
+    if (tv !== null && max !== min) {
+      const tp = Math.max(0, Math.min(100, ((Math.max(min, Math.min(tv, max)) - min) / (max - min)) * 100));
+      targetFlag = html`<div class="tick-target" style="left: ${tp}%">▾ ${tv}</div>`;
+    }
+    const valueLabel = showValueInBar
+      ? html`<div class="ticks-value" style="left: ${Math.max(0, Math.min(100, percent))}%">${displayValue}</div>`
+      : html``;
+    return html`
+      <div class="ticks-wrap">
+        ${targetFlag}
+        ${valueLabel}
+        <div class="bar-bg ticks-bar">
+          <div class="bar-fill no-shimmer" style="width: ${percent}%; background: ${color}; box-shadow: none;"></div>
+        </div>
+        <div class="ticks">
+          ${ticks.map(tk => html`
+            <div class="tick" style="left: ${tk}%">
+              <div class="tick-mark"></div>
+              <span class="tick-label">${Math.round(min + (max - min) * tk / 100)}</span>
+            </div>`)}
+        </div>
+      </div>`;
+  }
+
+  _visualCursor(p) {
+    const { layout, percent, color, displayValue, conf } = p;
+    const grad = this._gradientCssFor(layout);
+    const solid = this._solidColor(color, percent / 100);
+    const shape = conf.cursor_shape || this._config.cursor_shape || 'circle';
+    if (layout === 'vertical') {
+      // Value is already shown in the entity row above; keep the column clean.
+      return html`
+        <div class="cursor-wrap vertical">
+          <div class="cursor-track" style="background-image: ${grad};"></div>
+          <div class="cursor-fill" style="height: ${percent}%; background: ${solid};"></div>
+          <div class="cursor-thumb shape-${shape}" style="bottom: ${percent}%; --lgc-thumb-color: ${solid};"></div>
+        </div>`;
+    }
+    return html`
+      <div class="cursor-wrap">
+        <div class="cursor-label" style="left: ${percent}%">${displayValue}</div>
+        <div class="cursor-track" style="background-image: ${grad};"></div>
+        <div class="cursor-fill" style="width: ${percent}%; background: ${solid};"></div>
+        <div class="cursor-thumb shape-${shape}" style="left: ${percent}%; --lgc-thumb-color: ${solid};"></div>
+      </div>`;
+  }
+
+  _visualSparkline(p) {
+    const { entityId, percent, color, min, max } = p;
+    const h = this._history[entityId];
+    if (!h || !Array.isArray(h.series) || h.series.length < 2) return this._visualBar(p);
+    const series = h.series;
+    const W = 300, H = 46;
+    const dmin = Math.min(...series), dmax = Math.max(...series);
+    const range = (dmax - dmin) || 1;
+    const xs = (i) => (i / (series.length - 1)) * W;
+    const ys = (v) => H - 3 - ((v - dmin) / range) * (H - 6);
+    const line = series.map((v, i) => `${i ? 'L' : 'M'}${xs(i).toFixed(1)},${ys(v).toFixed(1)}`).join(' ');
+    const area = `${line} L${W},${H} L0,${H} Z`;
+    const stroke = this._solidColor(color, percent / 100);
+    const gid = 'lgcspark-' + String(entityId).replace(/[^a-z0-9]/gi, '');
+    return html`
+      <div class="spark-wrap">
+        <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="${stroke}" stop-opacity="0.34"></stop>
+              <stop offset="100%" stop-color="${stroke}" stop-opacity="0.02"></stop>
+            </linearGradient>
+          </defs>
+          <path d="${area}" fill="url(#${gid})"></path>
+          <path d="${line}" fill="none" stroke="${stroke}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+          <circle cx="${W}" cy="${ys(series[series.length - 1])}" r="3.2" fill="${stroke}"></circle>
+        </svg>
+        <div class="spark-meta">
+          <span>min ${dmin.toFixed(0)}</span>
+          <span style="opacity:0.7">24 h</span>
+          <span>max ${dmax.toFixed(0)}</span>
+        </div>
+      </div>`;
   }
 
   _handleAction(e, conf, entityId) {
@@ -691,18 +1078,15 @@ class LinearGaugeCard extends LitElement {
     const config = conf.tap_action || this._config.tap_action || { action: 'more-info' };
     const action = config.action;
 
-    // Allow action to target a different entity
-    const targetEntityId = config.target_entity || entityId;
-
     if (action === 'more-info') {
       const event = new CustomEvent('hass-more-info', {
-        detail: { entityId: targetEntityId },
+        detail: { entityId },
         bubbles: true,
         composed: true,
       });
       this.dispatchEvent(event);
     } else if (action === 'toggle') {
-      this.hass.callService('homeassistant', 'toggle', { entity_id: targetEntityId });
+      this.hass.callService('homeassistant', 'toggle', { entity_id: entityId });
     } else if (action === 'navigate' && config.navigation_path) {
       history.pushState(null, '', config.navigation_path);
       const event = new Event('location-changed', { bubbles: true, composed: true });
@@ -713,7 +1097,7 @@ class LinearGaugeCard extends LitElement {
       const [domain, service] = config.service.split('.');
       const serviceData = { ...config.data };
       if (!serviceData.entity_id) {
-        serviceData.entity_id = targetEntityId;
+        serviceData.entity_id = entityId;
       }
       this.hass.callService(domain, service, serviceData);
     }
@@ -796,16 +1180,61 @@ class LinearGaugeCardEditor extends LitElement {
       hass: { attribute: false },
       _config: { state: true },
       _expandedEntities: { state: true },
+      _haLoaded: { state: true },
     };
   }
 
   constructor() {
     super();
     this._expandedEntities = new Set();
+    this._haLoaded = !!customElements.get('ha-textfield');
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    if (!this._haLoaded) this._ensureHaComponents();
+  }
+
+  // Some HA frontends don't have `ha-textfield` (and other editor inputs)
+  // registered when a custom card editor first renders, leaving those fields
+  // invisible. Loading the built-in `entities` card config element forces HA
+  // to import them; existing <ha-textfield> nodes then upgrade automatically.
+  async _ensureHaComponents() {
+    try {
+      if (window.loadCardHelpers) {
+        const helpers = await window.loadCardHelpers();
+        const el = await helpers.createCardElement({ type: 'entities', entities: [] });
+        if (el && el.constructor && el.constructor.getConfigElement) {
+          await el.constructor.getConfigElement();
+        }
+      }
+      await customElements.whenDefined('ha-textfield');
+    } catch (e) {
+      // best effort — fall back to whatever is already available
+    } finally {
+      this._haLoaded = true;
+    }
   }
 
   setConfig(config) {
     this._config = config;
+  }
+
+  // Native <input> replacement for ha-textfield, which isn't always registered
+  // in every HA frontend (it would otherwise render invisibly).
+  _plainInput({ label, value, placeholder = '', type = 'text', oninput, configValue, style = '' }) {
+    return html`
+      <div class="text-input-group" style=${style}>
+        <label>${label}</label>
+        <input
+          class="plain-input"
+          type=${type}
+          .value=${value ?? ''}
+          placeholder=${placeholder}
+          .configValue=${configValue}
+          @input=${oninput}
+        />
+      </div>`;
   }
 
   static get styles() {
@@ -963,6 +1392,20 @@ class LinearGaugeCardEditor extends LitElement {
       }
     };
 
+    const gaugeStyleSelector = {
+      select: {
+        mode: 'dropdown',
+        options: [
+          { value: 'bar', label: 'Bar (default)' },
+          { value: 'gradient_track', label: 'Gradient track' },
+          { value: 'segments', label: 'Segments (LED)' },
+          { value: 'ticks', label: 'Ticks / graduations' },
+          { value: 'cursor', label: 'Cursor' },
+          { value: 'sparkline', label: 'Sparkline (24h)' }
+        ]
+      }
+    };
+
     // Schema for ha-selector
     const sensorSelector = { entity: { domain: "sensor" } };
 
@@ -994,13 +1437,28 @@ class LinearGaugeCardEditor extends LitElement {
           ></ha-selector>
 
           <ha-selector
-            label="Effect"
+            label="Gauge Style"
             .hass=${this.hass}
-            .selector=${effectSelector}
-            .value=${this._config.effect || 'default'}
-            .configValue=${'effect'}
+            .selector=${gaugeStyleSelector}
+            .value=${this._config.gauge_style || (this._config.effect === 'led' ? 'segments' : 'bar')}
+            .configValue=${'gauge_style'}
             @value-changed=${this._valueChanged}
           ></ha-selector>
+        </div>
+
+        <div class="row">
+          <div class="text-input-group">
+            <label>Segments / LED count (segments style)</label>
+            <input
+              class="plain-input"
+              type="number"
+              min="3"
+              max="120"
+              placeholder="20"
+              .value=${this._config.segment_count ?? ''}
+              @input=${(e) => this._plainNumberChanged(e, 'segment_count', 'int')}
+            />
+          </div>
         </div>
 
         <div class="section-title">Gauge Size & Range</div>
@@ -1338,13 +1796,12 @@ class LinearGaugeCardEditor extends LitElement {
             >
           </div>
         </div>
-        <ha-textfield
-          label="CSS Color"
-          .value=${currentValue || ''}
-          .configValue=${configKey}
-          @input=${this._valueChanged}
-          style="width: 100%;"
-        ></ha-textfield>
+        ${this._plainInput({
+          label: 'CSS Color',
+          value: currentValue || '',
+          configValue: configKey,
+          oninput: this._valueChanged,
+        })}
       </div>
     `;
   }
@@ -1398,54 +1855,102 @@ class LinearGaugeCardEditor extends LitElement {
       { value: 'led', label: 'LED' }
     ];
 
+    const gaugeStyleOptions = [
+      { value: '', label: '(inherit global)' },
+      { value: 'bar', label: 'Bar' },
+      { value: 'gradient_track', label: 'Gradient track' },
+      { value: 'segments', label: 'Segments (LED)' },
+      { value: 'ticks', label: 'Ticks / graduations' },
+      { value: 'cursor', label: 'Cursor' },
+      { value: 'sparkline', label: 'Sparkline (24h)' }
+    ];
+
+    const cursorShapeOptions = [
+      { value: 'circle', label: 'Circle ●' },
+      { value: 'line', label: 'Line |' },
+      { value: 'arrow', label: 'Arrow ▾' },
+      { value: 'diamond', label: 'Diamond ◆' },
+      { value: 'bar', label: 'Bar ▐' }
+    ];
+
     return html`
         <div class="entity-details">
             <div class="row">
-                <ha-textfield
-                    label="Icon (e.g., mdi:thermometer)"
-                    .value=${entity.icon || ''}
-                    @input=${(e) => this._entityChanged(e, index, 'icon')}
-                ></ha-textfield>
+                ${this._plainInput({
+                  label: 'Icon (e.g., mdi:thermometer)',
+                  value: entity.icon || '',
+                  oninput: (e) => this._entityChanged(e, index, 'icon'),
+                })}
             </div>
             <div class="row">
-                <ha-textfield
-                    label="Min"
-                    type="number"
-                    .value=${entity.min ?? ''}
-                    placeholder=${this._config.min ?? 0}
-                    @input=${(e) => this._entityChanged(e, index, 'min')}
-                ></ha-textfield>
-                <ha-textfield
-                    label="Max"
-                    type="number"
-                    .value=${entity.max ?? ''}
-                    placeholder=${this._config.max ?? 100}
-                    @input=${(e) => this._entityChanged(e, index, 'max')}
-                ></ha-textfield>
-                <ha-textfield
-                    label="Target"
-                    type="number"
-                    .value=${entity.target || ''}
-                    @input=${(e) => this._entityChanged(e, index, 'target')}
-                ></ha-textfield>
-                <ha-textfield
-                    label="Precision"
-                    type="number"
-                    .value=${entity.value_precision ?? ''}
-                    placeholder=${this._config.value_precision ?? 1}
-                    @input=${(e) => this._entityChanged(e, index, 'value_precision')}
-                ></ha-textfield>
+                ${this._plainInput({
+                  label: 'Min', type: 'number',
+                  value: entity.min ?? '', placeholder: this._config.min ?? 0,
+                  oninput: (e) => this._entityChanged(e, index, 'min'),
+                })}
+                ${this._plainInput({
+                  label: 'Max', type: 'number',
+                  value: entity.max ?? '', placeholder: this._config.max ?? 100,
+                  oninput: (e) => this._entityChanged(e, index, 'max'),
+                })}
+                ${this._plainInput({
+                  label: 'Target', type: 'number',
+                  value: entity.target ?? '',
+                  oninput: (e) => this._entityChanged(e, index, 'target'),
+                })}
+                ${this._plainInput({
+                  label: 'Precision', type: 'number',
+                  value: entity.value_precision ?? '', placeholder: this._config.value_precision ?? 1,
+                  oninput: (e) => this._entityChanged(e, index, 'value_precision'),
+                })}
+            </div>
+            <div class="row" style="align-items: center;">
+                <ha-selector
+                    style="flex: 1;"
+                    label="Target Entity (marker)"
+                    .hass=${this.hass}
+                    .selector=${{ entity: {} }}
+                    .value=${entity.target_entity || ''}
+                    @value-changed=${(e) => this._entityChanged(e, index, 'target_entity')}
+                ></ha-selector>
+                ${entity.target_entity ? html`
+                    <ha-icon-button
+                        class="delete"
+                        .path=${ICON_CLOSE}
+                        @click=${() => this._clearEntityField(index, 'target_entity')}
+                        title="Clear target entity"
+                    ></ha-icon-button>
+                ` : ''}
             </div>
             <div class="row">
                 <ha-selector
-                    label="Effect"
+                    label="Gauge Style"
                     .hass=${this.hass}
-                    .selector=${{ select: { options: effectOptions } }}
-                    .value=${entity.effect || 'default'}
-                    @value-changed=${(e) => this._entityChanged(e, index, 'effect')}
+                    .selector=${{ select: { mode: 'dropdown', options: gaugeStyleOptions } }}
+                    .value=${entity.gauge_style || (entity.effect === 'led' ? 'segments' : '')}
+                    @value-changed=${(e) => this._entityChanged(e, index, 'gauge_style')}
+                ></ha-selector>
+                ${this._plainInput({
+                  label: 'LED count', type: 'number',
+                  value: entity.segment_count ?? '', placeholder: this._config.segment_count ?? 20,
+                  oninput: (e) => this._entityChanged(e, index, 'segment_count'),
+                })}
+            </div>
+            <div class="row">
+                ${this._plainInput({
+                  label: 'Tick count (ticks style)', type: 'number',
+                  value: entity.tick_count ?? '', placeholder: this._config.tick_count ?? 5,
+                  oninput: (e) => this._entityChanged(e, index, 'tick_count'),
+                })}
+                <ha-selector
+                    label="Cursor shape"
+                    .hass=${this.hass}
+                    .selector=${{ select: { mode: 'dropdown', options: cursorShapeOptions } }}
+                    .value=${entity.cursor_shape || 'circle'}
+                    @value-changed=${(e) => this._entityChanged(e, index, 'cursor_shape')}
                 ></ha-selector>
             </div>
-            
+
             <div class="row">
                 <span>Compact Mode</span>
                 <ha-switch
@@ -1542,52 +2047,37 @@ class LinearGaugeCardEditor extends LitElement {
                     .value=${tapAction.action}
                     @value-changed=${(e) => this._tapActionChanged(e, index, 'action')}
                  ></ha-selector>
-                 
-                 <ha-selector
-                    label="Target Entity (Optional)"
-                    .hass=${this.hass}
-                    .selector=${{ entity: {} }}
-                    .value=${tapAction.target_entity}
-                    @value-changed=${(e) => this._tapActionChanged(e, index, 'target_entity')}
-                 ></ha-selector>
 
-                 ${tapAction.action === 'navigate' ? html`
-                    <ha-textfield
-                        label="Navigation Path"
-                        .value=${tapAction.navigation_path || ''}
-                        @input=${(e) => this._tapActionChanged(e, index, 'navigation_path')}
-                        style="margin-top: 8px;"
-                    ></ha-textfield>
-                 ` : ''}
+                 ${tapAction.action === 'navigate' ? this._plainInput({
+                    label: 'Navigation Path',
+                    value: tapAction.navigation_path || '',
+                    oninput: (e) => this._tapActionChanged(e, index, 'navigation_path'),
+                    style: 'margin-top: 8px;',
+                 }) : ''}
 
-                 ${tapAction.action === 'url' ? html`
-                    <ha-textfield
-                        label="URL"
-                        .value=${tapAction.url_path || ''}
-                        @input=${(e) => this._tapActionChanged(e, index, 'url_path')}
-                        style="margin-top: 8px;"
-                    ></ha-textfield>
-                 ` : ''}
-                 
-                 ${tapAction.action === 'call-service' ? html`
-                    <ha-textfield
-                        label="Service (e.g., light.turn_on)"
-                        .value=${tapAction.service || ''}
-                        @input=${(e) => this._tapActionChanged(e, index, 'service')}
-                        style="margin-top: 8px;"
-                    ></ha-textfield>
-                 ` : ''}
+                 ${tapAction.action === 'url' ? this._plainInput({
+                    label: 'URL',
+                    value: tapAction.url_path || '',
+                    oninput: (e) => this._tapActionChanged(e, index, 'url_path'),
+                    style: 'margin-top: 8px;',
+                 }) : ''}
+
+                 ${tapAction.action === 'call-service' ? this._plainInput({
+                    label: 'Service (e.g., light.turn_on)',
+                    value: tapAction.service || '',
+                    oninput: (e) => this._tapActionChanged(e, index, 'service'),
+                    style: 'margin-top: 8px;',
+                 }) : ''}
             </div>
 
             <div>
                 <div class="section-title">Pulse (Animation)</div>
                 <div class="row">
-                     <ha-textfield
-                        label="Threshold"
-                        type="number"
-                        .value=${pulse.value || ''}
-                        @input=${(e) => this._pulseChanged(e, index, 'value')}
-                    ></ha-textfield>
+                     ${this._plainInput({
+                        label: 'Threshold', type: 'number',
+                        value: pulse.value ?? '',
+                        oninput: (e) => this._pulseChanged(e, index, 'value'),
+                     })}
                     <ha-selector
                         label="Condition"
                         .hass=${this.hass}
@@ -1602,13 +2092,12 @@ class LinearGaugeCardEditor extends LitElement {
                 <div class="section-title">Severity (Local Gradient)</div>
                 ${severity.map((band, bandIndex) => html`
                     <div class="severity-row">
-                        <ha-textfield
-                             label="From"
-                             type="number"
-                             .value=${band.from ?? 0}
-                             @input=${(e) => this._severityChanged(e, index, bandIndex, 'from')}
-                             style="width: 80px;"
-                        ></ha-textfield>
+                        ${this._plainInput({
+                          label: 'From', type: 'number',
+                          value: band.from ?? 0,
+                          oninput: (e) => this._severityChanged(e, index, bandIndex, 'from'),
+                          style: 'width: 80px;',
+                        })}
                          <input
                             type="color"
                             .value=${band.color || '#00ff00'}
@@ -1781,8 +2270,35 @@ class LinearGaugeCardEditor extends LitElement {
       newValue = e.target.checked;
     }
     
-    if (field === 'target') newValue = parseFloat(newValue);
-    
+    // Handle target (numeric marker) - if empty, delete
+    if (field === 'target') {
+      if (newValue === '' || newValue === undefined || newValue === null) {
+        delete currentValue[field];
+      } else {
+        currentValue[field] = parseFloat(newValue);
+      }
+    } else
+    // Handle target_entity (entity marker) - keep as string, delete if empty
+    if (field === 'target_entity') {
+      if (!newValue) {
+        delete currentValue[field];
+      } else {
+        currentValue[field] = newValue;
+      }
+    } else
+    // Tick / segment counts - if empty, delete to use global/default
+    if (field === 'tick_count' || field === 'segment_count') {
+      if (newValue === '' || newValue === undefined || newValue === null || isNaN(newValue)) {
+        delete currentValue[field];
+      } else {
+        currentValue[field] = parseInt(newValue, 10);
+      }
+    } else
+    // gauge_style / cursor_shape - delete when inheriting default
+    if ((field === 'gauge_style' && (!newValue || newValue === '')) ||
+        (field === 'cursor_shape' && (!newValue || newValue === 'circle'))) {
+      delete currentValue[field];
+    } else
     // Handle value_precision - if empty, delete to use global value
     if (field === 'value_precision') {
       if (newValue === '' || newValue === undefined || newValue === null || isNaN(newValue)) {
@@ -1842,6 +2358,15 @@ class LinearGaugeCardEditor extends LitElement {
       delete row.color_negative;
     }
 
+    newEntities[index] = row;
+    this._config = { ...this._config, entities: newEntities };
+    this._fireChangedEvent();
+  }
+
+  _clearEntityField(index, field) {
+    const newEntities = [...(this._config.entities || [])];
+    let row = { ...(typeof newEntities[index] === 'string' ? { entity: newEntities[index] } : newEntities[index]) };
+    delete row[field];
     newEntities[index] = row;
     this._config = { ...this._config, entities: newEntities };
     this._fireChangedEvent();
@@ -1967,6 +2492,13 @@ class LinearGaugeCardEditor extends LitElement {
     this.dispatchEvent(event);
   }
 }
+
+const LGC_VERSION = '1.2.0';
+console.info(
+  `%c LINEAR-GAUGE-CARD %c ${LGC_VERSION} `,
+  'color: white; background: #03a9f4; font-weight: 700;',
+  'color: #03a9f4; background: #1c1c1c; font-weight: 700;'
+);
 
 customElements.define('linear-gauge-card-editor', LinearGaugeCardEditor);
 customElements.define('linear-gauge-card', LinearGaugeCard);

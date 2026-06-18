@@ -21,7 +21,9 @@ A modern and interactive custom card to display your entities as linear gauges. 
   <img src="https://raw.githubusercontent.com/guiohm79/jaugeLineaire/main/image5.png" width="350" alt="center 0">
   <img src="https://raw.githubusercontent.com/guiohm79/jaugeLineaire/main/image6.png" width="350" alt="center 0">
   <img src="https://raw.githubusercontent.com/guiohm79/jaugeLineaire/main/exemple1.png" width="350" alt="Exemple 1">
+  <img src="https://raw.githubusercontent.com/guiohm79/jaugeLineaire/main/exemple6.png" width="350" alt="Exemple 6">
   <img src="https://raw.githubusercontent.com/guiohm79/jaugeLineaire/main/exemple2.png" width="350" alt="Exemple 2">
+  <img src="https://raw.githubusercontent.com/guiohm79/jaugeLineaire/main/exemple5.png" width="350" alt="Exemple 5">
   <img src="https://raw.githubusercontent.com/guiohm79/jaugeLineaire/main/exemple3.png" width="350" alt="Exemple 3">
   <img src="https://raw.githubusercontent.com/guiohm79/jaugeLineaire/main/exemple4.png" width="350" alt="Exemple 4">
   
@@ -31,14 +33,14 @@ A modern and interactive custom card to display your entities as linear gauges. 
 - **Visual Editor**: Fully configurable via the Home Assistant UI.
 - **Theme Integration**: Follows your Home Assistant theme or custom background color with transparency support.
 - **Interactive Actions**: Full support for `tap_action` on each entity (toggle, navigation, call-service, URL).
-- **Target Entity**: Actions can target a different entity than the one displayed.
 - **Icons**: Material Design icons support.
-- **Targets**: Display a target marker (fixed value or entity).
-- **Visual Alerts**: Pulse animation for critical states.
+- **Targets**: Display a target marker, either a fixed value (`target`) or driven by an entity's state (`target_entity`).
+- **Visual Alerts**: Pulse animation that blinks the bar for critical states.
 - **24h Min/Max**: Visualization of the value range over the last 24 hours.
 - **Flexible Layout**: Choose between horizontal (list) or vertical (columns) display.
 - **Smart Gradients**: Define a global gradient or specific colors per entity.
 - **LED Effect**: Segmented and rectangular display mode for a modern "pixel" style.
+- **Gauge Styles**: Choose how each gauge is drawn — `bar`, `gradient_track`, `segments` (LED, adjustable count), `ticks` (adjustable graduations), `cursor` (selectable shapes) or `sparkline` (24h trend).
 - **Compact Mode**: Minimal display with just icon and bar to save space.
 - **Value in Bar**: Display the value directly on the progress bar (hides the value next to the name to avoid duplication).
 - **Shimmer Effect**: Animated shine effect on bars (can be disabled).
@@ -90,7 +92,11 @@ Type: `custom:linear-gauge-card`
 | `color` | string | Global fixed color (overrides gradient) |
 | `color_negative` | string | Global fixed color for negative values when `center_zero` is active |
 | `severity` | list | Global severity configuration |
-| `effect` | string | `default` or `led` for a rectangular segmented effect |
+| `effect` | string | `default` or `led` for a rectangular segmented effect (legacy — prefer `gauge_style`) |
+| `gauge_style` | string | How the gauge is drawn: `bar` (default), `gradient_track`, `segments`, `ticks`, `cursor`, `sparkline` |
+| `segment_count` | number | Number of LEDs/segments for the `segments` style (default: 20, range 3–120) |
+| `tick_count` | number | Number of labelled graduations for the `ticks` style (default: 5, min 2) |
+| `cursor_shape` | string | Thumb shape for the `cursor` style: `circle` (default), `line`, `arrow`, `diamond`, `bar` |
 | `tap_action` | object | Default action on click (e.g., toggle) |
 | `transparent` | boolean | Transparent background (default: false) |
 | `card_background` | string | Custom card background color (with alpha support) |
@@ -111,12 +117,17 @@ Each entity in the list can be configured individually:
 | `entity` | string | Entity ID (e.g., `sensor.cpu_load`) |
 | `name` | string | Custom displayed name |
 | `icon` | string | Icon (e.g., `mdi:thermometer`) |
-| `target` | number/string | Target value or target entity ID |
+| `target` | number | Fixed target marker value |
+| `target_entity` | string | Entity whose state drives the target marker (takes priority over `target`) |
 | `min` / `max` | number | Specific limits for this entity |
 | `color` | string | Fixed color for this gauge (overrides global) |
 | `color_negative` | string | Fixed color for negative values when `center_zero` is active |
 | `severity` | list | Specific color thresholds |
 | `effect` | string | Effect override (`default` or `led`) |
+| `gauge_style` | string | Per-entity gauge style override (see global `gauge_style`) |
+| `segment_count` | number | Per-entity LED/segment count override |
+| `tick_count` | number | Number of labelled graduations for the `ticks` style (default 5, min 2) |
+| `cursor_shape` | string | Thumb shape for the `cursor` style: `circle` (default), `line`, `arrow`, `diamond`, `bar` |
 | `pulse` | object | Pulse alert configuration (see below) |
 | `tap_action` | object | Specific action on click |
 | `compact_mode` | boolean | Compact mode for this entity |
@@ -158,7 +169,6 @@ Standard Home Assistant configuration:
 ```yaml
 tap_action:
   action: toggle              # or more-info, call-service, navigate, url, none
-  target_entity: light.bureau # Optional: Action targets this entity instead
   # for navigate:
   navigation_path: /lovelace/0
   # for url:
@@ -167,6 +177,18 @@ tap_action:
   service: light.turn_on
   data:
     brightness: 255
+```
+
+The action always targets the gauge's own entity.
+
+### Target marker
+
+A marker can be drawn on the gauge, either at a fixed value or driven by an entity:
+
+```yaml
+- entity: sensor.temperature
+  target: 80                        # Fixed marker at 80
+  target_entity: sensor.target_temp # Dynamic marker (takes priority over target)
 ```
 
 ## Examples
@@ -192,10 +214,9 @@ entities:
         pulse: true               # Activates pulse animation
   - entity: sensor.temperature
     icon: mdi:thermometer
-    target: sensor.target_temp    # Dynamic marker
+    target_entity: sensor.target_temp  # Dynamic marker
     tap_action:
       action: toggle
-      target_entity: switch.fan_cooler
 ```
 
 ### LED Style
@@ -203,10 +224,39 @@ entities:
 ```yaml
 type: custom:linear-gauge-card
 title: Battery
-effect: led
+gauge_style: segments
+segment_count: 24        # number of LEDs (3–120)
 entities:
   - entity: sensor.battery_level
     name: Level
+```
+
+> `effect: led` still works and is treated as `gauge_style: segments`.
+
+### Gauge Styles
+
+Set `gauge_style` globally or per entity. Available values:
+
+| Value | Description |
+|---|---|
+| `bar` | Classic filled bar (default) |
+| `gradient_track` | Full colour scale shown faintly in the track, crisp fill on top |
+| `segments` | LED/segment style — number of segments set with `segment_count` |
+| `ticks` | Instrument-style bar with numbered graduations and a labelled target. Set the number of graduations with `tick_count`; enable `show_value_in_bar` to show the current value above the fill |
+| `cursor` | Thin gradient track with a slider-like cursor — great for dense dashboards. Pick the thumb shape with `cursor_shape` (`circle`, `line`, `arrow`, `diamond`, `bar`) |
+| `sparkline` | 24h trend line (requires history; falls back to a bar until data loads) |
+
+```yaml
+type: custom:linear-gauge-card
+title: Server
+gauge_style: gradient_track
+entities:
+  - entity: sensor.cpu_load
+    name: CPU
+    target: 85
+  - entity: sensor.temperature
+    name: Temp
+    gauge_style: sparkline   # per-entity override
 ```
 
 ### Vertical Mode (Columns)
@@ -309,6 +359,10 @@ When multiple color options are defined, the following priority order is used:
 4. **Global fixed color** (`color`)
 5. **Global gradient** (`colors`)
 6. **Default theme color** (fallback)
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for the full history. Latest: **v1.2.0** — six gauge styles, dynamic target marker, blinking pulse, and editor fixes.
 
 ## Support
 
