@@ -8,6 +8,38 @@ const ICON_PLUS = "M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z";
 // Default gradient palette used by the gradient-track / segments / cursor styles
 const LGC_DEFAULT_GRAD = ['#f44336', '#ff9800', '#ffd23f', '#7cb342', '#4caf50'];
 
+// Every gauge style the card can draw, in editor order. Shared by the card and
+// the visual editor so a new style only has to be declared once.
+const LGC_GAUGE_STYLES = [
+  { value: 'bar', label: 'Bar (default)' },
+  { value: 'gradient_track', label: 'Gradient track' },
+  { value: 'glass', label: 'Glass (glossy)' },
+  { value: 'stripes', label: 'Stripes (animated)' },
+  { value: 'segments', label: 'Segments (LED)' },
+  { value: 'dots', label: 'Dots' },
+  { value: 'chevrons', label: 'Chevrons' },
+  { value: 'equalizer', label: 'Equalizer (VU meter)' },
+  { value: 'battery', label: 'Battery' },
+  { value: 'thermometer', label: 'Thermometer' },
+  { value: 'wave', label: 'Wave (liquid)' },
+  { value: 'ticks', label: 'Ticks / graduations' },
+  { value: 'needle', label: 'Needle scale' },
+  { value: 'cursor', label: 'Cursor' },
+  { value: 'sparkline', label: 'Sparkline (24h)' },
+];
+
+// Styles that only make sense horizontally; they degrade in vertical layout.
+const LGC_HORIZONTAL_ONLY_STYLES = new Set(['sparkline', 'ticks', 'equalizer']);
+
+// Thumb shapes offered by the `cursor` style.
+const LGC_CURSOR_SHAPES = [
+  { value: 'circle', label: 'Circle ●' },
+  { value: 'line', label: 'Line |' },
+  { value: 'arrow', label: 'Arrow ▾' },
+  { value: 'diamond', label: 'Diamond ◆' },
+  { value: 'bar', label: 'Bar ▐' },
+];
+
 // Sample a hex-color array at position t (0..1) -> 'rgb(r,g,b)'. Non-hex stops
 // (rgb/rgba) are returned as-is without interpolation.
 function lgcSample(colors, t) {
@@ -209,6 +241,14 @@ class LinearGaugeCard extends LitElement {
       .gauge-container.pulsing .cursor-fill,
       .gauge-container.pulsing .cursor-thumb,
       .gauge-container.pulsing .seg,
+      .gauge-container.pulsing .dot,
+      .gauge-container.pulsing .chev,
+      .gauge-container.pulsing .eq-bar,
+      .gauge-container.pulsing .bat-fill,
+      .gauge-container.pulsing .thermo-fill,
+      .gauge-container.pulsing .thermo-bulb,
+      .gauge-container.pulsing .needle-pointer,
+      .gauge-container.pulsing .wave-anim,
       .gauge-container.pulsing .tick-target {
         animation: lgc-pulse-blink 1.1s ease-in-out infinite;
       }
@@ -530,7 +570,16 @@ class LinearGaugeCard extends LitElement {
         .gauge-container.pulsing .cursor-fill,
         .gauge-container.pulsing .cursor-thumb,
         .gauge-container.pulsing .seg,
+        .gauge-container.pulsing .dot,
+        .gauge-container.pulsing .chev,
+        .gauge-container.pulsing .eq-bar,
+        .gauge-container.pulsing .bat-fill,
+        .gauge-container.pulsing .thermo-fill,
+        .gauge-container.pulsing .thermo-bulb,
+        .gauge-container.pulsing .needle-pointer,
         .gauge-container.pulsing .tick-target { animation: none !important; }
+        .wave-anim { animation: none !important; }
+        .bar-fill.stripes-fill::after { animation: none !important; }
         .bar-fill::before { animation: none !important; display: none !important; }
         ha-card, .gauge-container { transition: none !important; }
       }
@@ -642,6 +691,337 @@ class LinearGaugeCard extends LitElement {
         font-size: 10.5px; font-family: var(--code-font-family, monospace);
         color: var(--secondary-text-color); margin-top: 2px; font-feature-settings: "tnum";
       }
+
+      /* ---- Gauge style: stripes (animated hazard fill) ---- */
+      .bar-fill.stripes-fill::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: repeating-linear-gradient(
+          -45deg,
+          rgba(255, 255, 255, 0.3) 0 8px,
+          rgba(255, 255, 255, 0) 8px 16px
+        );
+        background-size: 22.7px 22.7px;
+        animation: lgc-stripes 1.1s linear infinite;
+        pointer-events: none;
+      }
+      @keyframes lgc-stripes {
+        from { background-position: 0 0; }
+        to   { background-position: 22.7px 0; }
+      }
+
+      /* ---- Gauge style: glass (glossy capsule) ---- */
+      .bar-bg.glass-track {
+        border-radius: 999px;
+        background-color: rgba(127, 127, 127, 0.16);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.28), inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+      }
+      .bar-fill.glass-fill { border-radius: 999px; }
+      .bar-fill.glass-fill::after {
+        content: '';
+        position: absolute;
+        left: 0; right: 0; top: 0;
+        height: 46%;
+        border-radius: 999px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.05));
+        pointer-events: none;
+      }
+      .entities-wrapper.vertical .bar-fill.glass-fill::after {
+        top: 0; bottom: 0; left: 0; right: auto;
+        width: 46%; height: auto;
+        background: linear-gradient(90deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.04));
+      }
+
+      /* ---- Gauge style: dots ---- */
+      .dot-track {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--lgc-dot-gap, 4px);
+        width: 100%;
+        height: var(--lgc-bar-thickness, 12px);
+      }
+      .dot-track.vertical {
+        flex-direction: column-reverse;
+        width: var(--lgc-vertical-width, 16px);
+        height: var(--lgc-vertical-height, 120px);
+        margin: 0 auto;
+      }
+      .dot {
+        flex: 1 1 0;
+        height: 100%;
+        max-width: var(--lgc-bar-thickness, 12px);
+        border-radius: 50%;
+        background: rgba(127, 127, 127, 0.18);
+        transition: background 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+      }
+      .dot-track.vertical .dot {
+        width: auto;
+        height: 100%;
+        max-width: 100%;
+        aspect-ratio: 1 / 1;
+        margin: 0 auto;
+      }
+
+      /* ---- Gauge style: chevrons ---- */
+      .chev-track {
+        display: flex;
+        gap: var(--lgc-segment-gap, 3px);
+        width: 100%;
+        height: var(--lgc-bar-thickness, 12px);
+      }
+      .chev {
+        flex: 1 1 0;
+        background: rgba(127, 127, 127, 0.18);
+        clip-path: polygon(0 0, 70% 0, 100% 50%, 70% 100%, 0 100%);
+        transition: background 0.3s ease, box-shadow 0.3s ease;
+      }
+      .chev-track.vertical {
+        flex-direction: column-reverse;
+        width: var(--lgc-vertical-width, 16px);
+        height: var(--lgc-vertical-height, 120px);
+        margin: 0 auto;
+      }
+      .chev-track.vertical .chev {
+        clip-path: polygon(0 100%, 0 30%, 50% 0, 100% 30%, 100% 100%);
+      }
+
+      /* ---- Gauge style: equalizer (VU meter) ---- */
+      .eq-track {
+        display: flex;
+        align-items: flex-end;
+        gap: var(--lgc-segment-gap, 3px);
+        width: 100%;
+        height: var(--lgc-equalizer-height, 34px);
+      }
+      .eq-bar {
+        flex: 1 1 0;
+        border-radius: 2px;
+        background: rgba(127, 127, 127, 0.18);
+        transition: background 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      /* ---- Gauge style: battery ---- */
+      .bat-wrap { display: flex; align-items: center; gap: 2px; width: 100%; }
+      .bat-body {
+        position: relative;
+        flex: 1 1 auto;
+        height: var(--lgc-battery-size, 22px);
+        border: 2px solid rgba(127, 127, 127, 0.55);
+        border-radius: 5px;
+        overflow: hidden;
+        box-sizing: border-box;
+      }
+      .bat-cap {
+        flex: 0 0 auto;
+        width: 4px;
+        height: 40%;
+        border-radius: 0 2px 2px 0;
+        background: rgba(127, 127, 127, 0.55);
+      }
+      .bat-fill {
+        position: absolute;
+        left: 2px; top: 2px; bottom: 2px;
+        border-radius: 2px;
+        transition: width 1s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s ease;
+      }
+      .bat-value {
+        position: absolute;
+        inset: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 11px; font-weight: 600;
+        color: #fff;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+        font-feature-settings: "tnum";
+        pointer-events: none;
+      }
+      .bat-wrap.vertical {
+        flex-direction: column;
+        align-items: center;
+        width: auto;
+      }
+      .bat-wrap.vertical .bat-body {
+        flex: 0 0 auto;
+        width: var(--lgc-vertical-width, 16px);
+        height: var(--lgc-vertical-height, 120px);
+      }
+      .bat-wrap.vertical .bat-cap {
+        width: 40%;
+        height: 4px;
+        border-radius: 2px 2px 0 0;
+      }
+      .bat-wrap.vertical .bat-fill {
+        left: 2px; right: 2px; bottom: 2px; top: auto;
+        transition: height 1s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s ease;
+      }
+
+      /* ---- Gauge style: thermometer ---- */
+      .thermo-wrap { display: flex; align-items: center; width: 100%; }
+      .thermo-bulb {
+        flex: 0 0 auto;
+        width: var(--lgc-thermo-bulb, 18px);
+        height: var(--lgc-thermo-bulb, 18px);
+        border-radius: 50%;
+        box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
+        z-index: 1;
+      }
+      .thermo-tube {
+        position: relative;
+        flex: 1 1 auto;
+        height: var(--lgc-bar-thickness, 12px);
+        margin-left: -6px;
+        border-radius: 0 999px 999px 0;
+        background: rgba(127, 127, 127, 0.18);
+        overflow: hidden;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+      }
+      .thermo-fill {
+        position: absolute;
+        left: 0; top: 0; bottom: 0;
+        border-radius: 0 999px 999px 0;
+        transition: width 1s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s ease;
+      }
+      .thermo-grad {
+        position: absolute;
+        inset: 0;
+        background-image: repeating-linear-gradient(90deg, rgba(127, 127, 127, 0.5) 0 1px, rgba(0, 0, 0, 0) 1px 10%);
+        pointer-events: none;
+      }
+      .thermo-value {
+        position: absolute;
+        inset: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 10.5px; font-weight: 600;
+        color: var(--primary-text-color);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+        font-feature-settings: "tnum";
+        pointer-events: none;
+      }
+      .thermo-wrap.vertical {
+        flex-direction: column-reverse;
+        justify-content: flex-start;
+        width: auto;
+      }
+      .thermo-wrap.vertical .thermo-tube {
+        flex: 0 0 auto;
+        width: var(--lgc-vertical-width, 16px);
+        height: var(--lgc-vertical-height, 120px);
+        margin-left: 0;
+        margin-bottom: -6px;
+        border-radius: 999px 999px 0 0;
+      }
+      .thermo-wrap.vertical .thermo-fill {
+        left: 0; right: 0; bottom: 0; top: auto;
+        border-radius: 999px 999px 0 0;
+        transition: height 1s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s ease;
+      }
+      .thermo-wrap.vertical .thermo-grad {
+        background-image: repeating-linear-gradient(0deg, rgba(127, 127, 127, 0.5) 0 1px, rgba(0, 0, 0, 0) 1px 10%);
+      }
+
+      /* ---- Gauge style: needle scale ---- */
+      .needle-wrap { position: relative; width: 100%; padding-top: 26px; }
+      .needle-band {
+        height: var(--lgc-bar-thickness, 12px);
+        border-radius: 999px;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25);
+      }
+      .needle-pointer {
+        position: absolute;
+        top: 15px;
+        transform: translateX(-50%);
+        width: 0; height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 10px solid var(--lgc-needle-color, var(--primary-text-color));
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+        transition: left 1s cubic-bezier(0.2, 0.8, 0.2, 1), bottom 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      .needle-bubble {
+        position: absolute;
+        top: 0;
+        transform: translateX(-50%);
+        font-size: 11px; font-weight: 600; white-space: nowrap;
+        color: var(--primary-text-color);
+        font-feature-settings: "tnum";
+      }
+      .needle-target {
+        position: absolute;
+        bottom: -3px;
+        width: 2px; height: calc(var(--lgc-bar-thickness, 12px) + 6px);
+        transform: translateX(-50%);
+        background: var(--primary-text-color);
+        opacity: 0.75;
+      }
+      .needle-scale {
+        display: flex; justify-content: space-between;
+        font-size: 9.5px; color: var(--secondary-text-color);
+        margin-top: 3px; font-feature-settings: "tnum";
+      }
+      .needle-wrap.vertical {
+        padding-top: 0;
+        margin: 0 auto;
+        width: calc(var(--lgc-vertical-width, 16px) + 16px);
+        height: var(--lgc-vertical-height, 120px);
+      }
+      .needle-wrap.vertical .needle-band {
+        position: absolute;
+        right: 0; top: 0; bottom: 0;
+        width: var(--lgc-vertical-width, 16px);
+        height: auto;
+      }
+      .needle-wrap.vertical .needle-pointer {
+        top: auto; left: 0;
+        transform: translateY(50%);
+        border-top: 6px solid transparent;
+        border-bottom: 6px solid transparent;
+        border-left: 10px solid var(--lgc-needle-color, var(--primary-text-color));
+        border-right: none;
+      }
+      .needle-wrap.vertical .needle-target {
+        right: -3px; left: auto; bottom: 0;
+        width: calc(var(--lgc-vertical-width, 16px) + 6px);
+        height: 2px;
+        transform: translateY(50%);
+      }
+
+      /* ---- Gauge style: wave (liquid tank) ---- */
+      .wave-wrap {
+        position: relative;
+        width: 100%;
+        height: var(--lgc-wave-height, 40px);
+        border-radius: 8px;
+        overflow: hidden;
+        background: rgba(127, 127, 127, 0.14);
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+      }
+      .wave-wrap.vertical {
+        width: var(--lgc-vertical-width, 16px);
+        height: var(--lgc-vertical-height, 120px);
+        margin: 0 auto;
+      }
+      .wave-wrap svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+      .wave-anim { animation: lgc-wave-h 2.6s linear infinite; }
+      .wave-wrap.vertical .wave-anim { animation-name: lgc-wave-v; }
+      @keyframes lgc-wave-h {
+        from { transform: translateY(0); }
+        to   { transform: translateY(50px); }
+      }
+      @keyframes lgc-wave-v {
+        from { transform: translateX(0); }
+        to   { transform: translateX(50px); }
+      }
+      .wave-value {
+        position: absolute;
+        inset: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 12px; font-weight: 600;
+        color: var(--primary-text-color);
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        font-feature-settings: "tnum";
+        pointer-events: none;
+      }
     `;
   }
 
@@ -660,6 +1040,10 @@ class LinearGaugeCard extends LitElement {
     const cardBackground = this._config.card_background;
     const compactMode = this._config.compact_mode || false;
     const entitiesGap = this._config.entities_gap;
+    // Heights specific to the taller gauge styles (CSS keeps its own defaults).
+    const waveHeight = this._config.wave_height;
+    const equalizerHeight = this._config.equalizer_height;
+    const batterySize = this._config.battery_size;
 
     // We bind CSS variables to the host style
     let cardStyle = `
@@ -667,6 +1051,9 @@ class LinearGaugeCard extends LitElement {
       --lgc-vertical-height: ${verticalHeight}px;
       --lgc-vertical-width: ${verticalWidth}px;
       ${entitiesGap !== undefined ? `--lgc-entities-gap: ${entitiesGap}px;` : ''}
+      ${waveHeight !== undefined ? `--lgc-wave-height: ${waveHeight}px;` : ''}
+      ${equalizerHeight !== undefined ? `--lgc-equalizer-height: ${equalizerHeight}px;` : ''}
+      ${batterySize !== undefined ? `--lgc-battery-size: ${batterySize}px;` : ''}
     `;
     
     if (transparent) {
@@ -924,12 +1311,23 @@ class LinearGaugeCard extends LitElement {
 
   _renderVisual(style, p) {
     let s = style;
-    // Sparkline & ticks are horizontal concepts — fall back to a bar vertically.
-    if (p.layout === 'vertical' && (s === 'sparkline' || s === 'ticks')) s = 'bar';
+    // Sparkline, ticks & equalizer are horizontal concepts — fall back vertically.
+    if (p.layout === 'vertical' && LGC_HORIZONTAL_ONLY_STYLES.has(s)) {
+      s = (s === 'equalizer') ? 'segments' : 'bar';
+    }
     switch (s) {
       case 'gradient_track': return this._visualGradientTrack(p);
+      case 'glass':          return this._visualGlass(p);
+      case 'stripes':        return this._visualStripes(p);
       case 'segments':       return this._visualSegments(p);
+      case 'dots':           return this._visualDots(p);
+      case 'chevrons':       return this._visualChevrons(p);
+      case 'equalizer':      return this._visualEqualizer(p);
+      case 'battery':        return this._visualBattery(p);
+      case 'thermometer':    return this._visualThermometer(p);
+      case 'wave':           return this._visualWave(p);
       case 'ticks':          return this._visualTicks(p);
+      case 'needle':         return this._visualNeedle(p);
       case 'cursor':         return this._visualCursor(p);
       case 'sparkline':      return this._visualSparkline(p);
       default:               return this._visualBar(p);
@@ -1065,6 +1463,195 @@ class LinearGaugeCard extends LitElement {
           <span style="opacity:0.7">24 h</span>
           <span>max ${dmax.toFixed(0)}</span>
         </div>
+      </div>`;
+  }
+
+  // Segment/dot/bar count for the "repeated element" styles. Each style keeps
+  // its own sensible default when `segment_count` isn't explicitly configured.
+  _countFor(style, conf) {
+    const defaults = { segments: 20, dots: 12, chevrons: 10, equalizer: 16 };
+    const fallback = defaults[style] ?? 20;
+    const explicit = conf.segment_count ?? this._config.segment_count;
+    const n = parseInt(explicit ?? fallback, 10) || fallback;
+    return Math.max(3, Math.min(120, n));
+  }
+
+  // Colour of the i-th element of a repeated style: a fixed colour when one is
+  // configured, otherwise the gradient palette sampled at that position.
+  _elementColor(conf, color, i, count) {
+    const fixed = !!(conf.color || conf.severity || this._config.color || this._config.severity);
+    return fixed ? color : lgcSample(this._gradientColors(), (i + 0.5) / count);
+  }
+
+  _visualStripes(p) {
+    const { barStyle, targetMarker, minMaxMarker, showValueInBar, displayValue } = p;
+    return html`
+      <div class="bar-bg">
+        ${minMaxMarker}
+        <div class="bar-fill no-shimmer stripes-fill" style="${barStyle}"></div>
+        ${targetMarker}
+        ${showValueInBar ? html`<span class="bar-value">${displayValue}</span>` : ''}
+      </div>`;
+  }
+
+  _visualGlass(p) {
+    const { barStyle, targetMarker, minMaxMarker, showValueInBar, displayValue } = p;
+    return html`
+      <div class="bar-bg glass-track">
+        ${minMaxMarker}
+        <div class="bar-fill no-shimmer glass-fill" style="${barStyle}"></div>
+        ${targetMarker}
+        ${showValueInBar ? html`<span class="bar-value">${displayValue}</span>` : ''}
+      </div>`;
+  }
+
+  _visualDots(p) {
+    const { layout, percent, conf, color } = p;
+    const count = this._countFor('dots', conf);
+    // Fractional last dot so small changes stay readable.
+    const exact = (percent / 100) * count;
+    const full = Math.floor(exact);
+    const frac = exact - full;
+    const dots = [];
+    for (let i = 0; i < count; i++) {
+      const c = this._elementColor(conf, color, i, count);
+      let style = '';
+      if (i < full) {
+        style = `background: ${c}; box-shadow: 0 0 6px ${c}66;`;
+      } else if (i === full && frac > 0.05) {
+        style = `background: ${c}; opacity: ${(0.25 + 0.75 * frac).toFixed(2)}; transform: scale(${(0.7 + 0.3 * frac).toFixed(2)});`;
+      }
+      dots.push(html`<div class="dot" style="${style}"></div>`);
+    }
+    return html`<div class="dot-track ${layout === 'vertical' ? 'vertical' : ''}">${dots}</div>`;
+  }
+
+  _visualChevrons(p) {
+    const { layout, percent, conf, color } = p;
+    const count = this._countFor('chevrons', conf);
+    const lit = Math.round((percent / 100) * count);
+    const items = [];
+    for (let i = 0; i < count; i++) {
+      const c = this._elementColor(conf, color, i, count);
+      items.push(html`<div class="chev" style="${i < lit ? `background: ${c}; box-shadow: 0 0 6px ${c}55;` : ''}"></div>`);
+    }
+    return html`<div class="chev-track ${layout === 'vertical' ? 'vertical' : ''}">${items}</div>`;
+  }
+
+  _visualEqualizer(p) {
+    const { percent, conf, color } = p;
+    const count = this._countFor('equalizer', conf);
+    const lit = Math.round((percent / 100) * count);
+    const bars = [];
+    for (let i = 0; i < count; i++) {
+      const c = this._elementColor(conf, color, i, count);
+      // Bars ramp up from 28% to 100% of the track height, VU-meter style.
+      const h = 28 + 72 * ((i + 1) / count);
+      bars.push(html`<div class="eq-bar" style="height: ${h.toFixed(1)}%; ${i < lit ? `background: ${c}; box-shadow: 0 0 6px ${c}66;` : ''}"></div>`);
+    }
+    return html`<div class="eq-track">${bars}</div>`;
+  }
+
+  _visualBattery(p) {
+    const { layout, percent, color, showValueInBar, displayValue, targetMarker, minMaxMarker } = p;
+    const vertical = layout === 'vertical';
+    const fillStyle = vertical
+      ? `height: ${percent}%; background: ${color};`
+      : `width: ${percent}%; background: ${color};`;
+    const body = html`
+      <div class="bat-body">
+        ${minMaxMarker}
+        <div class="bat-fill" style="${fillStyle}"></div>
+        ${targetMarker}
+        ${showValueInBar ? html`<span class="bat-value">${displayValue}</span>` : ''}
+      </div>`;
+    const cap = html`<div class="bat-cap"></div>`;
+    return html`
+      <div class="bat-wrap ${vertical ? 'vertical' : ''}">
+        ${vertical ? html`${cap}${body}` : html`${body}${cap}`}
+      </div>`;
+  }
+
+  _visualThermometer(p) {
+    const { layout, percent, color, showValueInBar, displayValue, targetMarker, minMaxMarker } = p;
+    const vertical = layout === 'vertical';
+    const solid = this._solidColor(color, percent / 100);
+    const fillStyle = vertical
+      ? `height: ${percent}%; background: ${color};`
+      : `width: ${percent}%; background: ${color};`;
+    return html`
+      <div class="thermo-wrap ${vertical ? 'vertical' : ''}">
+        <div class="thermo-bulb" style="background: ${solid};"></div>
+        <div class="thermo-tube">
+          ${minMaxMarker}
+          <div class="thermo-fill" style="${fillStyle}"></div>
+          <div class="thermo-grad"></div>
+          ${targetMarker}
+          ${showValueInBar ? html`<span class="thermo-value">${displayValue}</span>` : ''}
+        </div>
+      </div>`;
+  }
+
+  _visualNeedle(p) {
+    const { layout, percent, color, min, max, conf, showValueInBar, displayValue } = p;
+    const vertical = layout === 'vertical';
+    const grad = this._gradientCssFor(layout);
+    const solid = this._solidColor(color, percent / 100);
+    const pos = Math.max(0, Math.min(100, percent));
+    const tv = this._resolveTarget(conf);
+    let targetTick = html``;
+    if (tv !== null && max !== min) {
+      const tp = Math.max(0, Math.min(100, ((Math.max(min, Math.min(tv, max)) - min) / (max - min)) * 100));
+      targetTick = html`<div class="needle-target" style="${vertical ? `bottom: ${tp}%` : `left: ${tp}%`}"></div>`;
+    }
+    if (vertical) {
+      return html`
+        <div class="needle-wrap vertical">
+          <div class="needle-band" style="background-image: ${grad};"></div>
+          ${targetTick}
+          <div class="needle-pointer" style="bottom: ${pos}%; --lgc-needle-color: ${solid};"></div>
+        </div>`;
+    }
+    return html`
+      <div class="needle-wrap">
+        ${showValueInBar ? html`<div class="needle-bubble" style="left: ${pos}%">${displayValue}</div>` : ''}
+        <div class="needle-pointer" style="left: ${pos}%; --lgc-needle-color: ${solid};"></div>
+        <div class="needle-band" style="background-image: ${grad};"></div>
+        ${targetTick}
+        <div class="needle-scale"><span>${min}</span><span>${max}</span></div>
+      </div>`;
+  }
+
+  // Liquid tank: the fill boundary is a sine wave that scrolls sideways.
+  // The polygon is drawn well outside the 0..100 view box so the CSS
+  // translation of exactly one wavelength loops seamlessly.
+  _visualWave(p) {
+    const { layout, percent, color, displayValue, showValueInBar, targetMarker } = p;
+    const vertical = layout === 'vertical';
+    const solid = this._solidColor(color, percent / 100);
+    const pct = Math.max(0, Math.min(100, percent));
+    const amp = 3, wavelength = 50, steps = 130;
+    const from = -80, to = 180;
+    // Push the surface past the edges so 0% reads as empty and 100% as full
+    // even with the wave crests.
+    const surface = (pct / 100) * (100 + 2 * amp) - amp;
+    const pts = [];
+    for (let i = 0; i <= steps; i++) {
+      const u = from + ((to - from) * i) / steps;
+      const off = Math.sin((u / wavelength) * Math.PI * 2) * amp;
+      pts.push(vertical
+        ? `${u.toFixed(2)},${(100 - surface + off).toFixed(2)}`
+        : `${(surface + off).toFixed(2)},${u.toFixed(2)}`);
+    }
+    const close = vertical ? `180,180 -80,180` : `-80,180 -80,-80`;
+    const d = `M${pts.join(' L')} L${close.split(' ').join(' L')} Z`;
+    return html`
+      <div class="wave-wrap ${vertical ? 'vertical' : ''}">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <path class="wave-anim" d="${d}" fill="${solid}" opacity="0.9"></path>
+        </svg>
+        ${targetMarker}
+        ${showValueInBar ? html`<span class="wave-value">${displayValue}</span>` : ''}
       </div>`;
   }
 
@@ -1393,17 +1980,11 @@ class LinearGaugeCardEditor extends LitElement {
     };
 
     const gaugeStyleSelector = {
-      select: {
-        mode: 'dropdown',
-        options: [
-          { value: 'bar', label: 'Bar (default)' },
-          { value: 'gradient_track', label: 'Gradient track' },
-          { value: 'segments', label: 'Segments (LED)' },
-          { value: 'ticks', label: 'Ticks / graduations' },
-          { value: 'cursor', label: 'Cursor' },
-          { value: 'sparkline', label: 'Sparkline (24h)' }
-        ]
-      }
+      select: { mode: 'dropdown', options: LGC_GAUGE_STYLES }
+    };
+
+    const cursorShapeSelector = {
+      select: { mode: 'dropdown', options: LGC_CURSOR_SHAPES }
     };
 
     // Schema for ha-selector
@@ -1448,7 +2029,7 @@ class LinearGaugeCardEditor extends LitElement {
 
         <div class="row">
           <div class="text-input-group">
-            <label>Segments / LED count (segments style)</label>
+            <label>Element count (segments, dots, chevrons, equalizer)</label>
             <input
               class="plain-input"
               type="number"
@@ -1457,6 +2038,65 @@ class LinearGaugeCardEditor extends LitElement {
               placeholder="20"
               .value=${this._config.segment_count ?? ''}
               @input=${(e) => this._plainNumberChanged(e, 'segment_count', 'int')}
+            />
+          </div>
+          <div class="text-input-group">
+            <label>Tick count (ticks style)</label>
+            <input
+              class="plain-input"
+              type="number"
+              min="2"
+              max="21"
+              placeholder="5"
+              .value=${this._config.tick_count ?? ''}
+              @input=${(e) => this._plainNumberChanged(e, 'tick_count', 'int')}
+            />
+          </div>
+        </div>
+
+        <div class="row">
+          <ha-selector
+            label="Cursor shape (cursor style)"
+            .hass=${this.hass}
+            .selector=${cursorShapeSelector}
+            .value=${this._config.cursor_shape || 'circle'}
+            .configValue=${'cursor_shape'}
+            @value-changed=${this._valueChanged}
+          ></ha-selector>
+          <div class="text-input-group">
+            <label>Wave height (px)</label>
+            <input
+              class="plain-input"
+              type="number"
+              min="16"
+              placeholder="40"
+              .value=${this._config.wave_height ?? ''}
+              @input=${(e) => this._plainNumberChanged(e, 'wave_height', 'int')}
+            />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="text-input-group">
+            <label>Equalizer height (px)</label>
+            <input
+              class="plain-input"
+              type="number"
+              min="12"
+              placeholder="34"
+              .value=${this._config.equalizer_height ?? ''}
+              @input=${(e) => this._plainNumberChanged(e, 'equalizer_height', 'int')}
+            />
+          </div>
+          <div class="text-input-group">
+            <label>Battery height (px)</label>
+            <input
+              class="plain-input"
+              type="number"
+              min="12"
+              placeholder="22"
+              .value=${this._config.battery_size ?? ''}
+              @input=${(e) => this._plainNumberChanged(e, 'battery_size', 'int')}
             />
           </div>
         </div>
@@ -1857,21 +2497,10 @@ class LinearGaugeCardEditor extends LitElement {
 
     const gaugeStyleOptions = [
       { value: '', label: '(inherit global)' },
-      { value: 'bar', label: 'Bar' },
-      { value: 'gradient_track', label: 'Gradient track' },
-      { value: 'segments', label: 'Segments (LED)' },
-      { value: 'ticks', label: 'Ticks / graduations' },
-      { value: 'cursor', label: 'Cursor' },
-      { value: 'sparkline', label: 'Sparkline (24h)' }
+      ...LGC_GAUGE_STYLES,
     ];
 
-    const cursorShapeOptions = [
-      { value: 'circle', label: 'Circle ●' },
-      { value: 'line', label: 'Line |' },
-      { value: 'arrow', label: 'Arrow ▾' },
-      { value: 'diamond', label: 'Diamond ◆' },
-      { value: 'bar', label: 'Bar ▐' }
-    ];
+    const cursorShapeOptions = LGC_CURSOR_SHAPES;
 
     return html`
         <div class="entity-details">
@@ -1931,7 +2560,7 @@ class LinearGaugeCardEditor extends LitElement {
                     @value-changed=${(e) => this._entityChanged(e, index, 'gauge_style')}
                 ></ha-selector>
                 ${this._plainInput({
-                  label: 'LED count', type: 'number',
+                  label: 'Element count', type: 'number',
                   value: entity.segment_count ?? '', placeholder: this._config.segment_count ?? 20,
                   oninput: (e) => this._entityChanged(e, index, 'segment_count'),
                 })}
@@ -2151,6 +2780,15 @@ class LinearGaugeCardEditor extends LitElement {
     
     // Handle empty values for optional numeric fields
     if (configValue === 'entities_gap' && (isNaN(value) || target.value === '')) {
+      const newConfig = { ...this._config };
+      delete newConfig[configValue];
+      this._config = newConfig;
+      this._fireChangedEvent();
+      return;
+    }
+
+    // `circle` is the implicit cursor shape — drop it to keep the YAML clean.
+    if (configValue === 'cursor_shape' && (!value || value === 'circle')) {
       const newConfig = { ...this._config };
       delete newConfig[configValue];
       this._config = newConfig;
@@ -2493,7 +3131,7 @@ class LinearGaugeCardEditor extends LitElement {
   }
 }
 
-const LGC_VERSION = '1.2.0';
+const LGC_VERSION = '1.3.0';
 console.info(
   `%c LINEAR-GAUGE-CARD %c ${LGC_VERSION} `,
   'color: white; background: #03a9f4; font-weight: 700;',

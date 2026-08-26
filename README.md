@@ -40,7 +40,7 @@ A modern and interactive custom card to display your entities as linear gauges. 
 - **Flexible Layout**: Choose between horizontal (list) or vertical (columns) display.
 - **Smart Gradients**: Define a global gradient or specific colors per entity.
 - **LED Effect**: Segmented and rectangular display mode for a modern "pixel" style.
-- **Gauge Styles**: Choose how each gauge is drawn — `bar`, `gradient_track`, `segments` (LED, adjustable count), `ticks` (adjustable graduations), `cursor` (selectable shapes) or `sparkline` (24h trend).
+- **15 Gauge Styles**: Choose how each gauge is drawn — `bar`, `gradient_track`, `glass`, `stripes`, `segments` (LED), `dots`, `chevrons`, `equalizer`, `battery`, `thermometer`, `wave`, `ticks`, `needle`, `cursor` or `sparkline` (24h trend). Set globally or per entity.
 - **Compact Mode**: Minimal display with just icon and bar to save space.
 - **Value in Bar**: Display the value directly on the progress bar (hides the value next to the name to avoid duplication).
 - **Shimmer Effect**: Animated shine effect on bars (can be disabled).
@@ -93,8 +93,8 @@ Type: `custom:linear-gauge-card`
 | `color_negative` | string | Global fixed color for negative values when `center_zero` is active |
 | `severity` | list | Global severity configuration |
 | `effect` | string | `default` or `led` for a rectangular segmented effect (legacy — prefer `gauge_style`) |
-| `gauge_style` | string | How the gauge is drawn: `bar` (default), `gradient_track`, `segments`, `ticks`, `cursor`, `sparkline` |
-| `segment_count` | number | Number of LEDs/segments for the `segments` style (default: 20, range 3–120) |
+| `gauge_style` | string | How the gauge is drawn: `bar` (default), `gradient_track`, `glass`, `stripes`, `segments`, `dots`, `chevrons`, `equalizer`, `battery`, `thermometer`, `wave`, `ticks`, `needle`, `cursor`, `sparkline` |
+| `segment_count` | number | Number of elements for the `segments`, `dots`, `chevrons` and `equalizer` styles (range 3–120; defaults: 20 segments, 12 dots, 10 chevrons, 16 equalizer bars) |
 | `tick_count` | number | Number of labelled graduations for the `ticks` style (default: 5, min 2) |
 | `cursor_shape` | string | Thumb shape for the `cursor` style: `circle` (default), `line`, `arrow`, `diamond`, `bar` |
 | `tap_action` | object | Default action on click (e.g., toggle) |
@@ -107,6 +107,9 @@ Type: `custom:linear-gauge-card`
 | `bar_thickness` | number | Bar thickness in pixels (default: 12) |
 | `vertical_height` | number | Vertical bar height in pixels (default: 120) |
 | `vertical_width` | number | Vertical bar width in pixels (default: 16) |
+| `wave_height` | number | Height of the `wave` style in horizontal layout, in pixels (default: 40) |
+| `equalizer_height` | number | Height of the `equalizer` style, in pixels (default: 34) |
+| `battery_size` | number | Height of the `battery` body in horizontal layout, in pixels (default: 22) |
 
 ### Entity Configuration
 
@@ -125,7 +128,7 @@ Each entity in the list can be configured individually:
 | `severity` | list | Specific color thresholds |
 | `effect` | string | Effect override (`default` or `led`) |
 | `gauge_style` | string | Per-entity gauge style override (see global `gauge_style`) |
-| `segment_count` | number | Per-entity LED/segment count override |
+| `segment_count` | number | Per-entity element count override (segments, dots, chevrons, equalizer) |
 | `tick_count` | number | Number of labelled graduations for the `ticks` style (default 5, min 2) |
 | `cursor_shape` | string | Thumb shape for the `cursor` style: `circle` (default), `line`, `arrow`, `diamond`, `bar` |
 | `pulse` | object | Pulse alert configuration (see below) |
@@ -237,14 +240,29 @@ entities:
 
 Set `gauge_style` globally or per entity. Available values:
 
-| Value | Description |
-|---|---|
-| `bar` | Classic filled bar (default) |
-| `gradient_track` | Full colour scale shown faintly in the track, crisp fill on top |
-| `segments` | LED/segment style — number of segments set with `segment_count` |
-| `ticks` | Instrument-style bar with numbered graduations and a labelled target. Set the number of graduations with `tick_count`; enable `show_value_in_bar` to show the current value above the fill |
-| `cursor` | Thin gradient track with a slider-like cursor — great for dense dashboards. Pick the thumb shape with `cursor_shape` (`circle`, `line`, `arrow`, `diamond`, `bar`) |
-| `sparkline` | 24h trend line (requires history; falls back to a bar until data loads) |
+| Value | Description | Vertical layout |
+|---|---|---|
+| `bar` | Classic filled bar (default) | ✅ |
+| `gradient_track` | Full colour scale shown faintly in the track, crisp fill on top | ✅ |
+| `glass` | Glossy capsule with a highlight on the fill — a softer, 3D take on `bar` | ✅ |
+| `stripes` | Animated diagonal hazard stripes scrolling over the fill | ✅ |
+| `segments` | LED/segment style — number of segments set with `segment_count` | ✅ |
+| `dots` | Row of dots that light up one by one; the leading dot fades in progressively | ✅ |
+| `chevrons` | Arrow-shaped segments pointing in the direction of travel | ✅ |
+| `equalizer` | VU-meter bars of increasing height | ↩︎ falls back to `segments` |
+| `battery` | Battery outline with a terminal cap, filled with the value | ✅ (cap on top) |
+| `thermometer` | Graduated tube with a coloured bulb | ✅ (bulb at the bottom) |
+| `wave` | Liquid tank with an animated wave surface | ✅ |
+| `ticks` | Instrument-style bar with numbered graduations and a labelled target. Set the number of graduations with `tick_count`; enable `show_value_in_bar` to show the current value above the fill | ↩︎ falls back to `bar` |
+| `needle` | Full colour scale with a needle pointer and end-of-scale labels | ✅ (needle on the left) |
+| `cursor` | Thin gradient track with a slider-like cursor — great for dense dashboards. Pick the thumb shape with `cursor_shape` (`circle`, `line`, `arrow`, `diamond`, `bar`) | ✅ |
+| `sparkline` | 24h trend line (requires history; falls back to a bar until data loads) | ↩︎ falls back to `bar` |
+
+All styles honour `color`, `colors`, `severity` and `pulse`. The repeated-element
+styles (`segments`, `dots`, `chevrons`, `equalizer`) colour each element from the
+gradient palette unless a fixed `color`/`severity` is configured. `bar`,
+`gradient_track`, `glass`, `stripes`, `battery`, `thermometer`, `wave`, `ticks`
+and `needle` also draw the `target` / `target_entity` marker.
 
 ```yaml
 type: custom:linear-gauge-card
@@ -257,6 +275,32 @@ entities:
   - entity: sensor.temperature
     name: Temp
     gauge_style: sparkline   # per-entity override
+```
+
+Mixing several styles in one card:
+
+```yaml
+type: custom:linear-gauge-card
+title: Home
+entities:
+  - entity: sensor.phone_battery
+    name: Phone
+    gauge_style: battery
+  - entity: sensor.living_room_temperature
+    name: Living room
+    gauge_style: thermometer
+    min: 10
+    max: 30
+  - entity: sensor.water_tank
+    name: Tank
+    gauge_style: wave
+  - entity: sensor.noise_level
+    name: Noise
+    gauge_style: equalizer
+    segment_count: 20
+  - entity: sensor.humidity
+    name: Humidity
+    gauge_style: needle
 ```
 
 ### Vertical Mode (Columns)
