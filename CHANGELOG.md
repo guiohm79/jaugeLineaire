@@ -3,6 +3,36 @@
 All notable changes to the Linear Gauge Card are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## v1.4.0 — 2026-08-27
+
+Follow-up to the new gauge styles, from testing feedback.
+
+### ✨ Added
+- **`center_zero` now works with every gauge style.** The fill grows out of the
+  zero point instead of the start of the track: `segments`, `dots`, `equalizer`
+  and the `battery` cells light up outwards from zero, the `wave` rises above or
+  hangs below it, and `gradient_track` keeps its colours aligned with the scale
+  behind it. A faint line marks where zero sits.
+- **`battery_cells`** (default 4, range 2–12) — number of cells drawn inside the
+  battery shell.
+- `tick_count` also sets the number of graduation marks on the `thermometer` tube.
+
+### 🔧 Changed
+- **`battery` redesigned** — it was too close to `bar`/`glass`. It now has a
+  thicker shell and fills cell by cell like a battery indicator, with the leading
+  cell draining proportionally so the reading stays precise.
+- **`thermometer` redesigned** — the bulb is now a proper reservoir: larger,
+  ringed like the tube, joined to it, and always carrying the colour of the
+  current reading. The tube gained graduation marks and an end-of-scale label.
+- **`wave` improved** — two wave layers at different amplitudes and speeds give
+  the surface some depth, and the liquid no longer spills past the zero point.
+
+### 🗑️ Removed
+- **The `chevrons` style** (introduced in the unreleased v1.3.0) — it did not read
+  well at any size. Cards using `gauge_style: chevrons` fall back to `bar`.
+
+---
+
 ## v1.3.0 — 2026-08-26
 
 Nine new gauge visualisations, on top of the six that already shipped.
