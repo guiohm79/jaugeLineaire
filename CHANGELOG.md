@@ -3,6 +3,33 @@
 All notable changes to the Linear Gauge Card are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## v1.3.0 — 2026-08-26
+
+Nine new gauge visualisations, on top of the six that already shipped.
+
+### ✨ Added
+- **Nine new `gauge_style` values** (global or per entity):
+  - `glass` — glossy capsule with a highlight on the fill
+  - `stripes` — animated diagonal hazard stripes over the fill
+  - `dots` — row of dots lighting up one by one, with a progressively fading leading dot
+  - `chevrons` — arrow-shaped segments pointing in the direction of travel
+  - `equalizer` — VU-meter bars of increasing height
+  - `battery` — battery outline with a terminal cap
+  - `thermometer` — graduated tube with a coloured bulb
+  - `wave` — liquid tank with an animated wave surface
+  - `needle` — full colour scale with a needle pointer and end-of-scale labels
+- **`wave_height`**, **`equalizer_height`** and **`battery_size`** to size the taller styles.
+- The visual editor gained global **Tick count** and **Cursor shape** fields (previously per entity only).
+- `segment_count` now also drives `dots`, `chevrons` and `equalizer`, each with its own default when left unset (20 segments, 12 dots, 10 chevrons, 16 equalizer bars).
+
+### 🔧 Changed
+- `target` / `target_entity` markers and the 24 h min/max range now also render on `battery`, `thermometer` and `wave`.
+- Pulse alerts blink the fill on every new style, and all new animations respect `prefers-reduced-motion`.
+- Gauge style and cursor shape lists are now declared once and shared by the card and its editor.
+- In vertical layout, `equalizer` falls back to `segments` (`ticks` and `sparkline` still fall back to `bar`); every other new style has a native vertical rendering.
+
+---
+
 ## v1.2.0 — 2026-06-18
 
 A big visual update: six gauge styles, a dynamic target marker, a more visible
