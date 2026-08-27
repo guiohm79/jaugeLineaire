@@ -21,9 +21,9 @@ Follow-up to the new gauge styles, from testing feedback.
 - **`battery` redesigned** — it was too close to `bar`/`glass`. It now has a
   thicker shell and fills cell by cell like a battery indicator, with the leading
   cell draining proportionally so the reading stays precise.
-- **`thermometer` redesigned** — the bulb is now a proper reservoir: larger,
-  ringed like the tube, joined to it, and always carrying the colour of the
-  current reading. The tube gained graduation marks and an end-of-scale label.
+- **`thermometer` redesigned** — the bulb is gone; it is now simply a rounded,
+  outlined tube with graduation marks inside (`tick_count`) and an end-of-scale
+  label, which reads more clearly at small sizes.
 - **`wave` improved** — two wave layers at different amplitudes and speeds give
   the surface some depth, and the liquid no longer spills past the zero point.
 

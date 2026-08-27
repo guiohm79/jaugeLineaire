@@ -244,7 +244,6 @@ class LinearGaugeCard extends LitElement {
       .gauge-container.pulsing .eq-bar,
       .gauge-container.pulsing .bat-fill,
       .gauge-container.pulsing .thermo-fill,
-      .gauge-container.pulsing .thermo-bulb,
       .gauge-container.pulsing .needle-pointer,
       .gauge-container.pulsing .wave-anim,
       .gauge-container.pulsing .tick-target {
@@ -572,8 +571,7 @@ class LinearGaugeCard extends LitElement {
           .gauge-container.pulsing .eq-bar,
         .gauge-container.pulsing .bat-fill,
         .gauge-container.pulsing .thermo-fill,
-        .gauge-container.pulsing .thermo-bulb,
-        .gauge-container.pulsing .needle-pointer,
+          .gauge-container.pulsing .needle-pointer,
         .gauge-container.pulsing .tick-target { animation: none !important; }
         .wave-anim { animation: none !important; }
         .bar-fill.stripes-fill::after { animation: none !important; }
@@ -839,20 +837,8 @@ class LinearGaugeCard extends LitElement {
         border-radius: 2.5px 2.5px 0 0;
       }
 
-      /* ---- Gauge style: thermometer ---- */
+      /* ---- Gauge style: thermometer (graduated tube) ---- */
       .thermo-wrap { display: flex; align-items: center; width: 100%; }
-      /* The bulb is the reservoir: always full, ringed like the tube. */
-      .thermo-bulb {
-        flex: 0 0 auto;
-        width: var(--lgc-thermo-bulb, 20px);
-        height: var(--lgc-thermo-bulb, 20px);
-        margin-right: -7px;
-        border-radius: 50%;
-        background: var(--lgc-thermo-color, var(--primary-color));
-        border: 2px solid rgba(127, 127, 127, 0.45);
-        box-sizing: border-box;
-        z-index: 1;
-      }
       .thermo-tube {
         position: relative;
         flex: 1 1 auto;
@@ -895,14 +881,9 @@ class LinearGaugeCard extends LitElement {
         pointer-events: none;
       }
       .thermo-wrap.vertical {
-        flex-direction: column-reverse;
+        flex-direction: column;
         justify-content: flex-start;
         width: auto;
-      }
-      .thermo-wrap.vertical .thermo-bulb {
-        width: var(--lgc-thermo-bulb-v, 22px);
-        height: var(--lgc-thermo-bulb-v, 22px);
-        margin: -7px 0 0 0;
       }
       .thermo-wrap.vertical .thermo-tube {
         flex: 0 0 auto;
@@ -1655,12 +1636,10 @@ class LinearGaugeCard extends LitElement {
   }
 
   _visualThermometer(p) {
-    const { layout, percent, color, min, max, conf, showValueInBar, displayValue,
+    const { layout, color, max, conf, showValueInBar, displayValue,
             targetMarker, minMaxMarker } = p;
     const vertical = layout === 'vertical';
     const span = this._fillSpan(p);
-    // The bulb is the reservoir: always full, in the colour of the reading.
-    const solid = this._solidColor(color, percent / 100);
     // Graduations inside the tube, spaced like the `ticks` style.
     const count = Math.max(2, Math.min(21, parseInt(conf.tick_count ?? this._config.tick_count ?? 5, 10) || 5));
     const ticks = [];
@@ -1670,7 +1649,6 @@ class LinearGaugeCard extends LitElement {
     }
     return html`
       <div class="thermo-wrap ${vertical ? 'vertical' : ''}">
-        <div class="thermo-bulb" style="--lgc-thermo-color: ${solid};"></div>
         <div class="thermo-tube">
           ${minMaxMarker}
           <div class="thermo-fill" style="${this._spanStyle(span, layout)} background: ${color};"></div>

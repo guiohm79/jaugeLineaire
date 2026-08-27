@@ -251,7 +251,7 @@ Set `gauge_style` globally or per entity. Available values:
 | `dots` | Row of dots that light up one by one; the leading dot fades in progressively | ✅ |
 | `equalizer` | VU-meter bars of increasing height | ↩︎ falls back to `segments` |
 | `battery` | Battery shell with a terminal cap, filled cell by cell (`battery_cells`); the leading cell drains proportionally | ✅ (cap on top) |
-| `thermometer` | Graduated tube (`tick_count` marks) joined to a reservoir bulb that always carries the colour of the current reading | ✅ (bulb at the bottom) |
+| `thermometer` | Rounded, outlined tube with graduation marks inside (`tick_count`) and an end-of-scale label | ✅ |
 | `wave` | Liquid tank with two animated wave layers | ✅ |
 | `ticks` | Instrument-style bar with numbered graduations and a labelled target. Set the number of graduations with `tick_count`; enable `show_value_in_bar` to show the current value above the fill | ↩︎ falls back to `bar` |
 | `needle` | Full colour scale with a needle pointer and end-of-scale labels | ✅ (needle on the left) |
