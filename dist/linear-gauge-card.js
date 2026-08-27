@@ -3,18 +3,18 @@
  * Copyright 2019 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const q = globalThis, nt = q.ShadowRoot && (q.ShadyCSS === void 0 || q.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, ot = Symbol(), pt = /* @__PURE__ */ new WeakMap();
-let Et = class {
+const K = globalThis, ht = K.ShadowRoot && (K.ShadyCSS === void 0 || K.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, dt = Symbol(), ft = /* @__PURE__ */ new WeakMap();
+let Mt = class {
   constructor(t, e, i) {
-    if (this._$cssResult$ = !0, i !== ot) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
+    if (this._$cssResult$ = !0, i !== dt) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
     this.cssText = t, this.t = e;
   }
   get styleSheet() {
     let t = this.o;
     const e = this.t;
-    if (nt && t === void 0) {
+    if (ht && t === void 0) {
       const i = e !== void 0 && e.length === 1;
-      i && (t = pt.get(e)), t === void 0 && ((this.o = t = new CSSStyleSheet()).replaceSync(this.cssText), i && pt.set(e, t));
+      i && (t = ft.get(e)), t === void 0 && ((this.o = t = new CSSStyleSheet()).replaceSync(this.cssText), i && ft.set(e, t));
     }
     return t;
   }
@@ -22,74 +22,74 @@ let Et = class {
     return this.cssText;
   }
 };
-const Ut = (h) => new Et(typeof h == "string" ? h : h + "", void 0, ot), At = (h, ...t) => {
-  const e = h.length === 1 ? h[0] : t.reduce((i, a, r) => i + ((s) => {
+const Ft = (d) => new Mt(typeof d == "string" ? d : d + "", void 0, dt), Nt = (d, ...t) => {
+  const e = d.length === 1 ? d[0] : t.reduce((i, a, r) => i + ((s) => {
     if (s._$cssResult$ === !0) return s.cssText;
     if (typeof s == "number") return s;
     throw Error("Value passed to 'css' function must be a 'css' function result: " + s + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
-  })(a) + h[r + 1], h[0]);
-  return new Et(e, h, ot);
-}, Ft = (h, t) => {
-  if (nt) h.adoptedStyleSheets = t.map((e) => e instanceof CSSStyleSheet ? e : e.styleSheet);
+  })(a) + d[r + 1], d[0]);
+  return new Mt(e, d, dt);
+}, Ut = (d, t) => {
+  if (ht) d.adoptedStyleSheets = t.map((e) => e instanceof CSSStyleSheet ? e : e.styleSheet);
   else for (const e of t) {
-    const i = document.createElement("style"), a = q.litNonce;
-    a !== void 0 && i.setAttribute("nonce", a), i.textContent = e.cssText, h.appendChild(i);
+    const i = document.createElement("style"), a = K.litNonce;
+    a !== void 0 && i.setAttribute("nonce", a), i.textContent = e.cssText, d.appendChild(i);
   }
-}, gt = nt ? (h) => h : (h) => h instanceof CSSStyleSheet ? ((t) => {
+}, vt = ht ? (d) => d : (d) => d instanceof CSSStyleSheet ? ((t) => {
   let e = "";
   for (const i of t.cssRules) e += i.cssText;
-  return Ut(e);
-})(h) : h;
+  return Ft(e);
+})(d) : d;
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const { is: Gt, defineProperty: jt, getOwnPropertyDescriptor: Bt, getOwnPropertyNames: Rt, getOwnPropertySymbols: Dt, getPrototypeOf: qt } = Object, E = globalThis, ut = E.trustedTypes, Wt = ut ? ut.emptyScript : "", tt = E.reactiveElementPolyfillSupport, U = (h, t) => h, rt = { toAttribute(h, t) {
+const { is: Gt, defineProperty: Bt, getOwnPropertyDescriptor: jt, getOwnPropertyNames: Rt, getOwnPropertySymbols: Dt, getPrototypeOf: qt } = Object, E = globalThis, mt = E.trustedTypes, Wt = mt ? mt.emptyScript : "", rt = E.reactiveElementPolyfillSupport, B = (d, t) => d, ct = { toAttribute(d, t) {
   switch (t) {
     case Boolean:
-      h = h ? Wt : null;
+      d = d ? Wt : null;
       break;
     case Object:
     case Array:
-      h = h == null ? h : JSON.stringify(h);
+      d = d == null ? d : JSON.stringify(d);
   }
-  return h;
-}, fromAttribute(h, t) {
-  let e = h;
+  return d;
+}, fromAttribute(d, t) {
+  let e = d;
   switch (t) {
     case Boolean:
-      e = h !== null;
+      e = d !== null;
       break;
     case Number:
-      e = h === null ? null : Number(h);
+      e = d === null ? null : Number(d);
       break;
     case Object:
     case Array:
       try {
-        e = JSON.parse(h);
+        e = JSON.parse(d);
       } catch {
         e = null;
       }
   }
   return e;
-} }, St = (h, t) => !Gt(h, t), vt = { attribute: !0, type: String, converter: rt, reflect: !1, useDefault: !1, hasChanged: St };
+} }, It = (d, t) => !Gt(d, t), bt = { attribute: !0, type: String, converter: ct, reflect: !1, useDefault: !1, hasChanged: It };
 Symbol.metadata ?? (Symbol.metadata = Symbol("metadata")), E.litPropertyMetadata ?? (E.litPropertyMetadata = /* @__PURE__ */ new WeakMap());
-let L = class extends HTMLElement {
+let V = class extends HTMLElement {
   static addInitializer(t) {
     this._$Ei(), (this.l ?? (this.l = [])).push(t);
   }
   static get observedAttributes() {
     return this.finalize(), this._$Eh && [...this._$Eh.keys()];
   }
-  static createProperty(t, e = vt) {
+  static createProperty(t, e = bt) {
     if (e.state && (e.attribute = !1), this._$Ei(), this.prototype.hasOwnProperty(t) && ((e = Object.create(e)).wrapped = !0), this.elementProperties.set(t, e), !e.noAccessor) {
       const i = Symbol(), a = this.getPropertyDescriptor(t, i, e);
-      a !== void 0 && jt(this.prototype, t, a);
+      a !== void 0 && Bt(this.prototype, t, a);
     }
   }
   static getPropertyDescriptor(t, e, i) {
-    const { get: a, set: r } = Bt(this.prototype, t) ?? { get() {
+    const { get: a, set: r } = jt(this.prototype, t) ?? { get() {
       return this[e];
     }, set(s) {
       this[e] = s;
@@ -100,16 +100,16 @@ let L = class extends HTMLElement {
     }, configurable: !0, enumerable: !0 };
   }
   static getPropertyOptions(t) {
-    return this.elementProperties.get(t) ?? vt;
+    return this.elementProperties.get(t) ?? bt;
   }
   static _$Ei() {
-    if (this.hasOwnProperty(U("elementProperties"))) return;
+    if (this.hasOwnProperty(B("elementProperties"))) return;
     const t = qt(this);
     t.finalize(), t.l !== void 0 && (this.l = [...t.l]), this.elementProperties = new Map(t.elementProperties);
   }
   static finalize() {
-    if (this.hasOwnProperty(U("finalized"))) return;
-    if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(U("properties"))) {
+    if (this.hasOwnProperty(B("finalized"))) return;
+    if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(B("properties"))) {
       const e = this.properties, i = [...Rt(e), ...Dt(e)];
       for (const a of i) this.createProperty(a, e[a]);
     }
@@ -129,8 +129,8 @@ let L = class extends HTMLElement {
     const e = [];
     if (Array.isArray(t)) {
       const i = new Set(t.flat(1 / 0).reverse());
-      for (const a of i) e.unshift(gt(a));
-    } else t !== void 0 && e.push(gt(t));
+      for (const a of i) e.unshift(vt(a));
+    } else t !== void 0 && e.push(vt(t));
     return e;
   }
   static _$Eu(t, e) {
@@ -159,7 +159,7 @@ let L = class extends HTMLElement {
   }
   createRenderRoot() {
     const t = this.shadowRoot ?? this.attachShadow(this.constructor.shadowRootOptions);
-    return Ft(t, this.constructor.elementStyles), t;
+    return Ut(t, this.constructor.elementStyles), t;
   }
   connectedCallback() {
     var t;
@@ -184,7 +184,7 @@ let L = class extends HTMLElement {
     var r;
     const i = this.constructor.elementProperties.get(t), a = this.constructor._$Eu(t, i);
     if (a !== void 0 && i.reflect === !0) {
-      const s = (((r = i.converter) == null ? void 0 : r.toAttribute) !== void 0 ? i.converter : rt).toAttribute(e, i.type);
+      const s = (((r = i.converter) == null ? void 0 : r.toAttribute) !== void 0 ? i.converter : ct).toAttribute(e, i.type);
       this._$Em = t, s == null ? this.removeAttribute(a) : this.setAttribute(a, s), this._$Em = null;
     }
   }
@@ -192,17 +192,17 @@ let L = class extends HTMLElement {
     var r, s;
     const i = this.constructor, a = i._$Eh.get(t);
     if (a !== void 0 && this._$Em !== a) {
-      const o = i.getPropertyOptions(a), l = typeof o.converter == "function" ? { fromAttribute: o.converter } : ((r = o.converter) == null ? void 0 : r.fromAttribute) !== void 0 ? o.converter : rt;
+      const o = i.getPropertyOptions(a), l = typeof o.converter == "function" ? { fromAttribute: o.converter } : ((r = o.converter) == null ? void 0 : r.fromAttribute) !== void 0 ? o.converter : ct;
       this._$Em = a;
-      const c = l.fromAttribute(e, o.type);
-      this[a] = c ?? ((s = this._$Ej) == null ? void 0 : s.get(a)) ?? c, this._$Em = null;
+      const h = l.fromAttribute(e, o.type);
+      this[a] = h ?? ((s = this._$Ej) == null ? void 0 : s.get(a)) ?? h, this._$Em = null;
     }
   }
   requestUpdate(t, e, i, a = !1, r) {
     var s;
     if (t !== void 0) {
       const o = this.constructor;
-      if (a === !1 && (r = this[t]), i ?? (i = o.getPropertyOptions(t)), !((i.hasChanged ?? St)(r, e) || i.useDefault && i.reflect && r === ((s = this._$Ej) == null ? void 0 : s.get(t)) && !this.hasAttribute(o._$Eu(t, i)))) return;
+      if (a === !1 && (r = this[t]), i ?? (i = o.getPropertyOptions(t)), !((i.hasChanged ?? It)(r, e) || i.useDefault && i.reflect && r === ((s = this._$Ej) == null ? void 0 : s.get(t)) && !this.hasAttribute(o._$Eu(t, i)))) return;
       this.C(t, e, i);
     }
     this.isUpdatePending === !1 && (this._$ES = this._$EP());
@@ -278,56 +278,56 @@ let L = class extends HTMLElement {
   firstUpdated(t) {
   }
 };
-L.elementStyles = [], L.shadowRootOptions = { mode: "open" }, L[U("elementProperties")] = /* @__PURE__ */ new Map(), L[U("finalized")] = /* @__PURE__ */ new Map(), tt == null || tt({ ReactiveElement: L }), (E.reactiveElementVersions ?? (E.reactiveElementVersions = [])).push("2.1.2");
+V.elementStyles = [], V.shadowRootOptions = { mode: "open" }, V[B("elementProperties")] = /* @__PURE__ */ new Map(), V[B("finalized")] = /* @__PURE__ */ new Map(), rt == null || rt({ ReactiveElement: V }), (E.reactiveElementVersions ?? (E.reactiveElementVersions = [])).push("2.1.2");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const F = globalThis, ft = (h) => h, W = F.trustedTypes, mt = W ? W.createPolicy("lit-html", { createHTML: (h) => h }) : void 0, Mt = "$lit$", C = `lit$${Math.random().toFixed(9).slice(2)}$`, zt = "?" + C, Xt = `<${zt}>`, N = document, G = () => N.createComment(""), j = (h) => h === null || typeof h != "object" && typeof h != "function", lt = Array.isArray, Zt = (h) => lt(h) || typeof (h == null ? void 0 : h[Symbol.iterator]) == "function", et = `[ 	
-\f\r]`, H = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, bt = /-->/g, _t = />/g, S = RegExp(`>|${et}(?:([^\\s"'>=/]+)(${et}*=${et}*(?:[^ 	
-\f\r"'\`<>=]|("|')|))|$)`, "g"), yt = /'/g, $t = /"/g, Nt = /^(?:script|style|textarea|title)$/i, Yt = (h) => (t, ...e) => ({ _$litType$: h, strings: t, values: e }), p = Yt(1), P = Symbol.for("lit-noChange"), _ = Symbol.for("lit-nothing"), xt = /* @__PURE__ */ new WeakMap(), M = N.createTreeWalker(N, 129);
-function Lt(h, t) {
-  if (!lt(h) || !h.hasOwnProperty("raw")) throw Error("invalid template strings array");
-  return mt !== void 0 ? mt.createHTML(t) : t;
+const j = globalThis, _t = (d) => d, tt = j.trustedTypes, $t = tt ? tt.createPolicy("lit-html", { createHTML: (d) => d }) : void 0, Lt = "$lit$", C = `lit$${Math.random().toFixed(9).slice(2)}$`, Vt = "?" + C, Xt = `<${Vt}>`, N = document, R = () => N.createComment(""), D = (d) => d === null || typeof d != "object" && typeof d != "function", pt = Array.isArray, Zt = (d) => pt(d) || typeof (d == null ? void 0 : d[Symbol.iterator]) == "function", nt = `[ 	
+\f\r]`, U = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, yt = /-->/g, xt = />/g, A = RegExp(`>|${nt}(?:([^\\s"'>=/]+)(${nt}*=${nt}*(?:[^ 	
+\f\r"'\`<>=]|("|')|))|$)`, "g"), wt = /'/g, kt = /"/g, Pt = /^(?:script|style|textarea|title)$/i, Yt = (d) => (t, ...e) => ({ _$litType$: d, strings: t, values: e }), p = Yt(1), T = Symbol.for("lit-noChange"), _ = Symbol.for("lit-nothing"), Ct = /* @__PURE__ */ new WeakMap(), z = N.createTreeWalker(N, 129);
+function Tt(d, t) {
+  if (!pt(d) || !d.hasOwnProperty("raw")) throw Error("invalid template strings array");
+  return $t !== void 0 ? $t.createHTML(t) : t;
 }
-const Jt = (h, t) => {
-  const e = h.length - 1, i = [];
-  let a, r = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", s = H;
+const Jt = (d, t) => {
+  const e = d.length - 1, i = [];
+  let a, r = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", s = U;
   for (let o = 0; o < e; o++) {
-    const l = h[o];
-    let c, d, n = -1, g = 0;
-    for (; g < l.length && (s.lastIndex = g, d = s.exec(l), d !== null); ) g = s.lastIndex, s === H ? d[1] === "!--" ? s = bt : d[1] !== void 0 ? s = _t : d[2] !== void 0 ? (Nt.test(d[2]) && (a = RegExp("</" + d[2], "g")), s = S) : d[3] !== void 0 && (s = S) : s === S ? d[0] === ">" ? (s = a ?? H, n = -1) : d[1] === void 0 ? n = -2 : (n = s.lastIndex - d[2].length, c = d[1], s = d[3] === void 0 ? S : d[3] === '"' ? $t : yt) : s === $t || s === yt ? s = S : s === bt || s === _t ? s = H : (s = S, a = void 0);
-    const u = s === S && h[o + 1].startsWith("/>") ? " " : "";
-    r += s === H ? l + Xt : n >= 0 ? (i.push(c), l.slice(0, n) + Mt + l.slice(n) + C + u) : l + C + (n === -2 ? o : u);
+    const l = d[o];
+    let h, c, n = -1, g = 0;
+    for (; g < l.length && (s.lastIndex = g, c = s.exec(l), c !== null); ) g = s.lastIndex, s === U ? c[1] === "!--" ? s = yt : c[1] !== void 0 ? s = xt : c[2] !== void 0 ? (Pt.test(c[2]) && (a = RegExp("</" + c[2], "g")), s = A) : c[3] !== void 0 && (s = A) : s === A ? c[0] === ">" ? (s = a ?? U, n = -1) : c[1] === void 0 ? n = -2 : (n = s.lastIndex - c[2].length, h = c[1], s = c[3] === void 0 ? A : c[3] === '"' ? kt : wt) : s === kt || s === wt ? s = A : s === yt || s === xt ? s = U : (s = A, a = void 0);
+    const u = s === A && d[o + 1].startsWith("/>") ? " " : "";
+    r += s === U ? l + Xt : n >= 0 ? (i.push(h), l.slice(0, n) + Lt + l.slice(n) + C + u) : l + C + (n === -2 ? o : u);
   }
-  return [Lt(h, r + (h[e] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), i];
+  return [Tt(d, r + (d[e] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), i];
 };
-class B {
+class q {
   constructor({ strings: t, _$litType$: e }, i) {
     let a;
     this.parts = [];
     let r = 0, s = 0;
-    const o = t.length - 1, l = this.parts, [c, d] = Jt(t, e);
-    if (this.el = B.createElement(c, i), M.currentNode = this.el.content, e === 2 || e === 3) {
+    const o = t.length - 1, l = this.parts, [h, c] = Jt(t, e);
+    if (this.el = q.createElement(h, i), z.currentNode = this.el.content, e === 2 || e === 3) {
       const n = this.el.content.firstChild;
       n.replaceWith(...n.childNodes);
     }
-    for (; (a = M.nextNode()) !== null && l.length < o; ) {
+    for (; (a = z.nextNode()) !== null && l.length < o; ) {
       if (a.nodeType === 1) {
-        if (a.hasAttributes()) for (const n of a.getAttributeNames()) if (n.endsWith(Mt)) {
-          const g = d[s++], u = a.getAttribute(n).split(C), v = /([.?@])?(.*)/.exec(g);
-          l.push({ type: 1, index: r, name: v[2], strings: u, ctor: v[1] === "." ? Kt : v[1] === "?" ? te : v[1] === "@" ? ee : X }), a.removeAttribute(n);
+        if (a.hasAttributes()) for (const n of a.getAttributeNames()) if (n.endsWith(Lt)) {
+          const g = c[s++], u = a.getAttribute(n).split(C), v = /([.?@])?(.*)/.exec(g);
+          l.push({ type: 1, index: r, name: v[2], strings: u, ctor: v[1] === "." ? Kt : v[1] === "?" ? te : v[1] === "@" ? ee : et }), a.removeAttribute(n);
         } else n.startsWith(C) && (l.push({ type: 6, index: r }), a.removeAttribute(n));
-        if (Nt.test(a.tagName)) {
+        if (Pt.test(a.tagName)) {
           const n = a.textContent.split(C), g = n.length - 1;
           if (g > 0) {
-            a.textContent = W ? W.emptyScript : "";
-            for (let u = 0; u < g; u++) a.append(n[u], G()), M.nextNode(), l.push({ type: 2, index: ++r });
-            a.append(n[g], G());
+            a.textContent = tt ? tt.emptyScript : "";
+            for (let u = 0; u < g; u++) a.append(n[u], R()), z.nextNode(), l.push({ type: 2, index: ++r });
+            a.append(n[g], R());
           }
         }
-      } else if (a.nodeType === 8) if (a.data === zt) l.push({ type: 2, index: r });
+      } else if (a.nodeType === 8) if (a.data === Vt) l.push({ type: 2, index: r });
       else {
         let n = -1;
         for (; (n = a.data.indexOf(C, n + 1)) !== -1; ) l.push({ type: 7, index: r }), n += C.length - 1;
@@ -340,12 +340,12 @@ class B {
     return i.innerHTML = t, i;
   }
 }
-function V(h, t, e = h, i) {
+function H(d, t, e = d, i) {
   var s, o;
-  if (t === P) return t;
+  if (t === T) return t;
   let a = i !== void 0 ? (s = e._$Co) == null ? void 0 : s[i] : e._$Cl;
-  const r = j(t) ? void 0 : t._$litDirective$;
-  return (a == null ? void 0 : a.constructor) !== r && ((o = a == null ? void 0 : a._$AO) == null || o.call(a, !1), r === void 0 ? a = void 0 : (a = new r(h), a._$AT(h, e, i)), i !== void 0 ? (e._$Co ?? (e._$Co = []))[i] = a : e._$Cl = a), a !== void 0 && (t = V(h, a._$AS(h, t.values), a, i)), t;
+  const r = D(t) ? void 0 : t._$litDirective$;
+  return (a == null ? void 0 : a.constructor) !== r && ((o = a == null ? void 0 : a._$AO) == null || o.call(a, !1), r === void 0 ? a = void 0 : (a = new r(d), a._$AT(d, e, i)), i !== void 0 ? (e._$Co ?? (e._$Co = []))[i] = a : e._$Cl = a), a !== void 0 && (t = H(d, a._$AS(d, t.values), a, i)), t;
 }
 class Qt {
   constructor(t, e) {
@@ -359,23 +359,23 @@ class Qt {
   }
   u(t) {
     const { el: { content: e }, parts: i } = this._$AD, a = ((t == null ? void 0 : t.creationScope) ?? N).importNode(e, !0);
-    M.currentNode = a;
-    let r = M.nextNode(), s = 0, o = 0, l = i[0];
+    z.currentNode = a;
+    let r = z.nextNode(), s = 0, o = 0, l = i[0];
     for (; l !== void 0; ) {
       if (s === l.index) {
-        let c;
-        l.type === 2 ? c = new R(r, r.nextSibling, this, t) : l.type === 1 ? c = new l.ctor(r, l.name, l.strings, this, t) : l.type === 6 && (c = new ie(r, this, t)), this._$AV.push(c), l = i[++o];
+        let h;
+        l.type === 2 ? h = new W(r, r.nextSibling, this, t) : l.type === 1 ? h = new l.ctor(r, l.name, l.strings, this, t) : l.type === 6 && (h = new ie(r, this, t)), this._$AV.push(h), l = i[++o];
       }
-      s !== (l == null ? void 0 : l.index) && (r = M.nextNode(), s++);
+      s !== (l == null ? void 0 : l.index) && (r = z.nextNode(), s++);
     }
-    return M.currentNode = N, a;
+    return z.currentNode = N, a;
   }
   p(t) {
     let e = 0;
     for (const i of this._$AV) i !== void 0 && (i.strings !== void 0 ? (i._$AI(t, i, e), e += i.strings.length - 2) : i._$AI(t[e])), e++;
   }
 }
-class R {
+class W {
   get _$AU() {
     var t;
     return ((t = this._$AM) == null ? void 0 : t._$AU) ?? this._$Cv;
@@ -395,7 +395,7 @@ class R {
     return this._$AB;
   }
   _$AI(t, e = this) {
-    t = V(this, t, e), j(t) ? t === _ || t == null || t === "" ? (this._$AH !== _ && this._$AR(), this._$AH = _) : t !== this._$AH && t !== P && this._(t) : t._$litType$ !== void 0 ? this.$(t) : t.nodeType !== void 0 ? this.T(t) : Zt(t) ? this.k(t) : this._(t);
+    t = H(this, t, e), D(t) ? t === _ || t == null || t === "" ? (this._$AH !== _ && this._$AR(), this._$AH = _) : t !== this._$AH && t !== T && this._(t) : t._$litType$ !== void 0 ? this.$(t) : t.nodeType !== void 0 ? this.T(t) : Zt(t) ? this.k(t) : this._(t);
   }
   O(t) {
     return this._$AA.parentNode.insertBefore(t, this._$AB);
@@ -404,11 +404,11 @@ class R {
     this._$AH !== t && (this._$AR(), this._$AH = this.O(t));
   }
   _(t) {
-    this._$AH !== _ && j(this._$AH) ? this._$AA.nextSibling.data = t : this.T(N.createTextNode(t)), this._$AH = t;
+    this._$AH !== _ && D(this._$AH) ? this._$AA.nextSibling.data = t : this.T(N.createTextNode(t)), this._$AH = t;
   }
   $(t) {
     var r;
-    const { values: e, _$litType$: i } = t, a = typeof i == "number" ? this._$AC(t) : (i.el === void 0 && (i.el = B.createElement(Lt(i.h, i.h[0]), this.options)), i);
+    const { values: e, _$litType$: i } = t, a = typeof i == "number" ? this._$AC(t) : (i.el === void 0 && (i.el = q.createElement(Tt(i.h, i.h[0]), this.options)), i);
     if (((r = this._$AH) == null ? void 0 : r._$AD) === a) this._$AH.p(e);
     else {
       const s = new Qt(a, this), o = s.u(this.options);
@@ -416,21 +416,21 @@ class R {
     }
   }
   _$AC(t) {
-    let e = xt.get(t.strings);
-    return e === void 0 && xt.set(t.strings, e = new B(t)), e;
+    let e = Ct.get(t.strings);
+    return e === void 0 && Ct.set(t.strings, e = new q(t)), e;
   }
   k(t) {
-    lt(this._$AH) || (this._$AH = [], this._$AR());
+    pt(this._$AH) || (this._$AH = [], this._$AR());
     const e = this._$AH;
     let i, a = 0;
-    for (const r of t) a === e.length ? e.push(i = new R(this.O(G()), this.O(G()), this, this.options)) : i = e[a], i._$AI(r), a++;
+    for (const r of t) a === e.length ? e.push(i = new W(this.O(R()), this.O(R()), this, this.options)) : i = e[a], i._$AI(r), a++;
     a < e.length && (this._$AR(i && i._$AB.nextSibling, a), e.length = a);
   }
   _$AR(t = this._$AA.nextSibling, e) {
     var i;
     for ((i = this._$AP) == null ? void 0 : i.call(this, !1, !0, e); t !== this._$AB; ) {
-      const a = ft(t).nextSibling;
-      ft(t).remove(), t = a;
+      const a = _t(t).nextSibling;
+      _t(t).remove(), t = a;
     }
   }
   setConnected(t) {
@@ -438,7 +438,7 @@ class R {
     this._$AM === void 0 && (this._$Cv = t, (e = this._$AP) == null || e.call(this, t));
   }
 }
-class X {
+class et {
   get tagName() {
     return this.element.tagName;
   }
@@ -451,11 +451,11 @@ class X {
   _$AI(t, e = this, i, a) {
     const r = this.strings;
     let s = !1;
-    if (r === void 0) t = V(this, t, e, 0), s = !j(t) || t !== this._$AH && t !== P, s && (this._$AH = t);
+    if (r === void 0) t = H(this, t, e, 0), s = !D(t) || t !== this._$AH && t !== T, s && (this._$AH = t);
     else {
       const o = t;
-      let l, c;
-      for (t = r[0], l = 0; l < r.length - 1; l++) c = V(this, o[i + l], e, l), c === P && (c = this._$AH[l]), s || (s = !j(c) || c !== this._$AH[l]), c === _ ? t = _ : t !== _ && (t += (c ?? "") + r[l + 1]), this._$AH[l] = c;
+      let l, h;
+      for (t = r[0], l = 0; l < r.length - 1; l++) h = H(this, o[i + l], e, l), h === T && (h = this._$AH[l]), s || (s = !D(h) || h !== this._$AH[l]), h === _ ? t = _ : t !== _ && (t += (h ?? "") + r[l + 1]), this._$AH[l] = h;
     }
     s && !a && this.j(t);
   }
@@ -463,7 +463,7 @@ class X {
     t === _ ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, t ?? "");
   }
 }
-class Kt extends X {
+class Kt extends et {
   constructor() {
     super(...arguments), this.type = 3;
   }
@@ -471,7 +471,7 @@ class Kt extends X {
     this.element[this.name] = t === _ ? void 0 : t;
   }
 }
-class te extends X {
+class te extends et {
   constructor() {
     super(...arguments), this.type = 4;
   }
@@ -479,12 +479,12 @@ class te extends X {
     this.element.toggleAttribute(this.name, !!t && t !== _);
   }
 }
-class ee extends X {
+class ee extends et {
   constructor(t, e, i, a, r) {
     super(t, e, i, a, r), this.type = 5;
   }
   _$AI(t, e = this) {
-    if ((t = V(this, t, e, 0) ?? _) === P) return;
+    if ((t = H(this, t, e, 0) ?? _) === T) return;
     const i = this._$AH, a = t === _ && i !== _ || t.capture !== i.capture || t.once !== i.once || t.passive !== i.passive, r = t !== _ && (i === _ || a);
     a && this.element.removeEventListener(this.name, this, i), r && this.element.addEventListener(this.name, this, t), this._$AH = t;
   }
@@ -501,27 +501,27 @@ class ie {
     return this._$AM._$AU;
   }
   _$AI(t) {
-    V(this, t);
+    H(this, t);
   }
 }
-const it = F.litHtmlPolyfillSupport;
-it == null || it(B, R), (F.litHtmlVersions ?? (F.litHtmlVersions = [])).push("3.3.2");
-const ae = (h, t, e) => {
+const ot = j.litHtmlPolyfillSupport;
+ot == null || ot(q, W), (j.litHtmlVersions ?? (j.litHtmlVersions = [])).push("3.3.2");
+const ae = (d, t, e) => {
   const i = (e == null ? void 0 : e.renderBefore) ?? t;
   let a = i._$litPart$;
   if (a === void 0) {
     const r = (e == null ? void 0 : e.renderBefore) ?? null;
-    i._$litPart$ = a = new R(t.insertBefore(G(), r), r, void 0, e ?? {});
+    i._$litPart$ = a = new W(t.insertBefore(R(), r), r, void 0, e ?? {});
   }
-  return a._$AI(h), a;
+  return a._$AI(d), a;
 };
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const z = globalThis;
-class I extends L {
+const M = globalThis;
+class P extends V {
   constructor() {
     super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
   }
@@ -543,22 +543,21 @@ class I extends L {
     super.disconnectedCallback(), (t = this._$Do) == null || t.setConnected(!1);
   }
   render() {
-    return P;
+    return T;
   }
 }
-var Ct;
-I._$litElement$ = !0, I.finalized = !0, (Ct = z.litElementHydrateSupport) == null || Ct.call(z, { LitElement: I });
-const at = z.litElementPolyfillSupport;
-at == null || at({ LitElement: I });
-(z.litElementVersions ?? (z.litElementVersions = [])).push("4.2.2");
-const O = "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z", se = "M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z", re = "M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z", ne = "M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z", oe = ["#f44336", "#ff9800", "#ffd23f", "#7cb342", "#4caf50"], wt = [
+var zt;
+P._$litElement$ = !0, P.finalized = !0, (zt = M.litElementHydrateSupport) == null || zt.call(M, { LitElement: P });
+const lt = M.litElementPolyfillSupport;
+lt == null || lt({ LitElement: P });
+(M.litElementVersions ?? (M.litElementVersions = [])).push("4.2.2");
+const G = "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z", se = "M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z", re = "M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z", ne = "M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z", oe = ["#f44336", "#ff9800", "#ffd23f", "#7cb342", "#4caf50"], Et = [
   { value: "bar", label: "Bar (default)" },
   { value: "gradient_track", label: "Gradient track" },
   { value: "glass", label: "Glass (glossy)" },
   { value: "stripes", label: "Stripes (animated)" },
   { value: "segments", label: "Segments (LED)" },
   { value: "dots", label: "Dots" },
-  { value: "chevrons", label: "Chevrons" },
   { value: "equalizer", label: "Equalizer (VU meter)" },
   { value: "battery", label: "Battery" },
   { value: "thermometer", label: "Thermometer" },
@@ -567,27 +566,27 @@ const O = "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,1
   { value: "needle", label: "Needle scale" },
   { value: "cursor", label: "Cursor" },
   { value: "sparkline", label: "Sparkline (24h)" }
-], le = /* @__PURE__ */ new Set(["sparkline", "ticks", "equalizer"]), kt = [
+], le = /* @__PURE__ */ new Set(["sparkline", "ticks", "equalizer"]), St = [
   { value: "circle", label: "Circle ●" },
   { value: "line", label: "Line |" },
   { value: "arrow", label: "Arrow ▾" },
   { value: "diamond", label: "Diamond ◆" },
   { value: "bar", label: "Bar ▐" }
 ];
-function st(h, t) {
-  if (t = Math.max(0, Math.min(1, t)), !h || h.length === 0) return "var(--primary-color, #03a9f4)";
-  if (h.length === 1) return h[0];
-  const e = t * (h.length - 1), i = Math.min(h.length - 2, Math.floor(e)), a = e - i, r = h[i], s = h[i + 1];
+function At(d, t) {
+  if (t = Math.max(0, Math.min(1, t)), !d || d.length === 0) return "var(--primary-color, #03a9f4)";
+  if (d.length === 1) return d[0];
+  const e = t * (d.length - 1), i = Math.min(d.length - 2, Math.floor(e)), a = e - i, r = d[i], s = d[i + 1];
   if (typeof r != "string" || typeof s != "string" || r[0] !== "#" || s[0] !== "#") return r;
   const o = (n) => {
     let g = n.slice(1);
     g.length === 3 && (g = g.split("").map((v) => v + v).join(""));
     const u = parseInt(g.slice(0, 6), 16);
     return [u >> 16 & 255, u >> 8 & 255, u & 255];
-  }, l = o(r), c = o(s), d = (n) => Math.round(l[n] + (c[n] - l[n]) * a);
-  return `rgb(${d(0)},${d(1)},${d(2)})`;
+  }, l = o(r), h = o(s), c = (n) => Math.round(l[n] + (h[n] - l[n]) * a);
+  return `rgb(${c(0)},${c(1)},${c(2)})`;
 }
-class ce extends I {
+class ce extends P {
   static get properties() {
     return {
       hass: { attribute: !1 },
@@ -619,23 +618,23 @@ class ce extends I {
           "GET",
           `history/period/${r}?end_time=${a}&filter_entity_id=${s}&minimal_response`
         ), l = { ...this._history };
-        Array.isArray(o) && o.forEach((c) => {
-          if (c && c.length > 0) {
-            const d = c[0].entity_id;
-            let n = parseFloat(c[0].state), g = n;
-            if (c.forEach((u) => {
+        Array.isArray(o) && o.forEach((h) => {
+          if (h && h.length > 0) {
+            const c = h[0].entity_id;
+            let n = parseFloat(h[0].state), g = n;
+            if (h.forEach((u) => {
               const v = parseFloat(u.state);
               isNaN(v) || (v < n && (n = v), v > g && (g = v));
             }), !isNaN(n) && !isNaN(g)) {
-              const u = c.map((b) => parseFloat(b.state)).filter((b) => !isNaN(b));
+              const u = h.map((b) => parseFloat(b.state)).filter((b) => !isNaN(b));
               let v = u;
-              const m = 60;
-              if (u.length > m) {
+              const f = 60;
+              if (u.length > f) {
                 v = [];
-                const b = u.length / m;
-                for (let x = 0; x < m; x++) v.push(u[Math.floor(x * b)]);
+                const b = u.length / f;
+                for (let y = 0; y < f; y++) v.push(u[Math.floor(y * b)]);
               }
-              l[d] = { min: n, max: g, series: v }, this._historyFetched.add(d);
+              l[c] = { min: n, max: g, series: v }, this._historyFetched.add(c);
             }
           }
         }), this._history = l;
@@ -647,7 +646,7 @@ class ce extends I {
     }
   }
   static get styles() {
-    return At`
+    return Nt`
       :host {
         display: block;
       }
@@ -739,11 +738,9 @@ class ce extends I {
       .gauge-container.pulsing .cursor-thumb,
       .gauge-container.pulsing .seg,
       .gauge-container.pulsing .dot,
-      .gauge-container.pulsing .chev,
       .gauge-container.pulsing .eq-bar,
       .gauge-container.pulsing .bat-fill,
       .gauge-container.pulsing .thermo-fill,
-      .gauge-container.pulsing .thermo-bulb,
       .gauge-container.pulsing .needle-pointer,
       .gauge-container.pulsing .wave-anim,
       .gauge-container.pulsing .tick-target {
@@ -1068,12 +1065,10 @@ class ce extends I {
         .gauge-container.pulsing .cursor-thumb,
         .gauge-container.pulsing .seg,
         .gauge-container.pulsing .dot,
-        .gauge-container.pulsing .chev,
-        .gauge-container.pulsing .eq-bar,
+          .gauge-container.pulsing .eq-bar,
         .gauge-container.pulsing .bat-fill,
         .gauge-container.pulsing .thermo-fill,
-        .gauge-container.pulsing .thermo-bulb,
-        .gauge-container.pulsing .needle-pointer,
+          .gauge-container.pulsing .needle-pointer,
         .gauge-container.pulsing .tick-target { animation: none !important; }
         .wave-anim { animation: none !important; }
         .bar-fill.stripes-fill::after { animation: none !important; }
@@ -1125,6 +1120,10 @@ class ce extends I {
       .cursor-wrap { position: relative; height: 22px; margin-top: 16px; }
       .cursor-track { position: absolute; top: 9px; left: 0; right: 0; height: 4px; border-radius: 2px; opacity: 0.32; }
       .cursor-fill { position: absolute; top: 9px; left: 0; height: 4px; border-radius: 2px; }
+      /* Zero marker sits on the thin rail rather than spanning the whole row. */
+      .cursor-wrap .zero-marker { top: 5px; bottom: auto; height: 12px; }
+      .cursor-wrap.vertical .zero-marker { left: 50%; right: auto; width: 12px; transform: translateX(-50%); }
+      .needle-wrap .zero-marker { top: auto; bottom: -3px; height: calc(var(--lgc-bar-thickness, 12px) + 6px); }
       .cursor-thumb {
         position: absolute; top: 2px; width: 18px; height: 18px; border-radius: 50%;
         transform: translateX(-50%);
@@ -1261,29 +1260,6 @@ class ce extends I {
         margin: 0 auto;
       }
 
-      /* ---- Gauge style: chevrons ---- */
-      .chev-track {
-        display: flex;
-        gap: var(--lgc-segment-gap, 3px);
-        width: 100%;
-        height: var(--lgc-bar-thickness, 12px);
-      }
-      .chev {
-        flex: 1 1 0;
-        background: rgba(127, 127, 127, 0.18);
-        clip-path: polygon(0 0, 70% 0, 100% 50%, 70% 100%, 0 100%);
-        transition: background 0.3s ease, box-shadow 0.3s ease;
-      }
-      .chev-track.vertical {
-        flex-direction: column-reverse;
-        width: var(--lgc-vertical-width, 16px);
-        height: var(--lgc-vertical-height, 120px);
-        margin: 0 auto;
-      }
-      .chev-track.vertical .chev {
-        clip-path: polygon(0 100%, 0 30%, 50% 0, 100% 30%, 100% 100%);
-      }
-
       /* ---- Gauge style: equalizer (VU meter) ---- */
       .eq-track {
         display: flex;
@@ -1300,36 +1276,43 @@ class ce extends I {
       }
 
       /* ---- Gauge style: battery ---- */
-      .bat-wrap { display: flex; align-items: center; gap: 2px; width: 100%; }
+      .bat-wrap { display: flex; align-items: center; width: 100%; }
       .bat-body {
         position: relative;
         flex: 1 1 auto;
         height: var(--lgc-battery-size, 22px);
-        border: 2px solid rgba(127, 127, 127, 0.55);
-        border-radius: 5px;
-        overflow: hidden;
+        border: 2.5px solid var(--lgc-battery-shell, rgba(127, 127, 127, 0.75));
+        border-radius: 6px;
+        padding: 2.5px;
         box-sizing: border-box;
+      }
+      .bat-cells {
+        display: flex;
+        gap: 2px;
+        width: 100%;
+        height: 100%;
+      }
+      .bat-cell {
+        flex: 1 1 0;
+        border-radius: 1.5px;
+        background: rgba(127, 127, 127, 0.16);
+        transition: background 0.5s ease;
       }
       .bat-cap {
         flex: 0 0 auto;
-        width: 4px;
-        height: 40%;
-        border-radius: 0 2px 2px 0;
-        background: rgba(127, 127, 127, 0.55);
-      }
-      .bat-fill {
-        position: absolute;
-        left: 2px; top: 2px; bottom: 2px;
-        border-radius: 2px;
-        transition: width 1s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s ease;
+        width: 3.5px;
+        height: 42%;
+        margin-left: 1.5px;
+        border-radius: 0 2.5px 2.5px 0;
+        background: var(--lgc-battery-shell, rgba(127, 127, 127, 0.75));
       }
       .bat-value {
         position: absolute;
         inset: 0;
         display: flex; align-items: center; justify-content: center;
-        font-size: 11px; font-weight: 600;
-        color: #fff;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+        font-size: 11px; font-weight: 700;
+        color: var(--primary-text-color);
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55), 0 0 3px rgba(0, 0, 0, 0.4);
         font-feature-settings: "tnum";
         pointer-events: none;
       }
@@ -1343,60 +1326,59 @@ class ce extends I {
         width: var(--lgc-vertical-width, 16px);
         height: var(--lgc-vertical-height, 120px);
       }
+      .bat-wrap.vertical .bat-cells { flex-direction: column-reverse; }
       .bat-wrap.vertical .bat-cap {
-        width: 40%;
-        height: 4px;
-        border-radius: 2px 2px 0 0;
-      }
-      .bat-wrap.vertical .bat-fill {
-        left: 2px; right: 2px; bottom: 2px; top: auto;
-        transition: height 1s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s ease;
+        width: 42%;
+        height: 3.5px;
+        margin: 0 0 1.5px 0;
+        border-radius: 2.5px 2.5px 0 0;
       }
 
-      /* ---- Gauge style: thermometer ---- */
+      /* ---- Gauge style: thermometer (graduated tube) ---- */
       .thermo-wrap { display: flex; align-items: center; width: 100%; }
-      .thermo-bulb {
-        flex: 0 0 auto;
-        width: var(--lgc-thermo-bulb, 18px);
-        height: var(--lgc-thermo-bulb, 18px);
-        border-radius: 50%;
-        box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
-        z-index: 1;
-      }
       .thermo-tube {
         position: relative;
         flex: 1 1 auto;
-        height: var(--lgc-bar-thickness, 12px);
-        margin-left: -6px;
-        border-radius: 0 999px 999px 0;
+        height: var(--lgc-thermo-tube, 12px);
+        border-radius: 999px;
         background: rgba(127, 127, 127, 0.18);
+        border: 2px solid rgba(127, 127, 127, 0.45);
+        box-sizing: border-box;
         overflow: hidden;
-        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
       }
       .thermo-fill {
         position: absolute;
-        left: 0; top: 0; bottom: 0;
-        border-radius: 0 999px 999px 0;
-        transition: width 1s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s ease;
+        top: 0; bottom: 0;
+        border-radius: 999px;
+        transition: width 1s cubic-bezier(0.2, 0.8, 0.2, 1), left 1s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s ease;
       }
-      .thermo-grad {
+      .thermo-tick {
         position: absolute;
-        inset: 0;
-        background-image: repeating-linear-gradient(90deg, rgba(127, 127, 127, 0.5) 0 1px, rgba(0, 0, 0, 0) 1px 10%);
+        top: 0;
+        width: 1px; height: 45%;
+        background: var(--secondary-text-color, rgba(127, 127, 127, 0.8));
+        opacity: 0.55;
         pointer-events: none;
+      }
+      .thermo-scale {
+        flex: 0 0 auto;
+        margin-left: 5px;
+        font-size: 9.5px;
+        color: var(--secondary-text-color);
+        font-feature-settings: "tnum";
       }
       .thermo-value {
         position: absolute;
         inset: 0;
         display: flex; align-items: center; justify-content: center;
-        font-size: 10.5px; font-weight: 600;
+        font-size: 10.5px; font-weight: 700;
         color: var(--primary-text-color);
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
         font-feature-settings: "tnum";
         pointer-events: none;
       }
       .thermo-wrap.vertical {
-        flex-direction: column-reverse;
+        flex-direction: column;
         justify-content: flex-start;
         width: auto;
       }
@@ -1404,17 +1386,14 @@ class ce extends I {
         flex: 0 0 auto;
         width: var(--lgc-vertical-width, 16px);
         height: var(--lgc-vertical-height, 120px);
-        margin-left: 0;
-        margin-bottom: -6px;
-        border-radius: 999px 999px 0 0;
       }
       .thermo-wrap.vertical .thermo-fill {
-        left: 0; right: 0; bottom: 0; top: auto;
-        border-radius: 999px 999px 0 0;
-        transition: height 1s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s ease;
+        left: 0; right: 0; top: auto;
+        transition: height 1s cubic-bezier(0.2, 0.8, 0.2, 1), bottom 1s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s ease;
       }
-      .thermo-wrap.vertical .thermo-grad {
-        background-image: repeating-linear-gradient(0deg, rgba(127, 127, 127, 0.5) 0 1px, rgba(0, 0, 0, 0) 1px 10%);
+      .thermo-wrap.vertical .thermo-tick {
+        top: auto; left: 0;
+        width: 45%; height: 1px;
       }
 
       /* ---- Gauge style: needle scale ---- */
@@ -1500,6 +1479,8 @@ class ce extends I {
       }
       .wave-wrap svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
       .wave-anim { animation: lgc-wave-h 2.6s linear infinite; }
+      .wave-back { opacity: 0.42; animation-duration: 4.1s; animation-direction: reverse; }
+      .wave-front { opacity: 0.92; }
       .wave-wrap.vertical .wave-anim { animation-name: lgc-wave-v; }
       @keyframes lgc-wave-h {
         from { transform: translateY(0); }
@@ -1509,6 +1490,21 @@ class ce extends I {
         from { transform: translateX(0); }
         to   { transform: translateX(50px); }
       }
+      /* ---- center_zero: faint line marking the zero point ---- */
+      .zero-marker {
+        position: absolute;
+        background: var(--primary-text-color);
+        opacity: 0.35;
+        pointer-events: none;
+        z-index: 2;
+      }
+      .entities-wrapper.horizontal .zero-marker {
+        top: 0; bottom: 0; width: 1px;
+      }
+      .entities-wrapper.vertical .zero-marker {
+        left: 0; right: 0; height: 1px;
+      }
+
       .wave-value {
         position: absolute;
         inset: 0;
@@ -1524,22 +1520,22 @@ class ce extends I {
   render() {
     if (!this._config || !this.hass)
       return p``;
-    const t = this._config.title, e = this._config.layout || "horizontal", i = this._config.transparent_card_background || this._config.transparent || !1, a = this._config.bar_thickness || 12, r = this._config.vertical_height || 120, s = this._config.vertical_width || 16, o = this._config.card_background, l = this._config.compact_mode || !1, c = this._config.entities_gap, d = this._config.wave_height, n = this._config.equalizer_height, g = this._config.battery_size;
+    const t = this._config.title, e = this._config.layout || "horizontal", i = this._config.transparent_card_background || this._config.transparent || !1, a = this._config.bar_thickness || 12, r = this._config.vertical_height || 120, s = this._config.vertical_width || 16, o = this._config.card_background, l = this._config.compact_mode || !1, h = this._config.entities_gap, c = this._config.wave_height, n = this._config.equalizer_height, g = this._config.battery_size;
     let u = `
       --lgc-bar-thickness: ${a}px;
       --lgc-vertical-height: ${r}px;
       --lgc-vertical-width: ${s}px;
-      ${c !== void 0 ? `--lgc-entities-gap: ${c}px;` : ""}
-      ${d !== void 0 ? `--lgc-wave-height: ${d}px;` : ""}
+      ${h !== void 0 ? `--lgc-entities-gap: ${h}px;` : ""}
+      ${c !== void 0 ? `--lgc-wave-height: ${c}px;` : ""}
       ${n !== void 0 ? `--lgc-equalizer-height: ${n}px;` : ""}
       ${g !== void 0 ? `--lgc-battery-size: ${g}px;` : ""}
     `;
     i ? u += "background: none !important; background-color: transparent !important; border: none !important; box-shadow: none !important;" : o && (u += `--lgc-card-background: ${o};`);
-    const v = l ? "compact-mode" : "", m = c !== void 0;
+    const v = l ? "compact-mode" : "", f = h !== void 0;
     return p`
       <ha-card class="${v}" style="${u}">
         ${t ? p`<div class="card-header">${t}</div>` : ""}
-        <div class="entities-wrapper ${e} ${m ? "has-custom-gap" : ""}">
+        <div class="entities-wrapper ${e} ${f ? "has-custom-gap" : ""}">
           ${this._config.entities.map((b) => this.renderEntity(b, e))}
         </div>
       </ha-card>
@@ -1555,62 +1551,62 @@ class ce extends I {
             <span class="entity-state">N/A</span>
           </div>
         </div>`;
-    const s = i.name || r.attributes.friendly_name || a, o = parseFloat(r.state), l = i.unit || r.attributes.unit_of_measurement || "", c = i.icon || r.attributes.icon, d = i.min ?? this._config.min ?? 0, n = i.max ?? this._config.max ?? 100;
+    const s = i.name || r.attributes.friendly_name || a, o = parseFloat(r.state), l = i.unit || r.attributes.unit_of_measurement || "", h = i.icon || r.attributes.icon, c = i.min ?? this._config.min ?? 0, n = i.max ?? this._config.max ?? 100;
     i.effect || this._config.effect;
     let g = 0, u = o;
-    isNaN(o) || (u = Math.max(d, Math.min(o, n)), n !== d ? g = (u - d) / (n - d) * 100 : g = 0, g = Math.max(0, Math.min(100, g)));
-    const v = i.center_zero ?? this._config.center_zero ?? !1, m = this._computeColor(o, i, e, v);
+    isNaN(o) || (u = Math.max(c, Math.min(o, n)), n !== c ? g = (u - c) / (n - c) * 100 : g = 0, g = Math.max(0, Math.min(100, g)));
+    const v = i.center_zero ?? this._config.center_zero ?? !1, f = this._computeColor(o, i, e, v);
     let b = !1;
-    const x = i.pulse || this._config.pulse;
-    if (x && typeof x == "object") {
-      const f = parseFloat(x.value), y = x.condition || "above";
-      isNaN(f) || (y === "above" && o >= f || y === "below" && o <= f) && (b = !0);
+    const y = i.pulse || this._config.pulse;
+    if (y && typeof y == "object") {
+      const m = parseFloat(y.value), $ = y.condition || "above";
+      isNaN(m) || ($ === "above" && o >= m || $ === "below" && o <= m) && (b = !0);
     }
     if (!b) {
-      const f = this._getSeverityMatch(o, i.severity || this._config.severity);
-      f && f.pulse && (b = !0);
+      const m = this._getSeverityMatch(o, i.severity || this._config.severity);
+      m && m.pulse && (b = !0);
     }
-    let $ = "";
-    if (v && !isNaN(o) && d < 0 && n > 0) {
-      const f = (0 - d) / (n - d) * 100, y = (u - d) / (n - d) * 100;
-      e === "vertical" ? o >= 0 ? $ = `bottom: ${f}%; height: ${y - f}%; background: ${m}; box-shadow: 0 0 10px ${m};` : $ = `bottom: ${y}%; height: ${f - y}%; background: ${m}; box-shadow: 0 0 10px ${m};` : o >= 0 ? $ = `left: ${f}%; width: ${y - f}%; background: ${m}; box-shadow: 0 0 10px ${m};` : $ = `left: ${y}%; width: ${f - y}%; background: ${m}; box-shadow: 0 0 10px ${m};`;
-    } else e === "vertical" ? $ = `height: ${g}%; background: ${m}; box-shadow: 0 0 10px ${m};` : $ = `width: ${g}%; background: ${m}; box-shadow: 0 0 10px ${m};`;
-    let A = p``;
+    let x = "";
+    if (v && !isNaN(o) && c < 0 && n > 0) {
+      const m = (0 - c) / (n - c) * 100, $ = (u - c) / (n - c) * 100;
+      e === "vertical" ? o >= 0 ? x = `bottom: ${m}%; height: ${$ - m}%; background: ${f}; box-shadow: 0 0 10px ${f};` : x = `bottom: ${$}%; height: ${m - $}%; background: ${f}; box-shadow: 0 0 10px ${f};` : o >= 0 ? x = `left: ${m}%; width: ${$ - m}%; background: ${f}; box-shadow: 0 0 10px ${f};` : x = `left: ${$}%; width: ${m - $}%; background: ${f}; box-shadow: 0 0 10px ${f};`;
+    } else e === "vertical" ? x = `height: ${g}%; background: ${f}; box-shadow: 0 0 10px ${f};` : x = `width: ${g}%; background: ${f}; box-shadow: 0 0 10px ${f};`;
+    let k = p``;
     const w = i.target_entity !== void 0 && i.target_entity !== "" ? i.target_entity : i.target;
     if (w !== void 0 && w !== "") {
-      let f = w;
-      if (typeof f == "string" && isNaN(parseFloat(f))) {
-        const y = this.hass.states[f];
-        y && (f = parseFloat(y.state));
+      let m = w;
+      if (typeof m == "string" && isNaN(parseFloat(m))) {
+        const $ = this.hass.states[m];
+        $ && (m = parseFloat($.state));
       }
-      if (f = parseFloat(f), !isNaN(f) && n !== d) {
-        const D = (Math.max(d, Math.min(f, n)) - d) / (n - d) * 100, J = e === "vertical" ? `bottom: ${D}%` : `left: ${D}%`;
-        A = p`<div class="target-marker" style="${J}"></div>`;
+      if (m = parseFloat(m), !isNaN(m) && n !== c) {
+        const Q = (Math.max(c, Math.min(m, n)) - c) / (n - c) * 100, it = e === "vertical" ? `bottom: ${Q}%` : `left: ${Q}%`;
+        k = p`<div class="target-marker" style="${it}"></div>`;
       }
     }
-    let k = p``;
+    let S = p``;
     if (this._config.show_min_max && this._history[a]) {
-      const f = this._history[a].min, y = this._history[a].max;
-      if (f !== void 0 && y !== void 0 && n !== d) {
-        const D = Math.max(d, Math.min(f, n)), J = Math.max(d, Math.min(y, n)), Q = (D - d) / (n - d) * 100, dt = (J - d) / (n - d) * 100 - Q;
-        let K = "";
-        e === "vertical" ? K = `bottom: ${Q}%; height: ${dt}%;` : K = `left: ${Q}%; width: ${dt}%;`, k = p`<div class="min-max-range" style="${K}"></div>`;
+      const m = this._history[a].min, $ = this._history[a].max;
+      if (m !== void 0 && $ !== void 0 && n !== c) {
+        const Q = Math.max(c, Math.min(m, n)), it = Math.max(c, Math.min($, n)), at = (Q - c) / (n - c) * 100, ut = (it - c) / (n - c) * 100 - at;
+        let st = "";
+        e === "vertical" ? st = `bottom: ${at}%; height: ${ut}%;` : st = `left: ${at}%; width: ${ut}%;`, S = p`<div class="min-max-range" style="${st}"></div>`;
       }
     }
-    const T = i.compact_mode || this._config.compact_mode || !1, Z = i.show_value_in_bar || this._config.show_value_in_bar || !1, It = i.disable_shimmer || this._config.disable_shimmer || !1, ct = i.hide_icon || this._config.hide_icon || !1, Pt = i.hide_zero_bar || this._config.hide_zero_bar || !1, Vt = !isNaN(o) && o <= d, Y = isNaN(o) ? r.state : `${o.toFixed(i.value_precision ?? this._config.value_precision ?? 1)} ${l}`, Tt = this._gaugeStyle(i), Ht = Math.max(3, Math.min(120, parseInt(i.segment_count ?? this._config.segment_count ?? 20, 10) || 20)), ht = (i.tap_action || this._config.tap_action || { action: "more-info" }).action !== "none", Ot = this._renderVisual(Tt, {
+    const X = i.compact_mode || this._config.compact_mode || !1, I = i.show_value_in_bar || this._config.show_value_in_bar || !1, Z = i.disable_shimmer || this._config.disable_shimmer || !1, Y = i.hide_icon || this._config.hide_icon || !1, O = i.hide_zero_bar || this._config.hide_zero_bar || !1, F = !isNaN(o) && o <= c, L = isNaN(o) ? r.state : `${o.toFixed(i.value_precision ?? this._config.value_precision ?? 1)} ${l}`, J = this._gaugeStyle(i), Ht = Math.max(3, Math.min(120, parseInt(i.segment_count ?? this._config.segment_count ?? 20, 10) || 20)), gt = (i.tap_action || this._config.tap_action || { action: "more-info" }).action !== "none", Ot = this._renderVisual(J, {
       layout: e,
       percent: g,
-      color: m,
-      barStyle: $,
-      targetMarker: A,
-      minMaxMarker: k,
-      displayValue: Y,
-      showValueInBar: Z,
-      disableShimmer: It,
-      hideZeroBar: Pt,
-      isZero: Vt,
+      color: f,
+      barStyle: x,
+      targetMarker: k,
+      minMaxMarker: S,
+      displayValue: L,
+      showValueInBar: I,
+      disableShimmer: Z,
+      hideZeroBar: O,
+      isZero: F,
       value: o,
-      min: d,
+      min: c,
       max: n,
       clampedValue: u,
       entityId: a,
@@ -1618,23 +1614,23 @@ class ce extends I {
       segmentCount: Ht
     });
     return p`
-      <div class="gauge-container ${b ? "pulsing" : ""} ${T ? "compact" : ""} ${Z ? "value-in-bar" : ""}"
-           role="${ht ? "button" : "img"}"
-           tabindex="${ht ? "0" : "-1"}"
-           aria-label="${s}: ${Y}"
-           @keydown=${(f) => this._handleKey(f, i, a)}
-           @click=${(f) => this._handleAction(f, i, a)}>
-        ${T ? p`
+      <div class="gauge-container ${b ? "pulsing" : ""} ${X ? "compact" : ""} ${I ? "value-in-bar" : ""}"
+           role="${gt ? "button" : "img"}"
+           tabindex="${gt ? "0" : "-1"}"
+           aria-label="${s}: ${L}"
+           @keydown=${(m) => this._handleKey(m, i, a)}
+           @click=${(m) => this._handleAction(m, i, a)}>
+        ${X ? p`
         <div class="entity-row compact">
-          ${c && !ct ? p`<ha-icon class="entity-icon" .icon="${c}"></ha-icon>` : ""}
+          ${h && !Y ? p`<ha-icon class="entity-icon" .icon="${h}"></ha-icon>` : ""}
         </div>
         ` : p`
         <div class="entity-row">
           <div class="entity-info-group">
-            ${c && !ct ? p`<ha-icon class="entity-icon" .icon="${c}"></ha-icon>` : ""}
+            ${h && !Y ? p`<ha-icon class="entity-icon" .icon="${h}"></ha-icon>` : ""}
             <span class="entity-name" title="${s}">${s}</span>
           </div>
-          ${Z ? "" : p`<span class="entity-state">${Y}</span>`}
+          ${I ? "" : p`<span class="entity-state">${L}</span>`}
         </div>
         `}
         ${Ot}
@@ -1659,7 +1655,7 @@ class ce extends I {
   // Solid colour for thumbs / strokes: if the computed colour is a gradient
   // string, sample the palette at the current fraction instead.
   _solidColor(t, e) {
-    return typeof t == "string" && t.indexOf("gradient") === -1 ? t : st(this._gradientColors(), e);
+    return typeof t == "string" && t.indexOf("gradient") === -1 ? t : At(this._gradientColors(), e);
   }
   _resolveTarget(t) {
     let e = t.target_entity !== void 0 && t.target_entity !== "" ? t.target_entity : t.target;
@@ -1686,8 +1682,6 @@ class ce extends I {
         return this._visualSegments(e);
       case "dots":
         return this._visualDots(e);
-      case "chevrons":
-        return this._visualChevrons(e);
       case "equalizer":
         return this._visualEqualizer(e);
       case "battery":
@@ -1709,91 +1703,96 @@ class ce extends I {
     }
   }
   _visualBar(t) {
-    const { minMaxMarker: e, disableShimmer: i, hideZeroBar: a, isZero: r, barStyle: s, targetMarker: o, showValueInBar: l, displayValue: c } = t;
+    const { layout: e, minMaxMarker: i, disableShimmer: a, hideZeroBar: r, isZero: s, barStyle: o, targetMarker: l, showValueInBar: h, displayValue: c } = t;
     return p`
       <div class="bar-bg">
-        ${e}
-        <div class="bar-fill ${i ? "no-shimmer" : ""} ${a && r ? "hide-at-zero" : ""}" style="${s}"></div>
-        ${o}
-        ${l ? p`<span class="bar-value">${c}</span>` : ""}
+        ${i}
+        <div class="bar-fill ${a ? "no-shimmer" : ""} ${r && s ? "hide-at-zero" : ""}" style="${o}"></div>
+        ${this._zeroMarker(this._fillSpan(t), e)}
+        ${l}
+        ${h ? p`<span class="bar-value">${c}</span>` : ""}
       </div>`;
   }
   _visualGradientTrack(t) {
-    const { layout: e, percent: i, targetMarker: a, minMaxMarker: r, showValueInBar: s, displayValue: o } = t, l = this._gradientCssFor(e), c = Math.max(1e-4, i), d = e === "vertical" ? `height: ${i}%; background-image: ${l}; background-size: 100% ${1e4 / c}%; background-repeat: no-repeat; background-position: bottom; box-shadow: none;` : `width: ${i}%; background-image: ${l}; background-size: ${1e4 / c}% 100%; background-repeat: no-repeat; box-shadow: none;`;
+    const { layout: e, targetMarker: i, minMaxMarker: a, showValueInBar: r, displayValue: s } = t, o = this._gradientCssFor(e), l = this._fillSpan(t), h = Math.max(1e-4, l.size), c = 100 - h, n = e === "vertical" ? 100 - l.end : l.start, g = c > 1e-4 ? n / c * 100 : 0, u = e === "vertical" ? `${this._spanStyle(l, e)} background-image: ${o}; background-size: 100% ${1e4 / h}%; background-repeat: no-repeat; background-position: 0 ${g}%; box-shadow: none;` : `${this._spanStyle(l, e)} background-image: ${o}; background-size: ${1e4 / h}% 100%; background-repeat: no-repeat; background-position: ${g}% 0; box-shadow: none;`;
     return p`
       <div class="bar-bg grad-track">
-        <div class="grad-track-bg" style="background-image: ${l};"></div>
-        ${r}
-        <div class="bar-fill no-shimmer" style="${d}"></div>
+        <div class="grad-track-bg" style="background-image: ${o};"></div>
         ${a}
-        ${s ? p`<span class="bar-value">${o}</span>` : ""}
+        <div class="bar-fill no-shimmer" style="${u}"></div>
+        ${this._zeroMarker(l, e)}
+        ${i}
+        ${r ? p`<span class="bar-value">${s}</span>` : ""}
       </div>`;
   }
   _visualSegments(t) {
-    const { layout: e, percent: i, segmentCount: a, conf: r, color: s } = t, o = this._gradientColors(), l = !!(r.color || r.severity || this._config.color || this._config.severity), c = Math.round(i / 100 * a), d = [];
-    for (let n = 0; n < a; n++) {
-      const g = n < c, u = l ? s : st(o, (n + 0.5) / a);
-      d.push(p`<div class="seg" style="${g ? `background: ${u}; box-shadow: 0 0 6px ${u}66;` : ""}"></div>`);
+    const { layout: e, segmentCount: i, conf: a, color: r } = t, s = this._fillSpan(t), o = [];
+    for (let l = 0; l < i; l++) {
+      const h = this._elementCoverage(s, l, i) >= 0.5, c = this._elementColor(a, r, l, i);
+      o.push(p`<div class="seg" style="${h ? `background: ${c}; box-shadow: 0 0 6px ${c}66;` : ""}"></div>`);
     }
-    return p`<div class="seg-track ${e === "vertical" ? "vertical" : ""}">${d}</div>`;
+    return p`<div class="seg-track ${e === "vertical" ? "vertical" : ""}">${o}</div>`;
   }
   _visualTicks(t) {
-    const { percent: e, color: i, min: a, max: r, conf: s, showValueInBar: o, displayValue: l } = t, c = Math.max(2, Math.min(21, parseInt(s.tick_count ?? this._config.tick_count ?? 5, 10) || 5)), d = [];
-    for (let v = 0; v < c; v++) d.push(v / (c - 1) * 100);
+    const { percent: e, color: i, min: a, max: r, conf: s, showValueInBar: o, displayValue: l } = t, h = Math.max(2, Math.min(21, parseInt(s.tick_count ?? this._config.tick_count ?? 5, 10) || 5)), c = [];
+    for (let f = 0; f < h; f++) c.push(f / (h - 1) * 100);
     const n = this._resolveTarget(s);
     let g = p``;
     if (n !== null && r !== a) {
-      const v = Math.max(0, Math.min(100, (Math.max(a, Math.min(n, r)) - a) / (r - a) * 100));
-      g = p`<div class="tick-target" style="left: ${v}%">▾ ${n}</div>`;
+      const f = Math.max(0, Math.min(100, (Math.max(a, Math.min(n, r)) - a) / (r - a) * 100));
+      g = p`<div class="tick-target" style="left: ${f}%">▾ ${n}</div>`;
     }
-    const u = o ? p`<div class="ticks-value" style="left: ${Math.max(0, Math.min(100, e))}%">${l}</div>` : p``;
+    const u = o ? p`<div class="ticks-value" style="left: ${Math.max(0, Math.min(100, e))}%">${l}</div>` : p``, v = this._fillSpan(t);
     return p`
       <div class="ticks-wrap">
         ${g}
         ${u}
         <div class="bar-bg ticks-bar">
-          <div class="bar-fill no-shimmer" style="width: ${e}%; background: ${i}; box-shadow: none;"></div>
+          <div class="bar-fill no-shimmer" style="${this._spanStyle(v, "horizontal")} background: ${i}; box-shadow: none;"></div>
+          ${this._zeroMarker(v, "horizontal")}
         </div>
         <div class="ticks">
-          ${d.map((v) => p`
-            <div class="tick" style="left: ${v}%">
+          ${c.map((f) => p`
+            <div class="tick" style="left: ${f}%">
               <div class="tick-mark"></div>
-              <span class="tick-label">${Math.round(a + (r - a) * v / 100)}</span>
+              <span class="tick-label">${Math.round(a + (r - a) * f / 100)}</span>
             </div>`)}
         </div>
       </div>`;
   }
   _visualCursor(t) {
-    const { layout: e, percent: i, color: a, displayValue: r, conf: s } = t, o = this._gradientCssFor(e), l = this._solidColor(a, i / 100), c = s.cursor_shape || this._config.cursor_shape || "circle";
+    const { layout: e, percent: i, color: a, displayValue: r, conf: s } = t, o = this._gradientCssFor(e), l = this._solidColor(a, i / 100), h = s.cursor_shape || this._config.cursor_shape || "circle", c = this._fillSpan(t);
     return e === "vertical" ? p`
         <div class="cursor-wrap vertical">
           <div class="cursor-track" style="background-image: ${o};"></div>
-          <div class="cursor-fill" style="height: ${i}%; background: ${l};"></div>
-          <div class="cursor-thumb shape-${c}" style="bottom: ${i}%; --lgc-thumb-color: ${l};"></div>
+          <div class="cursor-fill" style="${this._spanStyle(c, e)} background: ${l};"></div>
+          ${this._zeroMarker(c, e)}
+          <div class="cursor-thumb shape-${h}" style="bottom: ${i}%; --lgc-thumb-color: ${l};"></div>
         </div>` : p`
       <div class="cursor-wrap">
         <div class="cursor-label" style="left: ${i}%">${r}</div>
         <div class="cursor-track" style="background-image: ${o};"></div>
-        <div class="cursor-fill" style="width: ${i}%; background: ${l};"></div>
-        <div class="cursor-thumb shape-${c}" style="left: ${i}%; --lgc-thumb-color: ${l};"></div>
+        <div class="cursor-fill" style="${this._spanStyle(c, e)} background: ${l};"></div>
+        ${this._zeroMarker(c, e)}
+        <div class="cursor-thumb shape-${h}" style="left: ${i}%; --lgc-thumb-color: ${l};"></div>
       </div>`;
   }
   _visualSparkline(t) {
     const { entityId: e, percent: i, color: a, min: r, max: s } = t, o = this._history[e];
     if (!o || !Array.isArray(o.series) || o.series.length < 2) return this._visualBar(t);
-    const l = o.series, c = 300, d = 46, n = Math.min(...l), g = Math.max(...l), u = g - n || 1, v = (w) => w / (l.length - 1) * c, m = (w) => d - 3 - (w - n) / u * (d - 6), b = l.map((w, k) => `${k ? "L" : "M"}${v(k).toFixed(1)},${m(w).toFixed(1)}`).join(" "), x = `${b} L${c},${d} L0,${d} Z`, $ = this._solidColor(a, i / 100), A = "lgcspark-" + String(e).replace(/[^a-z0-9]/gi, "");
+    const l = o.series, h = 300, c = 46, n = Math.min(...l), g = Math.max(...l), u = g - n || 1, v = (w) => w / (l.length - 1) * h, f = (w) => c - 3 - (w - n) / u * (c - 6), b = l.map((w, S) => `${S ? "L" : "M"}${v(S).toFixed(1)},${f(w).toFixed(1)}`).join(" "), y = `${b} L${h},${c} L0,${c} Z`, x = this._solidColor(a, i / 100), k = "lgcspark-" + String(e).replace(/[^a-z0-9]/gi, "");
     return p`
       <div class="spark-wrap">
-        <svg viewBox="0 0 ${c} ${d}" preserveAspectRatio="none">
+        <svg viewBox="0 0 ${h} ${c}" preserveAspectRatio="none">
           <defs>
-            <linearGradient id="${A}" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="${$}" stop-opacity="0.34"></stop>
-              <stop offset="100%" stop-color="${$}" stop-opacity="0.02"></stop>
+            <linearGradient id="${k}" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="${x}" stop-opacity="0.34"></stop>
+              <stop offset="100%" stop-color="${x}" stop-opacity="0.02"></stop>
             </linearGradient>
           </defs>
-          <path d="${x}" fill="url(#${A})"></path>
-          <path d="${b}" fill="none" stroke="${$}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
-          <circle cx="${c}" cy="${m(l[l.length - 1])}" r="3.2" fill="${$}"></circle>
+          <path d="${y}" fill="url(#${k})"></path>
+          <path d="${b}" fill="none" stroke="${x}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+          <circle cx="${h}" cy="${f(l[l.length - 1])}" r="3.2" fill="${x}"></circle>
         </svg>
         <div class="spark-meta">
           <span>min ${n.toFixed(0)}</span>
@@ -1805,122 +1804,175 @@ class ce extends I {
   // Segment/dot/bar count for the "repeated element" styles. Each style keeps
   // its own sensible default when `segment_count` isn't explicitly configured.
   _countFor(t, e) {
-    const a = { segments: 20, dots: 12, chevrons: 10, equalizer: 16 }[t] ?? 20, r = e.segment_count ?? this._config.segment_count, s = parseInt(r ?? a, 10) || a;
+    const a = { segments: 20, dots: 12, equalizer: 16 }[t] ?? 20, r = e.segment_count ?? this._config.segment_count, s = parseInt(r ?? a, 10) || a;
     return Math.max(3, Math.min(120, s));
+  }
+  // Span of the track covered by the fill, in percent: [start, end].
+  // With `center_zero` the fill grows out of the zero point in either
+  // direction; otherwise it simply starts at the beginning of the track.
+  _fillSpan(t) {
+    const { min: e, max: i, clampedValue: a, value: r, conf: s } = t, o = s.center_zero ?? this._config.center_zero ?? !1, l = (c) => (Math.max(e, Math.min(c, i)) - e) / (i - e) * 100;
+    if (i === e || isNaN(r))
+      return { start: 0, end: 0, size: 0, zero: 0, centered: !1, negative: !1 };
+    if (o && e < 0 && i > 0) {
+      const c = l(0), n = l(a), g = Math.min(c, n), u = Math.max(c, n);
+      return { start: g, end: u, size: u - g, zero: c, centered: !0, negative: a < 0 };
+    }
+    const h = l(a);
+    return { start: 0, end: h, size: h, zero: 0, centered: !1, negative: !1 };
+  }
+  // CSS for a fill covering `span` along the track.
+  _spanStyle(t, e) {
+    return e === "vertical" ? `bottom: ${t.start}%; height: ${t.size}%;` : `left: ${t.start}%; width: ${t.size}%;`;
+  }
+  // Faint line showing where zero sits; only drawn in center_zero mode.
+  _zeroMarker(t, e) {
+    if (!t.centered) return p``;
+    const i = e === "vertical" ? `bottom: ${t.zero}%` : `left: ${t.zero}%`;
+    return p`<div class="zero-marker" style="${i}"></div>`;
   }
   // Colour of the i-th element of a repeated style: a fixed colour when one is
   // configured, otherwise the gradient palette sampled at that position.
   _elementColor(t, e, i, a) {
-    return !!(t.color || t.severity || this._config.color || this._config.severity) ? e : st(this._gradientColors(), (i + 0.5) / a);
+    return !!(t.color || t.severity || this._config.color || this._config.severity) ? e : At(this._gradientColors(), (i + 0.5) / a);
+  }
+  // How much of element `i` (of `count`) the fill covers, 0..1.
+  _elementCoverage(t, e, i) {
+    const a = e / i * 100, r = (e + 1) / i * 100, s = Math.min(r, t.end) - Math.max(a, t.start);
+    return Math.max(0, s) / (r - a);
   }
   _visualStripes(t) {
-    const { barStyle: e, targetMarker: i, minMaxMarker: a, showValueInBar: r, displayValue: s } = t;
+    const { layout: e, barStyle: i, targetMarker: a, minMaxMarker: r, showValueInBar: s, displayValue: o } = t;
     return p`
       <div class="bar-bg">
+        ${r}
+        <div class="bar-fill no-shimmer stripes-fill" style="${i}"></div>
+        ${this._zeroMarker(this._fillSpan(t), e)}
         ${a}
-        <div class="bar-fill no-shimmer stripes-fill" style="${e}"></div>
-        ${i}
-        ${r ? p`<span class="bar-value">${s}</span>` : ""}
+        ${s ? p`<span class="bar-value">${o}</span>` : ""}
       </div>`;
   }
   _visualGlass(t) {
-    const { barStyle: e, targetMarker: i, minMaxMarker: a, showValueInBar: r, displayValue: s } = t;
+    const { layout: e, barStyle: i, targetMarker: a, minMaxMarker: r, showValueInBar: s, displayValue: o } = t;
     return p`
       <div class="bar-bg glass-track">
+        ${r}
+        <div class="bar-fill no-shimmer glass-fill" style="${i}"></div>
+        ${this._zeroMarker(this._fillSpan(t), e)}
         ${a}
-        <div class="bar-fill no-shimmer glass-fill" style="${e}"></div>
-        ${i}
-        ${r ? p`<span class="bar-value">${s}</span>` : ""}
+        ${s ? p`<span class="bar-value">${o}</span>` : ""}
       </div>`;
   }
   _visualDots(t) {
-    const { layout: e, percent: i, conf: a, color: r } = t, s = this._countFor("dots", a), o = i / 100 * s, l = Math.floor(o), c = o - l, d = [];
-    for (let n = 0; n < s; n++) {
-      const g = this._elementColor(a, r, n, s);
-      let u = "";
-      n < l ? u = `background: ${g}; box-shadow: 0 0 6px ${g}66;` : n === l && c > 0.05 && (u = `background: ${g}; opacity: ${(0.25 + 0.75 * c).toFixed(2)}; transform: scale(${(0.7 + 0.3 * c).toFixed(2)});`), d.push(p`<div class="dot" style="${u}"></div>`);
+    const { layout: e, conf: i, color: a } = t, r = this._countFor("dots", i), s = this._fillSpan(t), o = [];
+    for (let l = 0; l < r; l++) {
+      const h = this._elementColor(i, a, l, r), c = this._elementCoverage(s, l, r);
+      let n = "";
+      c >= 0.5 ? n = `background: ${h}; box-shadow: 0 0 6px ${h}66;` : c > 0.05 && (n = `background: ${h}; opacity: ${(0.25 + 1.5 * c).toFixed(2)}; transform: scale(${(0.7 + 0.6 * c).toFixed(2)});`), o.push(p`<div class="dot" style="${n}"></div>`);
     }
-    return p`<div class="dot-track ${e === "vertical" ? "vertical" : ""}">${d}</div>`;
-  }
-  _visualChevrons(t) {
-    const { layout: e, percent: i, conf: a, color: r } = t, s = this._countFor("chevrons", a), o = Math.round(i / 100 * s), l = [];
-    for (let c = 0; c < s; c++) {
-      const d = this._elementColor(a, r, c, s);
-      l.push(p`<div class="chev" style="${c < o ? `background: ${d}; box-shadow: 0 0 6px ${d}55;` : ""}"></div>`);
-    }
-    return p`<div class="chev-track ${e === "vertical" ? "vertical" : ""}">${l}</div>`;
+    return p`<div class="dot-track ${e === "vertical" ? "vertical" : ""}">${o}</div>`;
   }
   _visualEqualizer(t) {
-    const { percent: e, conf: i, color: a } = t, r = this._countFor("equalizer", i), s = Math.round(e / 100 * r), o = [];
-    for (let l = 0; l < r; l++) {
-      const c = this._elementColor(i, a, l, r), d = 28 + 72 * ((l + 1) / r);
-      o.push(p`<div class="eq-bar" style="height: ${d.toFixed(1)}%; ${l < s ? `background: ${c}; box-shadow: 0 0 6px ${c}66;` : ""}"></div>`);
+    const { conf: e, color: i } = t, a = this._countFor("equalizer", e), r = this._fillSpan(t), s = [];
+    for (let o = 0; o < a; o++) {
+      const l = this._elementColor(e, i, o, a), h = this._elementCoverage(r, o, a) >= 0.5, c = r.centered ? Math.abs((o + 0.5) / a * 100 - r.zero) / Math.max(r.zero, 100 - r.zero) : (o + 1) / a, n = 28 + 72 * Math.min(1, c);
+      s.push(p`<div class="eq-bar" style="height: ${n.toFixed(1)}%; ${h ? `background: ${l}; box-shadow: 0 0 6px ${l}66;` : ""}"></div>`);
     }
-    return p`<div class="eq-track">${o}</div>`;
+    return p`<div class="eq-track">${s}</div>`;
+  }
+  // Direction a partially filled cell drains from: away from the start of the
+  // fill, which flips when a center_zero value goes negative.
+  _drainAngle(t, e) {
+    return t === "vertical" ? e.negative ? "180deg" : "0deg" : e.negative ? "270deg" : "90deg";
   }
   _visualBattery(t) {
-    const { layout: e, percent: i, color: a, showValueInBar: r, displayValue: s, targetMarker: o, minMaxMarker: l } = t, c = e === "vertical", d = c ? `height: ${i}%; background: ${a};` : `width: ${i}%; background: ${a};`, n = p`
+    const { layout: e, conf: i, color: a, showValueInBar: r, displayValue: s } = t, o = e === "vertical", l = this._fillSpan(t), h = Math.max(2, Math.min(12, parseInt(i.battery_cells ?? this._config.battery_cells ?? 4, 10) || 4)), c = [];
+    for (let u = 0; u < h; u++) {
+      const v = this._elementCoverage(l, u, h), f = this._elementColor(i, a, u, h), b = (v * 100).toFixed(1), y = v >= 0.999 ? `background: ${f};` : v > 0.02 ? `background: linear-gradient(${this._drainAngle(e, l)}, ${f} ${b}%, rgba(0,0,0,0) ${b}%);` : "";
+      c.push(p`<div class="bat-cell" style="${y}"></div>`);
+    }
+    const n = p`
       <div class="bat-body">
-        ${l}
-        <div class="bat-fill" style="${d}"></div>
-        ${o}
+        <div class="bat-cells">${c}</div>
         ${r ? p`<span class="bat-value">${s}</span>` : ""}
       </div>`, g = p`<div class="bat-cap"></div>`;
     return p`
-      <div class="bat-wrap ${c ? "vertical" : ""}">
-        ${c ? p`${g}${n}` : p`${n}${g}`}
+      <div class="bat-wrap ${o ? "vertical" : ""}">
+        ${o ? p`${g}${n}` : p`${n}${g}`}
       </div>`;
   }
   _visualThermometer(t) {
-    const { layout: e, percent: i, color: a, showValueInBar: r, displayValue: s, targetMarker: o, minMaxMarker: l } = t, c = e === "vertical", d = this._solidColor(a, i / 100), n = c ? `height: ${i}%; background: ${a};` : `width: ${i}%; background: ${a};`;
+    const {
+      layout: e,
+      color: i,
+      max: a,
+      conf: r,
+      showValueInBar: s,
+      displayValue: o,
+      targetMarker: l,
+      minMaxMarker: h
+    } = t, c = e === "vertical", n = this._fillSpan(t), g = Math.max(2, Math.min(21, parseInt(r.tick_count ?? this._config.tick_count ?? 5, 10) || 5)), u = [];
+    for (let v = 1; v < g - 1; v++) {
+      const f = v / (g - 1) * 100;
+      u.push(p`<div class="thermo-tick" style="${c ? `bottom: ${f}%` : `left: ${f}%`}"></div>`);
+    }
     return p`
       <div class="thermo-wrap ${c ? "vertical" : ""}">
-        <div class="thermo-bulb" style="background: ${d};"></div>
         <div class="thermo-tube">
+          ${h}
+          <div class="thermo-fill" style="${this._spanStyle(n, e)} background: ${i};"></div>
+          ${u}
+          ${this._zeroMarker(n, e)}
           ${l}
-          <div class="thermo-fill" style="${n}"></div>
-          <div class="thermo-grad"></div>
-          ${o}
-          ${r ? p`<span class="thermo-value">${s}</span>` : ""}
+          ${s ? p`<span class="thermo-value">${o}</span>` : ""}
         </div>
+        ${c ? "" : p`<span class="thermo-scale">${a}</span>`}
       </div>`;
   }
   _visualNeedle(t) {
-    const { layout: e, percent: i, color: a, min: r, max: s, conf: o, showValueInBar: l, displayValue: c } = t, d = e === "vertical", n = this._gradientCssFor(e), g = this._solidColor(a, i / 100), u = Math.max(0, Math.min(100, i)), v = this._resolveTarget(o);
-    let m = p``;
+    const { layout: e, percent: i, color: a, min: r, max: s, conf: o, showValueInBar: l, displayValue: h } = t, c = e === "vertical", n = this._gradientCssFor(e), g = this._solidColor(a, i / 100), u = Math.max(0, Math.min(100, i)), v = this._resolveTarget(o);
+    let f = p``;
     if (v !== null && s !== r) {
       const b = Math.max(0, Math.min(100, (Math.max(r, Math.min(v, s)) - r) / (s - r) * 100));
-      m = p`<div class="needle-target" style="${d ? `bottom: ${b}%` : `left: ${b}%`}"></div>`;
+      f = p`<div class="needle-target" style="${c ? `bottom: ${b}%` : `left: ${b}%`}"></div>`;
     }
-    return d ? p`
+    return c ? p`
         <div class="needle-wrap vertical">
           <div class="needle-band" style="background-image: ${n};"></div>
-          ${m}
+          ${this._zeroMarker(this._fillSpan(t), e)}
+          ${f}
           <div class="needle-pointer" style="bottom: ${u}%; --lgc-needle-color: ${g};"></div>
         </div>` : p`
       <div class="needle-wrap">
-        ${l ? p`<div class="needle-bubble" style="left: ${u}%">${c}</div>` : ""}
+        ${l ? p`<div class="needle-bubble" style="left: ${u}%">${h}</div>` : ""}
         <div class="needle-pointer" style="left: ${u}%; --lgc-needle-color: ${g};"></div>
         <div class="needle-band" style="background-image: ${n};"></div>
-        ${m}
+        ${this._zeroMarker(this._fillSpan(t), e)}
+        ${f}
         <div class="needle-scale"><span>${r}</span><span>${s}</span></div>
       </div>`;
   }
-  // Liquid tank: the fill boundary is a sine wave that scrolls sideways.
-  // The polygon is drawn well outside the 0..100 view box so the CSS
-  // translation of exactly one wavelength loops seamlessly.
+  // Liquid tank: the fill boundary is a sine wave that scrolls sideways. Two
+  // layers at different amplitudes and speeds give the surface some depth.
+  // Each layer is drawn well outside the 0..100 view box so translating it by
+  // exactly one wavelength loops seamlessly.
   _visualWave(t) {
-    const { layout: e, percent: i, color: a, displayValue: r, showValueInBar: s, targetMarker: o } = t, l = e === "vertical", c = this._solidColor(a, i / 100), d = Math.max(0, Math.min(100, i)), n = 3, g = 50, u = 130, v = -80, m = 180, b = d / 100 * (100 + 2 * n) - n, x = [];
-    for (let w = 0; w <= u; w++) {
-      const k = v + (m - v) * w / u, T = Math.sin(k / g * Math.PI * 2) * n;
-      x.push(l ? `${k.toFixed(2)},${(100 - b + T).toFixed(2)}` : `${(b + T).toFixed(2)},${k.toFixed(2)}`);
-    }
-    const $ = l ? "180,180 -80,180" : "-80,180 -80,-80", A = `M${x.join(" L")} L${$.split(" ").join(" L")} Z`;
+    const { layout: e, percent: i, color: a, displayValue: r, showValueInBar: s, targetMarker: o } = t, l = e === "vertical", h = this._solidColor(a, i / 100), c = this._fillSpan(t), n = c.centered ? c.zero : 0, g = c.centered && c.negative ? c.start : c.end, u = g >= n ? 1 : -1, v = Math.abs((u > 0 ? 100 : 0) - n) || 1, f = 50, b = 130, y = -80, x = 180, k = (w, S) => {
+      const X = Math.abs(g - n) / v, I = n + u * (Math.abs(g - n) + w * (2 * X - 1)), Z = [];
+      for (let O = 0; O <= b; O++) {
+        const F = y + (x - y) * O / b, L = Math.sin((F / f + S) * Math.PI * 2) * w, J = u > 0 ? Math.max(n, I + L) : Math.min(n, I + L);
+        Z.push(l ? `${F.toFixed(2)},${(100 - J).toFixed(2)}` : `${J.toFixed(2)},${F.toFixed(2)}`);
+      }
+      const Y = l ? [`180,${(100 - n).toFixed(2)}`, `-80,${(100 - n).toFixed(2)}`] : [`${n.toFixed(2)},180`, `${n.toFixed(2)},-80`];
+      return `M${Z.join(" L")} L${Y.join(" L")} Z`;
+    };
     return p`
       <div class="wave-wrap ${l ? "vertical" : ""}">
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-          <path class="wave-anim" d="${A}" fill="${c}" opacity="0.9"></path>
+          <path class="wave-anim wave-back" d="${k(4, 0.35)}" fill="${h}"></path>
+          <path class="wave-anim wave-front" d="${k(2.4, 0)}" fill="${h}"></path>
         </svg>
+        ${this._zeroMarker(c, e)}
         ${o}
         ${s ? p`<span class="wave-value">${r}</span>` : ""}
       </div>`;
@@ -1988,7 +2040,7 @@ class ce extends I {
     return i ? i.color : "var(--primary-color)";
   }
 }
-class he extends I {
+class he extends P {
   static get properties() {
     return {
       hass: { attribute: !1 },
@@ -2039,7 +2091,7 @@ class he extends I {
       </div>`;
   }
   static get styles() {
-    return At`
+    return Nt`
       .card-config {
         display: flex;
         flex-direction: column;
@@ -2180,9 +2232,9 @@ class he extends I {
         ]
       }
     }, e = {
-      select: { mode: "dropdown", options: wt }
+      select: { mode: "dropdown", options: Et }
     }, i = {
-      select: { mode: "dropdown", options: kt }
+      select: { mode: "dropdown", options: St }
     }, a = { entity: { domain: "sensor" } }, r = this._config.colors || [];
     return p`
       <div class="card-config">
@@ -2221,7 +2273,7 @@ class he extends I {
 
         <div class="row">
           <div class="text-input-group">
-            <label>Element count (segments, dots, chevrons, equalizer)</label>
+            <label>Element count (segments, dots, equalizer)</label>
             <input
               class="plain-input"
               type="number"
@@ -2289,6 +2341,21 @@ class he extends I {
               placeholder="22"
               .value=${this._config.battery_size ?? ""}
               @input=${(s) => this._plainNumberChanged(s, "battery_size", "int")}
+            />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="text-input-group">
+            <label>Battery cells</label>
+            <input
+              class="plain-input"
+              type="number"
+              min="2"
+              max="12"
+              placeholder="4"
+              .value=${this._config.battery_cells ?? ""}
+              @input=${(s) => this._plainNumberChanged(s, "battery_cells", "int")}
             />
           </div>
         </div>
@@ -2382,7 +2449,7 @@ class he extends I {
                                 style="width: 40px; height: 40px; border: none; padding: 0; background: none; cursor: pointer;"
                              >
                              <ha-icon-button
-                                .path=${O}
+                                .path=${G}
                                 style="position: absolute; top: -14px; right: -14px; color: grey; --mdc-icon-button-size: 24px;"
                                 @click=${() => this._removeGlobalColor(o)}
                              ></ha-icon-button>
@@ -2519,7 +2586,7 @@ class he extends I {
                 .hass=${this.hass}
                 .selector=${i}
                 .value=${a}
-                @value-changed=${(c) => this._entityChanged(c, e, "entity")}
+                @value-changed=${(h) => this._entityChanged(h, e, "entity")}
               ></ha-selector>
           </div>
 
@@ -2530,7 +2597,7 @@ class he extends I {
 
           <ha-icon-button
             class="delete"
-            .path=${O}
+            .path=${G}
             @click=${() => this._removeEntity(e)}
           ></ha-icon-button>
         </div>
@@ -2542,7 +2609,7 @@ class he extends I {
             type="text"
             placeholder="Override the entity friendly name"
             .value=${l.name || ""}
-            @input=${(c) => this._entityPlainChanged(c, e, "name")}
+            @input=${(h) => this._entityPlainChanged(h, e, "name")}
           />
         </div>
 
@@ -2556,14 +2623,14 @@ class he extends I {
       if (e.startsWith("rgba")) {
         const s = e.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
         if (s) {
-          const o = parseInt(s[1]), l = parseInt(s[2]), c = parseInt(s[3]);
-          a = s[4] !== void 0 ? parseFloat(s[4]) : 1, i = "#" + [o, l, c].map((d) => d.toString(16).padStart(2, "0")).join("");
+          const o = parseInt(s[1]), l = parseInt(s[2]), h = parseInt(s[3]);
+          a = s[4] !== void 0 ? parseFloat(s[4]) : 1, i = "#" + [o, l, h].map((c) => c.toString(16).padStart(2, "0")).join("");
         }
       } else if (e.startsWith("rgb")) {
         const s = e.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
         if (s) {
-          const o = parseInt(s[1]), l = parseInt(s[2]), c = parseInt(s[3]);
-          i = "#" + [o, l, c].map((d) => d.toString(16).padStart(2, "0")).join("");
+          const o = parseInt(s[1]), l = parseInt(s[2]), h = parseInt(s[3]);
+          i = "#" + [o, l, h].map((c) => c.toString(16).padStart(2, "0")).join("");
         }
       } else e.startsWith("#") && (i = e.substring(0, 7), e.length === 9 && (a = parseInt(e.substring(7, 9), 16) / 255));
     const r = Math.round(a * 100);
@@ -2588,7 +2655,7 @@ class he extends I {
               <span style="font-size: 0.85em; opacity: 0.8;">Opacity: ${r}%</span>
               ${e ? p`
                 <ha-icon-button
-                  .path=${O}
+                  .path=${G}
                   style="color: var(--error-color); --mdc-icon-button-size: 32px;"
                   @click=${() => this._clearColorValue(t)}
                 ></ha-icon-button>
@@ -2636,10 +2703,10 @@ class he extends I {
       { value: "url", label: "Open URL" },
       { value: "call-service", label: "Call Service" },
       { value: "none", label: "None" }
-    ], c = [
+    ], h = [
       { value: "", label: "(inherit global)" },
-      ...wt
-    ], d = kt;
+      ...Et
+    ], c = St;
     return p`
         <div class="entity-details">
             <div class="row">
@@ -2690,7 +2757,7 @@ class he extends I {
                 ${t.target_entity ? p`
                     <ha-icon-button
                         class="delete"
-                        .path=${O}
+                        .path=${G}
                         @click=${() => this._clearEntityField(e, "target_entity")}
                         title="Clear target entity"
                     ></ha-icon-button>
@@ -2700,7 +2767,7 @@ class he extends I {
                 <ha-selector
                     label="Gauge Style"
                     .hass=${this.hass}
-                    .selector=${{ select: { mode: "dropdown", options: c } }}
+                    .selector=${{ select: { mode: "dropdown", options: h } }}
                     .value=${t.gauge_style || (t.effect === "led" ? "segments" : "")}
                     @value-changed=${(n) => this._entityChanged(n, e, "gauge_style")}
                 ></ha-selector>
@@ -2723,7 +2790,7 @@ class he extends I {
                 <ha-selector
                     label="Cursor shape"
                     .hass=${this.hass}
-                    .selector=${{ select: { mode: "dropdown", options: d } }}
+                    .selector=${{ select: { mode: "dropdown", options: c } }}
                     .value=${t.cursor_shape || "circle"}
                     @value-changed=${(n) => this._entityChanged(n, e, "cursor_shape")}
                 ></ha-selector>
@@ -2886,7 +2953,7 @@ class he extends I {
                          >
                          <ha-icon-button
                             class="delete"
-                            .path=${O}
+                            .path=${G}
                             @click=${() => this._removeSeverityBand(e, g)}
                          ></ha-icon-button>
                     </div>
@@ -3000,8 +3067,8 @@ class he extends I {
   }
   _severityChanged(t, e, i, a) {
     const r = [...this._config.entities || []];
-    let s = { ...typeof r[e] == "string" ? { entity: r[e] } : r[e] }, o = [...s.severity || []], l = { ...o[i] }, c = t.target.value;
-    l[a] = a === "from" ? parseFloat(c) : c, o[i] = l, s.severity = o, r[e] = s, this._config = { ...this._config, entities: r }, this._fireChangedEvent();
+    let s = { ...typeof r[e] == "string" ? { entity: r[e] } : r[e] }, o = [...s.severity || []], l = { ...o[i] }, h = t.target.value;
+    l[a] = a === "from" ? parseFloat(h) : h, o[i] = l, s.severity = o, r[e] = s, this._config = { ...this._config, entities: r }, this._fireChangedEvent();
   }
   _addSeverityBand(t) {
     const e = [...this._config.entities || []];
@@ -3034,7 +3101,7 @@ class he extends I {
     this.dispatchEvent(t);
   }
 }
-const de = "1.3.0";
+const de = "1.4.0";
 console.info(
   `%c LINEAR-GAUGE-CARD %c ${de} `,
   "color: white; background: #03a9f4; font-weight: 700;",

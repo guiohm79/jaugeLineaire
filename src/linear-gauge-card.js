@@ -17,7 +17,6 @@ const LGC_GAUGE_STYLES = [
   { value: 'stripes', label: 'Stripes (animated)' },
   { value: 'segments', label: 'Segments (LED)' },
   { value: 'dots', label: 'Dots' },
-  { value: 'chevrons', label: 'Chevrons' },
   { value: 'equalizer', label: 'Equalizer (VU meter)' },
   { value: 'battery', label: 'Battery' },
   { value: 'thermometer', label: 'Thermometer' },
@@ -242,11 +241,9 @@ class LinearGaugeCard extends LitElement {
       .gauge-container.pulsing .cursor-thumb,
       .gauge-container.pulsing .seg,
       .gauge-container.pulsing .dot,
-      .gauge-container.pulsing .chev,
       .gauge-container.pulsing .eq-bar,
       .gauge-container.pulsing .bat-fill,
       .gauge-container.pulsing .thermo-fill,
-      .gauge-container.pulsing .thermo-bulb,
       .gauge-container.pulsing .needle-pointer,
       .gauge-container.pulsing .wave-anim,
       .gauge-container.pulsing .tick-target {
@@ -571,12 +568,10 @@ class LinearGaugeCard extends LitElement {
         .gauge-container.pulsing .cursor-thumb,
         .gauge-container.pulsing .seg,
         .gauge-container.pulsing .dot,
-        .gauge-container.pulsing .chev,
-        .gauge-container.pulsing .eq-bar,
+          .gauge-container.pulsing .eq-bar,
         .gauge-container.pulsing .bat-fill,
         .gauge-container.pulsing .thermo-fill,
-        .gauge-container.pulsing .thermo-bulb,
-        .gauge-container.pulsing .needle-pointer,
+          .gauge-container.pulsing .needle-pointer,
         .gauge-container.pulsing .tick-target { animation: none !important; }
         .wave-anim { animation: none !important; }
         .bar-fill.stripes-fill::after { animation: none !important; }
@@ -628,6 +623,10 @@ class LinearGaugeCard extends LitElement {
       .cursor-wrap { position: relative; height: 22px; margin-top: 16px; }
       .cursor-track { position: absolute; top: 9px; left: 0; right: 0; height: 4px; border-radius: 2px; opacity: 0.32; }
       .cursor-fill { position: absolute; top: 9px; left: 0; height: 4px; border-radius: 2px; }
+      /* Zero marker sits on the thin rail rather than spanning the whole row. */
+      .cursor-wrap .zero-marker { top: 5px; bottom: auto; height: 12px; }
+      .cursor-wrap.vertical .zero-marker { left: 50%; right: auto; width: 12px; transform: translateX(-50%); }
+      .needle-wrap .zero-marker { top: auto; bottom: -3px; height: calc(var(--lgc-bar-thickness, 12px) + 6px); }
       .cursor-thumb {
         position: absolute; top: 2px; width: 18px; height: 18px; border-radius: 50%;
         transform: translateX(-50%);
@@ -764,29 +763,6 @@ class LinearGaugeCard extends LitElement {
         margin: 0 auto;
       }
 
-      /* ---- Gauge style: chevrons ---- */
-      .chev-track {
-        display: flex;
-        gap: var(--lgc-segment-gap, 3px);
-        width: 100%;
-        height: var(--lgc-bar-thickness, 12px);
-      }
-      .chev {
-        flex: 1 1 0;
-        background: rgba(127, 127, 127, 0.18);
-        clip-path: polygon(0 0, 70% 0, 100% 50%, 70% 100%, 0 100%);
-        transition: background 0.3s ease, box-shadow 0.3s ease;
-      }
-      .chev-track.vertical {
-        flex-direction: column-reverse;
-        width: var(--lgc-vertical-width, 16px);
-        height: var(--lgc-vertical-height, 120px);
-        margin: 0 auto;
-      }
-      .chev-track.vertical .chev {
-        clip-path: polygon(0 100%, 0 30%, 50% 0, 100% 30%, 100% 100%);
-      }
-
       /* ---- Gauge style: equalizer (VU meter) ---- */
       .eq-track {
         display: flex;
@@ -803,36 +779,43 @@ class LinearGaugeCard extends LitElement {
       }
 
       /* ---- Gauge style: battery ---- */
-      .bat-wrap { display: flex; align-items: center; gap: 2px; width: 100%; }
+      .bat-wrap { display: flex; align-items: center; width: 100%; }
       .bat-body {
         position: relative;
         flex: 1 1 auto;
         height: var(--lgc-battery-size, 22px);
-        border: 2px solid rgba(127, 127, 127, 0.55);
-        border-radius: 5px;
-        overflow: hidden;
+        border: 2.5px solid var(--lgc-battery-shell, rgba(127, 127, 127, 0.75));
+        border-radius: 6px;
+        padding: 2.5px;
         box-sizing: border-box;
+      }
+      .bat-cells {
+        display: flex;
+        gap: 2px;
+        width: 100%;
+        height: 100%;
+      }
+      .bat-cell {
+        flex: 1 1 0;
+        border-radius: 1.5px;
+        background: rgba(127, 127, 127, 0.16);
+        transition: background 0.5s ease;
       }
       .bat-cap {
         flex: 0 0 auto;
-        width: 4px;
-        height: 40%;
-        border-radius: 0 2px 2px 0;
-        background: rgba(127, 127, 127, 0.55);
-      }
-      .bat-fill {
-        position: absolute;
-        left: 2px; top: 2px; bottom: 2px;
-        border-radius: 2px;
-        transition: width 1s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s ease;
+        width: 3.5px;
+        height: 42%;
+        margin-left: 1.5px;
+        border-radius: 0 2.5px 2.5px 0;
+        background: var(--lgc-battery-shell, rgba(127, 127, 127, 0.75));
       }
       .bat-value {
         position: absolute;
         inset: 0;
         display: flex; align-items: center; justify-content: center;
-        font-size: 11px; font-weight: 600;
-        color: #fff;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+        font-size: 11px; font-weight: 700;
+        color: var(--primary-text-color);
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55), 0 0 3px rgba(0, 0, 0, 0.4);
         font-feature-settings: "tnum";
         pointer-events: none;
       }
@@ -846,60 +829,59 @@ class LinearGaugeCard extends LitElement {
         width: var(--lgc-vertical-width, 16px);
         height: var(--lgc-vertical-height, 120px);
       }
+      .bat-wrap.vertical .bat-cells { flex-direction: column-reverse; }
       .bat-wrap.vertical .bat-cap {
-        width: 40%;
-        height: 4px;
-        border-radius: 2px 2px 0 0;
-      }
-      .bat-wrap.vertical .bat-fill {
-        left: 2px; right: 2px; bottom: 2px; top: auto;
-        transition: height 1s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s ease;
+        width: 42%;
+        height: 3.5px;
+        margin: 0 0 1.5px 0;
+        border-radius: 2.5px 2.5px 0 0;
       }
 
-      /* ---- Gauge style: thermometer ---- */
+      /* ---- Gauge style: thermometer (graduated tube) ---- */
       .thermo-wrap { display: flex; align-items: center; width: 100%; }
-      .thermo-bulb {
-        flex: 0 0 auto;
-        width: var(--lgc-thermo-bulb, 18px);
-        height: var(--lgc-thermo-bulb, 18px);
-        border-radius: 50%;
-        box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
-        z-index: 1;
-      }
       .thermo-tube {
         position: relative;
         flex: 1 1 auto;
-        height: var(--lgc-bar-thickness, 12px);
-        margin-left: -6px;
-        border-radius: 0 999px 999px 0;
+        height: var(--lgc-thermo-tube, 12px);
+        border-radius: 999px;
         background: rgba(127, 127, 127, 0.18);
+        border: 2px solid rgba(127, 127, 127, 0.45);
+        box-sizing: border-box;
         overflow: hidden;
-        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
       }
       .thermo-fill {
         position: absolute;
-        left: 0; top: 0; bottom: 0;
-        border-radius: 0 999px 999px 0;
-        transition: width 1s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s ease;
+        top: 0; bottom: 0;
+        border-radius: 999px;
+        transition: width 1s cubic-bezier(0.2, 0.8, 0.2, 1), left 1s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s ease;
       }
-      .thermo-grad {
+      .thermo-tick {
         position: absolute;
-        inset: 0;
-        background-image: repeating-linear-gradient(90deg, rgba(127, 127, 127, 0.5) 0 1px, rgba(0, 0, 0, 0) 1px 10%);
+        top: 0;
+        width: 1px; height: 45%;
+        background: var(--secondary-text-color, rgba(127, 127, 127, 0.8));
+        opacity: 0.55;
         pointer-events: none;
+      }
+      .thermo-scale {
+        flex: 0 0 auto;
+        margin-left: 5px;
+        font-size: 9.5px;
+        color: var(--secondary-text-color);
+        font-feature-settings: "tnum";
       }
       .thermo-value {
         position: absolute;
         inset: 0;
         display: flex; align-items: center; justify-content: center;
-        font-size: 10.5px; font-weight: 600;
+        font-size: 10.5px; font-weight: 700;
         color: var(--primary-text-color);
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
         font-feature-settings: "tnum";
         pointer-events: none;
       }
       .thermo-wrap.vertical {
-        flex-direction: column-reverse;
+        flex-direction: column;
         justify-content: flex-start;
         width: auto;
       }
@@ -907,17 +889,14 @@ class LinearGaugeCard extends LitElement {
         flex: 0 0 auto;
         width: var(--lgc-vertical-width, 16px);
         height: var(--lgc-vertical-height, 120px);
-        margin-left: 0;
-        margin-bottom: -6px;
-        border-radius: 999px 999px 0 0;
       }
       .thermo-wrap.vertical .thermo-fill {
-        left: 0; right: 0; bottom: 0; top: auto;
-        border-radius: 999px 999px 0 0;
-        transition: height 1s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s ease;
+        left: 0; right: 0; top: auto;
+        transition: height 1s cubic-bezier(0.2, 0.8, 0.2, 1), bottom 1s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s ease;
       }
-      .thermo-wrap.vertical .thermo-grad {
-        background-image: repeating-linear-gradient(0deg, rgba(127, 127, 127, 0.5) 0 1px, rgba(0, 0, 0, 0) 1px 10%);
+      .thermo-wrap.vertical .thermo-tick {
+        top: auto; left: 0;
+        width: 45%; height: 1px;
       }
 
       /* ---- Gauge style: needle scale ---- */
@@ -1003,6 +982,8 @@ class LinearGaugeCard extends LitElement {
       }
       .wave-wrap svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
       .wave-anim { animation: lgc-wave-h 2.6s linear infinite; }
+      .wave-back { opacity: 0.42; animation-duration: 4.1s; animation-direction: reverse; }
+      .wave-front { opacity: 0.92; }
       .wave-wrap.vertical .wave-anim { animation-name: lgc-wave-v; }
       @keyframes lgc-wave-h {
         from { transform: translateY(0); }
@@ -1012,6 +993,21 @@ class LinearGaugeCard extends LitElement {
         from { transform: translateX(0); }
         to   { transform: translateX(50px); }
       }
+      /* ---- center_zero: faint line marking the zero point ---- */
+      .zero-marker {
+        position: absolute;
+        background: var(--primary-text-color);
+        opacity: 0.35;
+        pointer-events: none;
+        z-index: 2;
+      }
+      .entities-wrapper.horizontal .zero-marker {
+        top: 0; bottom: 0; width: 1px;
+      }
+      .entities-wrapper.vertical .zero-marker {
+        left: 0; right: 0; height: 1px;
+      }
+
       .wave-value {
         position: absolute;
         inset: 0;
@@ -1321,7 +1317,6 @@ class LinearGaugeCard extends LitElement {
       case 'stripes':        return this._visualStripes(p);
       case 'segments':       return this._visualSegments(p);
       case 'dots':           return this._visualDots(p);
-      case 'chevrons':       return this._visualChevrons(p);
       case 'equalizer':      return this._visualEqualizer(p);
       case 'battery':        return this._visualBattery(p);
       case 'thermometer':    return this._visualThermometer(p);
@@ -1335,42 +1330,50 @@ class LinearGaugeCard extends LitElement {
   }
 
   _visualBar(p) {
-    const { minMaxMarker, disableShimmer, hideZeroBar, isZero, barStyle, targetMarker, showValueInBar, displayValue } = p;
+    const { layout, minMaxMarker, disableShimmer, hideZeroBar, isZero, barStyle, targetMarker, showValueInBar, displayValue } = p;
     return html`
       <div class="bar-bg">
         ${minMaxMarker}
         <div class="bar-fill ${disableShimmer ? 'no-shimmer' : ''} ${hideZeroBar && isZero ? 'hide-at-zero' : ''}" style="${barStyle}"></div>
+        ${this._zeroMarker(this._fillSpan(p), layout)}
         ${targetMarker}
         ${showValueInBar ? html`<span class="bar-value">${displayValue}</span>` : ''}
       </div>`;
   }
 
   _visualGradientTrack(p) {
-    const { layout, percent, targetMarker, minMaxMarker, showValueInBar, displayValue } = p;
+    const { layout, targetMarker, minMaxMarker, showValueInBar, displayValue } = p;
     const grad = this._gradientCssFor(layout);
-    const pct = Math.max(0.0001, percent);
+    const span = this._fillSpan(p);
+    // The fill shows the slice of the full-scale gradient it actually covers, so
+    // its colours stay aligned with the faint track behind it. The background is
+    // blown up to track size, then shifted by the fill's distance from the start
+    // edge — as a percentage, that distance is measured against the overflow.
+    const size = Math.max(0.0001, span.size);
+    const overflow = 100 - size;
+    const fromEdge = layout === 'vertical' ? 100 - span.end : span.start;
+    const offset = overflow > 0.0001 ? (fromEdge / overflow) * 100 : 0;
     const fillStyle = layout === 'vertical'
-      ? `height: ${percent}%; background-image: ${grad}; background-size: 100% ${10000 / pct}%; background-repeat: no-repeat; background-position: bottom; box-shadow: none;`
-      : `width: ${percent}%; background-image: ${grad}; background-size: ${10000 / pct}% 100%; background-repeat: no-repeat; box-shadow: none;`;
+      ? `${this._spanStyle(span, layout)} background-image: ${grad}; background-size: 100% ${10000 / size}%; background-repeat: no-repeat; background-position: 0 ${offset}%; box-shadow: none;`
+      : `${this._spanStyle(span, layout)} background-image: ${grad}; background-size: ${10000 / size}% 100%; background-repeat: no-repeat; background-position: ${offset}% 0; box-shadow: none;`;
     return html`
       <div class="bar-bg grad-track">
         <div class="grad-track-bg" style="background-image: ${grad};"></div>
         ${minMaxMarker}
         <div class="bar-fill no-shimmer" style="${fillStyle}"></div>
+        ${this._zeroMarker(span, layout)}
         ${targetMarker}
         ${showValueInBar ? html`<span class="bar-value">${displayValue}</span>` : ''}
       </div>`;
   }
 
   _visualSegments(p) {
-    const { layout, percent, segmentCount, conf, color } = p;
-    const colors = this._gradientColors();
-    const fixed = !!(conf.color || conf.severity || this._config.color || this._config.severity);
-    const lit = Math.round((percent / 100) * segmentCount);
+    const { layout, segmentCount, conf, color } = p;
+    const span = this._fillSpan(p);
     const segs = [];
     for (let i = 0; i < segmentCount; i++) {
-      const on = i < lit;
-      const c = fixed ? color : lgcSample(colors, (i + 0.5) / segmentCount);
+      const on = this._elementCoverage(span, i, segmentCount) >= 0.5;
+      const c = this._elementColor(conf, color, i, segmentCount);
       segs.push(html`<div class="seg" style="${on ? `background: ${c}; box-shadow: 0 0 6px ${c}66;` : ''}"></div>`);
     }
     return html`<div class="seg-track ${layout === 'vertical' ? 'vertical' : ''}">${segs}</div>`;
@@ -1391,12 +1394,14 @@ class LinearGaugeCard extends LitElement {
     const valueLabel = showValueInBar
       ? html`<div class="ticks-value" style="left: ${Math.max(0, Math.min(100, percent))}%">${displayValue}</div>`
       : html``;
+    const span = this._fillSpan(p);
     return html`
       <div class="ticks-wrap">
         ${targetFlag}
         ${valueLabel}
         <div class="bar-bg ticks-bar">
-          <div class="bar-fill no-shimmer" style="width: ${percent}%; background: ${color}; box-shadow: none;"></div>
+          <div class="bar-fill no-shimmer" style="${this._spanStyle(span, 'horizontal')} background: ${color}; box-shadow: none;"></div>
+          ${this._zeroMarker(span, 'horizontal')}
         </div>
         <div class="ticks">
           ${ticks.map(tk => html`
@@ -1413,12 +1418,14 @@ class LinearGaugeCard extends LitElement {
     const grad = this._gradientCssFor(layout);
     const solid = this._solidColor(color, percent / 100);
     const shape = conf.cursor_shape || this._config.cursor_shape || 'circle';
+    const span = this._fillSpan(p);
     if (layout === 'vertical') {
       // Value is already shown in the entity row above; keep the column clean.
       return html`
         <div class="cursor-wrap vertical">
           <div class="cursor-track" style="background-image: ${grad};"></div>
-          <div class="cursor-fill" style="height: ${percent}%; background: ${solid};"></div>
+          <div class="cursor-fill" style="${this._spanStyle(span, layout)} background: ${solid};"></div>
+          ${this._zeroMarker(span, layout)}
           <div class="cursor-thumb shape-${shape}" style="bottom: ${percent}%; --lgc-thumb-color: ${solid};"></div>
         </div>`;
     }
@@ -1426,7 +1433,8 @@ class LinearGaugeCard extends LitElement {
       <div class="cursor-wrap">
         <div class="cursor-label" style="left: ${percent}%">${displayValue}</div>
         <div class="cursor-track" style="background-image: ${grad};"></div>
-        <div class="cursor-fill" style="width: ${percent}%; background: ${solid};"></div>
+        <div class="cursor-fill" style="${this._spanStyle(span, layout)} background: ${solid};"></div>
+        ${this._zeroMarker(span, layout)}
         <div class="cursor-thumb shape-${shape}" style="left: ${percent}%; --lgc-thumb-color: ${solid};"></div>
       </div>`;
   }
@@ -1469,11 +1477,46 @@ class LinearGaugeCard extends LitElement {
   // Segment/dot/bar count for the "repeated element" styles. Each style keeps
   // its own sensible default when `segment_count` isn't explicitly configured.
   _countFor(style, conf) {
-    const defaults = { segments: 20, dots: 12, chevrons: 10, equalizer: 16 };
+    const defaults = { segments: 20, dots: 12, equalizer: 16 };
     const fallback = defaults[style] ?? 20;
     const explicit = conf.segment_count ?? this._config.segment_count;
     const n = parseInt(explicit ?? fallback, 10) || fallback;
     return Math.max(3, Math.min(120, n));
+  }
+
+  // Span of the track covered by the fill, in percent: [start, end].
+  // With `center_zero` the fill grows out of the zero point in either
+  // direction; otherwise it simply starts at the beginning of the track.
+  _fillSpan(p) {
+    const { min, max, clampedValue, value, conf } = p;
+    const centerZero = conf.center_zero ?? this._config.center_zero ?? false;
+    const pos = (v) => ((Math.max(min, Math.min(v, max)) - min) / (max - min)) * 100;
+    if (max === min || isNaN(value)) {
+      return { start: 0, end: 0, size: 0, zero: 0, centered: false, negative: false };
+    }
+    if (centerZero && min < 0 && max > 0) {
+      const zero = pos(0);
+      const v = pos(clampedValue);
+      const start = Math.min(zero, v);
+      const end = Math.max(zero, v);
+      return { start, end, size: end - start, zero, centered: true, negative: clampedValue < 0 };
+    }
+    const end = pos(clampedValue);
+    return { start: 0, end, size: end, zero: 0, centered: false, negative: false };
+  }
+
+  // CSS for a fill covering `span` along the track.
+  _spanStyle(span, layout) {
+    return layout === 'vertical'
+      ? `bottom: ${span.start}%; height: ${span.size}%;`
+      : `left: ${span.start}%; width: ${span.size}%;`;
+  }
+
+  // Faint line showing where zero sits; only drawn in center_zero mode.
+  _zeroMarker(span, layout) {
+    if (!span.centered) return html``;
+    const style = layout === 'vertical' ? `bottom: ${span.zero}%` : `left: ${span.zero}%`;
+    return html`<div class="zero-marker" style="${style}"></div>`;
   }
 
   // Colour of the i-th element of a repeated style: a fixed colour when one is
@@ -1483,86 +1526,106 @@ class LinearGaugeCard extends LitElement {
     return fixed ? color : lgcSample(this._gradientColors(), (i + 0.5) / count);
   }
 
+  // How much of element `i` (of `count`) the fill covers, 0..1.
+  _elementCoverage(span, i, count) {
+    const lo = (i / count) * 100, hi = ((i + 1) / count) * 100;
+    const overlap = Math.min(hi, span.end) - Math.max(lo, span.start);
+    return Math.max(0, overlap) / (hi - lo);
+  }
+
   _visualStripes(p) {
-    const { barStyle, targetMarker, minMaxMarker, showValueInBar, displayValue } = p;
+    const { layout, barStyle, targetMarker, minMaxMarker, showValueInBar, displayValue } = p;
     return html`
       <div class="bar-bg">
         ${minMaxMarker}
         <div class="bar-fill no-shimmer stripes-fill" style="${barStyle}"></div>
+        ${this._zeroMarker(this._fillSpan(p), layout)}
         ${targetMarker}
         ${showValueInBar ? html`<span class="bar-value">${displayValue}</span>` : ''}
       </div>`;
   }
 
   _visualGlass(p) {
-    const { barStyle, targetMarker, minMaxMarker, showValueInBar, displayValue } = p;
+    const { layout, barStyle, targetMarker, minMaxMarker, showValueInBar, displayValue } = p;
     return html`
       <div class="bar-bg glass-track">
         ${minMaxMarker}
         <div class="bar-fill no-shimmer glass-fill" style="${barStyle}"></div>
+        ${this._zeroMarker(this._fillSpan(p), layout)}
         ${targetMarker}
         ${showValueInBar ? html`<span class="bar-value">${displayValue}</span>` : ''}
       </div>`;
   }
 
   _visualDots(p) {
-    const { layout, percent, conf, color } = p;
+    const { layout, conf, color } = p;
     const count = this._countFor('dots', conf);
-    // Fractional last dot so small changes stay readable.
-    const exact = (percent / 100) * count;
-    const full = Math.floor(exact);
-    const frac = exact - full;
+    const span = this._fillSpan(p);
     const dots = [];
     for (let i = 0; i < count; i++) {
       const c = this._elementColor(conf, color, i, count);
+      // Partially covered dots fade in, so small changes stay readable.
+      const cover = this._elementCoverage(span, i, count);
       let style = '';
-      if (i < full) {
+      if (cover >= 0.5) {
         style = `background: ${c}; box-shadow: 0 0 6px ${c}66;`;
-      } else if (i === full && frac > 0.05) {
-        style = `background: ${c}; opacity: ${(0.25 + 0.75 * frac).toFixed(2)}; transform: scale(${(0.7 + 0.3 * frac).toFixed(2)});`;
+      } else if (cover > 0.05) {
+        style = `background: ${c}; opacity: ${(0.25 + 1.5 * cover).toFixed(2)}; transform: scale(${(0.7 + 0.6 * cover).toFixed(2)});`;
       }
       dots.push(html`<div class="dot" style="${style}"></div>`);
     }
     return html`<div class="dot-track ${layout === 'vertical' ? 'vertical' : ''}">${dots}</div>`;
   }
 
-  _visualChevrons(p) {
-    const { layout, percent, conf, color } = p;
-    const count = this._countFor('chevrons', conf);
-    const lit = Math.round((percent / 100) * count);
-    const items = [];
-    for (let i = 0; i < count; i++) {
-      const c = this._elementColor(conf, color, i, count);
-      items.push(html`<div class="chev" style="${i < lit ? `background: ${c}; box-shadow: 0 0 6px ${c}55;` : ''}"></div>`);
-    }
-    return html`<div class="chev-track ${layout === 'vertical' ? 'vertical' : ''}">${items}</div>`;
-  }
-
   _visualEqualizer(p) {
-    const { percent, conf, color } = p;
+    const { conf, color } = p;
     const count = this._countFor('equalizer', conf);
-    const lit = Math.round((percent / 100) * count);
+    const span = this._fillSpan(p);
     const bars = [];
     for (let i = 0; i < count; i++) {
       const c = this._elementColor(conf, color, i, count);
-      // Bars ramp up from 28% to 100% of the track height, VU-meter style.
-      const h = 28 + 72 * ((i + 1) / count);
-      bars.push(html`<div class="eq-bar" style="height: ${h.toFixed(1)}%; ${i < lit ? `background: ${c}; box-shadow: 0 0 6px ${c}66;` : ''}"></div>`);
+      const on = this._elementCoverage(span, i, count) >= 0.5;
+      // Bars ramp up from 28% to 100% of the track height, VU-meter style —
+      // outwards from the zero point when center_zero is on.
+      const t = span.centered
+        ? Math.abs(((i + 0.5) / count) * 100 - span.zero) / Math.max(span.zero, 100 - span.zero)
+        : (i + 1) / count;
+      const h = 28 + 72 * Math.min(1, t);
+      bars.push(html`<div class="eq-bar" style="height: ${h.toFixed(1)}%; ${on ? `background: ${c}; box-shadow: 0 0 6px ${c}66;` : ''}"></div>`);
     }
     return html`<div class="eq-track">${bars}</div>`;
   }
 
+  // Direction a partially filled cell drains from: away from the start of the
+  // fill, which flips when a center_zero value goes negative.
+  _drainAngle(layout, span) {
+    if (layout === 'vertical') return span.negative ? '180deg' : '0deg';
+    return span.negative ? '270deg' : '90deg';
+  }
+
   _visualBattery(p) {
-    const { layout, percent, color, showValueInBar, displayValue, targetMarker, minMaxMarker } = p;
+    const { layout, conf, color, showValueInBar, displayValue } = p;
     const vertical = layout === 'vertical';
-    const fillStyle = vertical
-      ? `height: ${percent}%; background: ${color};`
-      : `width: ${percent}%; background: ${color};`;
+    const span = this._fillSpan(p);
+    // Chunky cells inside the shell — that is what makes it read as a battery
+    // rather than as a bordered bar.
+    const cells = Math.max(2, Math.min(12, parseInt(conf.battery_cells ?? this._config.battery_cells ?? 4, 10) || 4));
+    const items = [];
+    for (let i = 0; i < cells; i++) {
+      const cover = this._elementCoverage(span, i, cells);
+      const c = this._elementColor(conf, color, i, cells);
+      // The leading cell drains proportionally so the reading stays precise.
+      const pct = (cover * 100).toFixed(1);
+      const fill = cover >= 0.999
+        ? `background: ${c};`
+        : cover > 0.02
+          ? `background: linear-gradient(${this._drainAngle(layout, span)}, ${c} ${pct}%, rgba(0,0,0,0) ${pct}%);`
+          : '';
+      items.push(html`<div class="bat-cell" style="${fill}"></div>`);
+    }
     const body = html`
       <div class="bat-body">
-        ${minMaxMarker}
-        <div class="bat-fill" style="${fillStyle}"></div>
-        ${targetMarker}
+        <div class="bat-cells">${items}</div>
         ${showValueInBar ? html`<span class="bat-value">${displayValue}</span>` : ''}
       </div>`;
     const cap = html`<div class="bat-cap"></div>`;
@@ -1573,22 +1636,28 @@ class LinearGaugeCard extends LitElement {
   }
 
   _visualThermometer(p) {
-    const { layout, percent, color, showValueInBar, displayValue, targetMarker, minMaxMarker } = p;
+    const { layout, color, max, conf, showValueInBar, displayValue,
+            targetMarker, minMaxMarker } = p;
     const vertical = layout === 'vertical';
-    const solid = this._solidColor(color, percent / 100);
-    const fillStyle = vertical
-      ? `height: ${percent}%; background: ${color};`
-      : `width: ${percent}%; background: ${color};`;
+    const span = this._fillSpan(p);
+    // Graduations inside the tube, spaced like the `ticks` style.
+    const count = Math.max(2, Math.min(21, parseInt(conf.tick_count ?? this._config.tick_count ?? 5, 10) || 5));
+    const ticks = [];
+    for (let i = 1; i < count - 1; i++) {
+      const at = (i / (count - 1)) * 100;
+      ticks.push(html`<div class="thermo-tick" style="${vertical ? `bottom: ${at}%` : `left: ${at}%`}"></div>`);
+    }
     return html`
       <div class="thermo-wrap ${vertical ? 'vertical' : ''}">
-        <div class="thermo-bulb" style="background: ${solid};"></div>
         <div class="thermo-tube">
           ${minMaxMarker}
-          <div class="thermo-fill" style="${fillStyle}"></div>
-          <div class="thermo-grad"></div>
+          <div class="thermo-fill" style="${this._spanStyle(span, layout)} background: ${color};"></div>
+          ${ticks}
+          ${this._zeroMarker(span, layout)}
           ${targetMarker}
           ${showValueInBar ? html`<span class="thermo-value">${displayValue}</span>` : ''}
         </div>
+        ${vertical ? '' : html`<span class="thermo-scale">${max}</span>`}
       </div>`;
   }
 
@@ -1608,6 +1677,7 @@ class LinearGaugeCard extends LitElement {
       return html`
         <div class="needle-wrap vertical">
           <div class="needle-band" style="background-image: ${grad};"></div>
+          ${this._zeroMarker(this._fillSpan(p), layout)}
           ${targetTick}
           <div class="needle-pointer" style="bottom: ${pos}%; --lgc-needle-color: ${solid};"></div>
         </div>`;
@@ -1617,39 +1687,58 @@ class LinearGaugeCard extends LitElement {
         ${showValueInBar ? html`<div class="needle-bubble" style="left: ${pos}%">${displayValue}</div>` : ''}
         <div class="needle-pointer" style="left: ${pos}%; --lgc-needle-color: ${solid};"></div>
         <div class="needle-band" style="background-image: ${grad};"></div>
+        ${this._zeroMarker(this._fillSpan(p), layout)}
         ${targetTick}
         <div class="needle-scale"><span>${min}</span><span>${max}</span></div>
       </div>`;
   }
 
-  // Liquid tank: the fill boundary is a sine wave that scrolls sideways.
-  // The polygon is drawn well outside the 0..100 view box so the CSS
-  // translation of exactly one wavelength loops seamlessly.
+  // Liquid tank: the fill boundary is a sine wave that scrolls sideways. Two
+  // layers at different amplitudes and speeds give the surface some depth.
+  // Each layer is drawn well outside the 0..100 view box so translating it by
+  // exactly one wavelength loops seamlessly.
   _visualWave(p) {
     const { layout, percent, color, displayValue, showValueInBar, targetMarker } = p;
     const vertical = layout === 'vertical';
     const solid = this._solidColor(color, percent / 100);
-    const pct = Math.max(0, Math.min(100, percent));
-    const amp = 3, wavelength = 50, steps = 130;
-    const from = -80, to = 180;
-    // Push the surface past the edges so 0% reads as empty and 100% as full
-    // even with the wave crests.
-    const surface = (pct / 100) * (100 + 2 * amp) - amp;
-    const pts = [];
-    for (let i = 0; i <= steps; i++) {
-      const u = from + ((to - from) * i) / steps;
-      const off = Math.sin((u / wavelength) * Math.PI * 2) * amp;
-      pts.push(vertical
-        ? `${u.toFixed(2)},${(100 - surface + off).toFixed(2)}`
-        : `${(surface + off).toFixed(2)},${u.toFixed(2)}`);
-    }
-    const close = vertical ? `180,180 -80,180` : `-80,180 -80,-80`;
-    const d = `M${pts.join(' L')} L${close.split(' ').join(' L')} Z`;
+    const span = this._fillSpan(p);
+    // Flat edge of the liquid (the tank floor, or the zero point) and the level
+    // the waves ride on. They swap around when a center_zero value goes negative.
+    const base = span.centered ? span.zero : 0;
+    const level = span.centered && span.negative ? span.start : span.end;
+    const dir = level >= base ? 1 : -1;
+    const reach = Math.abs((dir > 0 ? 100 : 0) - base) || 1;
+    const wavelength = 50, steps = 130, from = -80, to = 180;
+
+    const layer = (amp, phase) => {
+      // Push the crests past the ends so "empty" shows nothing and "full" has
+      // no gap, then ride the sine on top.
+      const t = Math.abs(level - base) / reach;
+      const surface = base + dir * (Math.abs(level - base) + amp * (2 * t - 1));
+      const pts = [];
+      for (let i = 0; i <= steps; i++) {
+        const u = from + ((to - from) * i) / steps;
+        const off = Math.sin((u / wavelength + phase) * Math.PI * 2) * amp;
+        // Clamped to the base edge so crests never spill past the zero point
+        // (or the tank floor) onto the empty side.
+        const v = dir > 0
+          ? Math.max(base, surface + off)
+          : Math.min(base, surface + off);
+        pts.push(vertical ? `${u.toFixed(2)},${(100 - v).toFixed(2)}` : `${v.toFixed(2)},${u.toFixed(2)}`);
+      }
+      const close = vertical
+        ? [`180,${(100 - base).toFixed(2)}`, `-80,${(100 - base).toFixed(2)}`]
+        : [`${base.toFixed(2)},180`, `${base.toFixed(2)},-80`];
+      return `M${pts.join(' L')} L${close.join(' L')} Z`;
+    };
+
     return html`
       <div class="wave-wrap ${vertical ? 'vertical' : ''}">
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-          <path class="wave-anim" d="${d}" fill="${solid}" opacity="0.9"></path>
+          <path class="wave-anim wave-back" d="${layer(4, 0.35)}" fill="${solid}"></path>
+          <path class="wave-anim wave-front" d="${layer(2.4, 0)}" fill="${solid}"></path>
         </svg>
+        ${this._zeroMarker(span, layout)}
         ${targetMarker}
         ${showValueInBar ? html`<span class="wave-value">${displayValue}</span>` : ''}
       </div>`;
@@ -2029,7 +2118,7 @@ class LinearGaugeCardEditor extends LitElement {
 
         <div class="row">
           <div class="text-input-group">
-            <label>Element count (segments, dots, chevrons, equalizer)</label>
+            <label>Element count (segments, dots, equalizer)</label>
             <input
               class="plain-input"
               type="number"
@@ -2097,6 +2186,21 @@ class LinearGaugeCardEditor extends LitElement {
               placeholder="22"
               .value=${this._config.battery_size ?? ''}
               @input=${(e) => this._plainNumberChanged(e, 'battery_size', 'int')}
+            />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="text-input-group">
+            <label>Battery cells</label>
+            <input
+              class="plain-input"
+              type="number"
+              min="2"
+              max="12"
+              placeholder="4"
+              .value=${this._config.battery_cells ?? ''}
+              @input=${(e) => this._plainNumberChanged(e, 'battery_cells', 'int')}
             />
           </div>
         </div>
@@ -3131,7 +3235,7 @@ class LinearGaugeCardEditor extends LitElement {
   }
 }
 
-const LGC_VERSION = '1.3.0';
+const LGC_VERSION = '1.4.0';
 console.info(
   `%c LINEAR-GAUGE-CARD %c ${LGC_VERSION} `,
   'color: white; background: #03a9f4; font-weight: 700;',
