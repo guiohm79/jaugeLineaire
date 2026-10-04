@@ -130,7 +130,8 @@ Each entity in the list can be configured individually:
 | `effect` | string | Effect override (`default` or `led`) |
 | `gauge_style` | string | Per-entity gauge style override (see global `gauge_style`) |
 | `segment_count` | number | Per-entity element count override (segments, dots, equalizer) |
-| `tick_count` | number | Number of labelled graduations for the `ticks` style (default 5, min 2) |
+| `tick_count` | number | Number of graduations for the `ticks` style and the `thermometer` tube (default 5, min 2) |
+| `battery_cells` | number | Number of cells inside the `battery` shell for this entity (default 4, range 2–12) |
 | `cursor_shape` | string | Thumb shape for the `cursor` style: `circle` (default), `line`, `arrow`, `diamond`, `bar` |
 | `pulse` | object | Pulse alert configuration (see below) |
 | `tap_action` | object | Specific action on click |
@@ -417,7 +418,7 @@ When multiple color options are defined, the following priority order is used:
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) for the full history. Latest: **v1.2.0** — six gauge styles, dynamic target marker, blinking pulse, and editor fixes.
+See [CHANGELOG.md](CHANGELOG.md) for the full history. Latest: **v1.4.0** — fourteen gauge styles, `center_zero` on every style, redesigned `battery` and `thermometer`, and a livelier `wave`.
 
 ## Support
 
