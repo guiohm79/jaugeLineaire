@@ -3,6 +3,15 @@
 All notable changes to the Linear Gauge Card are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## v1.4.1 — 2026-10-11
+
+### 🐛 Fixed
+- **Global `colors` gradient now follows the value.** On the `default`, `glass`
+  and `stripes` styles the whole gradient used to be squeezed into the filled
+  part, so a 10 % bar still showed red → yellow → green. The fill now shows only
+  the slice of the full-scale gradient it covers (per side of zero with
+  `center_zero`), and its glow takes the colour at the current value.
+
 ## v1.4.0 — 2026-08-27
 
 Follow-up to the new gauge styles, from testing feedback.

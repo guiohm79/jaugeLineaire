@@ -1156,6 +1156,10 @@ class LinearGaugeCard extends LitElement {
     } else {
       barStyle = `width: ${percent}%; background: ${color}; box-shadow: 0 0 10px ${color};`;
     }
+    if (typeof color === 'string' && color.indexOf('gradient') !== -1) {
+      barStyle += this._gradientSliceStyle(
+        this._fillSpan({ min, max, clampedValue, value, conf }), layout);
+    }
 
     let targetMarker = html``;
     // Marker source: target_entity (dynamic, from an entity state) takes priority
@@ -1506,6 +1510,23 @@ class LinearGaugeCard extends LitElement {
   }
 
   // CSS for a fill covering `span` along the track.
+  // A gradient fill must follow the value: stretch the gradient over the whole
+  // scale (or the half-scale on that side of zero in center_zero mode) and
+  // anchor it where the fill grows from, so a low value only shows the low colours.
+  _gradientSliceStyle(span, layout) {
+    const size = Math.max(0.0001, span.size);
+    const reach = span.centered ? (span.negative ? span.zero : 100 - span.zero) : 100;
+    const scale = (Math.max(reach, size) / size) * 100;
+    const vertical = layout === 'vertical';
+    const anchor = vertical
+      ? (span.negative ? 0 : 100)
+      : (span.negative ? 100 : 0);
+    const glow = lgcSample(this._gradientColors(), Math.min(1, size / reach));
+    return vertical
+      ? ` background-size: 100% ${scale}%; background-repeat: no-repeat; background-position: 0 ${anchor}%; box-shadow: 0 0 10px ${glow};`
+      : ` background-size: ${scale}% 100%; background-repeat: no-repeat; background-position: ${anchor}% 0; box-shadow: 0 0 10px ${glow};`;
+  }
+
   _spanStyle(span, layout) {
     return layout === 'vertical'
       ? `bottom: ${span.start}%; height: ${span.size}%;`
@@ -3235,7 +3256,7 @@ class LinearGaugeCardEditor extends LitElement {
   }
 }
 
-const LGC_VERSION = '1.4.0';
+const LGC_VERSION = '1.4.1';
 console.info(
   `%c LINEAR-GAUGE-CARD %c ${LGC_VERSION} `,
   'color: white; background: #03a9f4; font-weight: 700;',

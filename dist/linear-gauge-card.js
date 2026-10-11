@@ -3,18 +3,18 @@
  * Copyright 2019 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const K = globalThis, ht = K.ShadowRoot && (K.ShadyCSS === void 0 || K.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, dt = Symbol(), ft = /* @__PURE__ */ new WeakMap();
+const K = globalThis, dt = K.ShadowRoot && (K.ShadyCSS === void 0 || K.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, pt = Symbol(), vt = /* @__PURE__ */ new WeakMap();
 let Mt = class {
   constructor(t, e, i) {
-    if (this._$cssResult$ = !0, i !== dt) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
+    if (this._$cssResult$ = !0, i !== pt) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
     this.cssText = t, this.t = e;
   }
   get styleSheet() {
     let t = this.o;
     const e = this.t;
-    if (ht && t === void 0) {
+    if (dt && t === void 0) {
       const i = e !== void 0 && e.length === 1;
-      i && (t = ft.get(e)), t === void 0 && ((this.o = t = new CSSStyleSheet()).replaceSync(this.cssText), i && ft.set(e, t));
+      i && (t = vt.get(e)), t === void 0 && ((this.o = t = new CSSStyleSheet()).replaceSync(this.cssText), i && vt.set(e, t));
     }
     return t;
   }
@@ -22,20 +22,20 @@ let Mt = class {
     return this.cssText;
   }
 };
-const Ft = (d) => new Mt(typeof d == "string" ? d : d + "", void 0, dt), Nt = (d, ...t) => {
+const Ft = (d) => new Mt(typeof d == "string" ? d : d + "", void 0, pt), Nt = (d, ...t) => {
   const e = d.length === 1 ? d[0] : t.reduce((i, a, r) => i + ((s) => {
     if (s._$cssResult$ === !0) return s.cssText;
     if (typeof s == "number") return s;
     throw Error("Value passed to 'css' function must be a 'css' function result: " + s + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
   })(a) + d[r + 1], d[0]);
-  return new Mt(e, d, dt);
+  return new Mt(e, d, pt);
 }, Ut = (d, t) => {
-  if (ht) d.adoptedStyleSheets = t.map((e) => e instanceof CSSStyleSheet ? e : e.styleSheet);
+  if (dt) d.adoptedStyleSheets = t.map((e) => e instanceof CSSStyleSheet ? e : e.styleSheet);
   else for (const e of t) {
     const i = document.createElement("style"), a = K.litNonce;
     a !== void 0 && i.setAttribute("nonce", a), i.textContent = e.cssText, d.appendChild(i);
   }
-}, vt = ht ? (d) => d : (d) => d instanceof CSSStyleSheet ? ((t) => {
+}, mt = dt ? (d) => d : (d) => d instanceof CSSStyleSheet ? ((t) => {
   let e = "";
   for (const i of t.cssRules) e += i.cssText;
   return Ft(e);
@@ -45,7 +45,7 @@ const Ft = (d) => new Mt(typeof d == "string" ? d : d + "", void 0, dt), Nt = (d
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const { is: Gt, defineProperty: Bt, getOwnPropertyDescriptor: jt, getOwnPropertyNames: Rt, getOwnPropertySymbols: Dt, getPrototypeOf: qt } = Object, E = globalThis, mt = E.trustedTypes, Wt = mt ? mt.emptyScript : "", rt = E.reactiveElementPolyfillSupport, B = (d, t) => d, ct = { toAttribute(d, t) {
+const { is: Gt, defineProperty: Bt, getOwnPropertyDescriptor: jt, getOwnPropertyNames: Rt, getOwnPropertySymbols: Dt, getPrototypeOf: qt } = Object, E = globalThis, bt = E.trustedTypes, Wt = bt ? bt.emptyScript : "", rt = E.reactiveElementPolyfillSupport, B = (d, t) => d, ht = { toAttribute(d, t) {
   switch (t) {
     case Boolean:
       d = d ? Wt : null;
@@ -73,7 +73,7 @@ const { is: Gt, defineProperty: Bt, getOwnPropertyDescriptor: jt, getOwnProperty
       }
   }
   return e;
-} }, It = (d, t) => !Gt(d, t), bt = { attribute: !0, type: String, converter: ct, reflect: !1, useDefault: !1, hasChanged: It };
+} }, It = (d, t) => !Gt(d, t), _t = { attribute: !0, type: String, converter: ht, reflect: !1, useDefault: !1, hasChanged: It };
 Symbol.metadata ?? (Symbol.metadata = Symbol("metadata")), E.litPropertyMetadata ?? (E.litPropertyMetadata = /* @__PURE__ */ new WeakMap());
 let V = class extends HTMLElement {
   static addInitializer(t) {
@@ -82,7 +82,7 @@ let V = class extends HTMLElement {
   static get observedAttributes() {
     return this.finalize(), this._$Eh && [...this._$Eh.keys()];
   }
-  static createProperty(t, e = bt) {
+  static createProperty(t, e = _t) {
     if (e.state && (e.attribute = !1), this._$Ei(), this.prototype.hasOwnProperty(t) && ((e = Object.create(e)).wrapped = !0), this.elementProperties.set(t, e), !e.noAccessor) {
       const i = Symbol(), a = this.getPropertyDescriptor(t, i, e);
       a !== void 0 && Bt(this.prototype, t, a);
@@ -100,7 +100,7 @@ let V = class extends HTMLElement {
     }, configurable: !0, enumerable: !0 };
   }
   static getPropertyOptions(t) {
-    return this.elementProperties.get(t) ?? bt;
+    return this.elementProperties.get(t) ?? _t;
   }
   static _$Ei() {
     if (this.hasOwnProperty(B("elementProperties"))) return;
@@ -129,8 +129,8 @@ let V = class extends HTMLElement {
     const e = [];
     if (Array.isArray(t)) {
       const i = new Set(t.flat(1 / 0).reverse());
-      for (const a of i) e.unshift(vt(a));
-    } else t !== void 0 && e.push(vt(t));
+      for (const a of i) e.unshift(mt(a));
+    } else t !== void 0 && e.push(mt(t));
     return e;
   }
   static _$Eu(t, e) {
@@ -184,7 +184,7 @@ let V = class extends HTMLElement {
     var r;
     const i = this.constructor.elementProperties.get(t), a = this.constructor._$Eu(t, i);
     if (a !== void 0 && i.reflect === !0) {
-      const s = (((r = i.converter) == null ? void 0 : r.toAttribute) !== void 0 ? i.converter : ct).toAttribute(e, i.type);
+      const s = (((r = i.converter) == null ? void 0 : r.toAttribute) !== void 0 ? i.converter : ht).toAttribute(e, i.type);
       this._$Em = t, s == null ? this.removeAttribute(a) : this.setAttribute(a, s), this._$Em = null;
     }
   }
@@ -192,7 +192,7 @@ let V = class extends HTMLElement {
     var r, s;
     const i = this.constructor, a = i._$Eh.get(t);
     if (a !== void 0 && this._$Em !== a) {
-      const o = i.getPropertyOptions(a), l = typeof o.converter == "function" ? { fromAttribute: o.converter } : ((r = o.converter) == null ? void 0 : r.fromAttribute) !== void 0 ? o.converter : ct;
+      const o = i.getPropertyOptions(a), l = typeof o.converter == "function" ? { fromAttribute: o.converter } : ((r = o.converter) == null ? void 0 : r.fromAttribute) !== void 0 ? o.converter : ht;
       this._$Em = a;
       const h = l.fromAttribute(e, o.type);
       this[a] = h ?? ((s = this._$Ej) == null ? void 0 : s.get(a)) ?? h, this._$Em = null;
@@ -284,12 +284,12 @@ V.elementStyles = [], V.shadowRootOptions = { mode: "open" }, V[B("elementProper
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const j = globalThis, _t = (d) => d, tt = j.trustedTypes, $t = tt ? tt.createPolicy("lit-html", { createHTML: (d) => d }) : void 0, Lt = "$lit$", C = `lit$${Math.random().toFixed(9).slice(2)}$`, Vt = "?" + C, Xt = `<${Vt}>`, N = document, R = () => N.createComment(""), D = (d) => d === null || typeof d != "object" && typeof d != "function", pt = Array.isArray, Zt = (d) => pt(d) || typeof (d == null ? void 0 : d[Symbol.iterator]) == "function", nt = `[ 	
-\f\r]`, U = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, yt = /-->/g, xt = />/g, A = RegExp(`>|${nt}(?:([^\\s"'>=/]+)(${nt}*=${nt}*(?:[^ 	
-\f\r"'\`<>=]|("|')|))|$)`, "g"), wt = /'/g, kt = /"/g, Pt = /^(?:script|style|textarea|title)$/i, Yt = (d) => (t, ...e) => ({ _$litType$: d, strings: t, values: e }), p = Yt(1), T = Symbol.for("lit-noChange"), _ = Symbol.for("lit-nothing"), Ct = /* @__PURE__ */ new WeakMap(), z = N.createTreeWalker(N, 129);
+const j = globalThis, $t = (d) => d, tt = j.trustedTypes, yt = tt ? tt.createPolicy("lit-html", { createHTML: (d) => d }) : void 0, Lt = "$lit$", C = `lit$${Math.random().toFixed(9).slice(2)}$`, Vt = "?" + C, Xt = `<${Vt}>`, N = document, R = () => N.createComment(""), D = (d) => d === null || typeof d != "object" && typeof d != "function", gt = Array.isArray, Zt = (d) => gt(d) || typeof (d == null ? void 0 : d[Symbol.iterator]) == "function", nt = `[ 	
+\f\r]`, U = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, xt = /-->/g, wt = />/g, A = RegExp(`>|${nt}(?:([^\\s"'>=/]+)(${nt}*=${nt}*(?:[^ 	
+\f\r"'\`<>=]|("|')|))|$)`, "g"), kt = /'/g, Ct = /"/g, Pt = /^(?:script|style|textarea|title)$/i, Yt = (d) => (t, ...e) => ({ _$litType$: d, strings: t, values: e }), p = Yt(1), T = Symbol.for("lit-noChange"), _ = Symbol.for("lit-nothing"), Et = /* @__PURE__ */ new WeakMap(), z = N.createTreeWalker(N, 129);
 function Tt(d, t) {
-  if (!pt(d) || !d.hasOwnProperty("raw")) throw Error("invalid template strings array");
-  return $t !== void 0 ? $t.createHTML(t) : t;
+  if (!gt(d) || !d.hasOwnProperty("raw")) throw Error("invalid template strings array");
+  return yt !== void 0 ? yt.createHTML(t) : t;
 }
 const Jt = (d, t) => {
   const e = d.length - 1, i = [];
@@ -297,7 +297,7 @@ const Jt = (d, t) => {
   for (let o = 0; o < e; o++) {
     const l = d[o];
     let h, c, n = -1, g = 0;
-    for (; g < l.length && (s.lastIndex = g, c = s.exec(l), c !== null); ) g = s.lastIndex, s === U ? c[1] === "!--" ? s = yt : c[1] !== void 0 ? s = xt : c[2] !== void 0 ? (Pt.test(c[2]) && (a = RegExp("</" + c[2], "g")), s = A) : c[3] !== void 0 && (s = A) : s === A ? c[0] === ">" ? (s = a ?? U, n = -1) : c[1] === void 0 ? n = -2 : (n = s.lastIndex - c[2].length, h = c[1], s = c[3] === void 0 ? A : c[3] === '"' ? kt : wt) : s === kt || s === wt ? s = A : s === yt || s === xt ? s = U : (s = A, a = void 0);
+    for (; g < l.length && (s.lastIndex = g, c = s.exec(l), c !== null); ) g = s.lastIndex, s === U ? c[1] === "!--" ? s = xt : c[1] !== void 0 ? s = wt : c[2] !== void 0 ? (Pt.test(c[2]) && (a = RegExp("</" + c[2], "g")), s = A) : c[3] !== void 0 && (s = A) : s === A ? c[0] === ">" ? (s = a ?? U, n = -1) : c[1] === void 0 ? n = -2 : (n = s.lastIndex - c[2].length, h = c[1], s = c[3] === void 0 ? A : c[3] === '"' ? Ct : kt) : s === Ct || s === kt ? s = A : s === xt || s === wt ? s = U : (s = A, a = void 0);
     const u = s === A && d[o + 1].startsWith("/>") ? " " : "";
     r += s === U ? l + Xt : n >= 0 ? (i.push(h), l.slice(0, n) + Lt + l.slice(n) + C + u) : l + C + (n === -2 ? o : u);
   }
@@ -416,11 +416,11 @@ class W {
     }
   }
   _$AC(t) {
-    let e = Ct.get(t.strings);
-    return e === void 0 && Ct.set(t.strings, e = new q(t)), e;
+    let e = Et.get(t.strings);
+    return e === void 0 && Et.set(t.strings, e = new q(t)), e;
   }
   k(t) {
-    pt(this._$AH) || (this._$AH = [], this._$AR());
+    gt(this._$AH) || (this._$AH = [], this._$AR());
     const e = this._$AH;
     let i, a = 0;
     for (const r of t) a === e.length ? e.push(i = new W(this.O(R()), this.O(R()), this, this.options)) : i = e[a], i._$AI(r), a++;
@@ -429,8 +429,8 @@ class W {
   _$AR(t = this._$AA.nextSibling, e) {
     var i;
     for ((i = this._$AP) == null ? void 0 : i.call(this, !1, !0, e); t !== this._$AB; ) {
-      const a = _t(t).nextSibling;
-      _t(t).remove(), t = a;
+      const a = $t(t).nextSibling;
+      $t(t).remove(), t = a;
     }
   }
   setConnected(t) {
@@ -551,7 +551,7 @@ P._$litElement$ = !0, P.finalized = !0, (zt = M.litElementHydrateSupport) == nul
 const lt = M.litElementPolyfillSupport;
 lt == null || lt({ LitElement: P });
 (M.litElementVersions ?? (M.litElementVersions = [])).push("4.2.2");
-const G = "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z", se = "M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z", re = "M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z", ne = "M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z", oe = ["#f44336", "#ff9800", "#ffd23f", "#7cb342", "#4caf50"], Et = [
+const G = "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z", se = "M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z", re = "M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z", ne = "M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z", oe = ["#f44336", "#ff9800", "#ffd23f", "#7cb342", "#4caf50"], St = [
   { value: "bar", label: "Bar (default)" },
   { value: "gradient_track", label: "Gradient track" },
   { value: "glass", label: "Glass (glossy)" },
@@ -566,14 +566,14 @@ const G = "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,1
   { value: "needle", label: "Needle scale" },
   { value: "cursor", label: "Cursor" },
   { value: "sparkline", label: "Sparkline (24h)" }
-], le = /* @__PURE__ */ new Set(["sparkline", "ticks", "equalizer"]), St = [
+], le = /* @__PURE__ */ new Set(["sparkline", "ticks", "equalizer"]), At = [
   { value: "circle", label: "Circle ●" },
   { value: "line", label: "Line |" },
   { value: "arrow", label: "Arrow ▾" },
   { value: "diamond", label: "Diamond ◆" },
   { value: "bar", label: "Bar ▐" }
 ];
-function At(d, t) {
+function ct(d, t) {
   if (t = Math.max(0, Math.min(1, t)), !d || d.length === 0) return "var(--primary-color, #03a9f4)";
   if (d.length === 1) return d[0];
   const e = t * (d.length - 1), i = Math.min(d.length - 2, Math.floor(e)), a = e - i, r = d[i], s = d[i + 1];
@@ -1571,6 +1571,10 @@ class ce extends P {
       const m = (0 - c) / (n - c) * 100, $ = (u - c) / (n - c) * 100;
       e === "vertical" ? o >= 0 ? x = `bottom: ${m}%; height: ${$ - m}%; background: ${f}; box-shadow: 0 0 10px ${f};` : x = `bottom: ${$}%; height: ${m - $}%; background: ${f}; box-shadow: 0 0 10px ${f};` : o >= 0 ? x = `left: ${m}%; width: ${$ - m}%; background: ${f}; box-shadow: 0 0 10px ${f};` : x = `left: ${$}%; width: ${m - $}%; background: ${f}; box-shadow: 0 0 10px ${f};`;
     } else e === "vertical" ? x = `height: ${g}%; background: ${f}; box-shadow: 0 0 10px ${f};` : x = `width: ${g}%; background: ${f}; box-shadow: 0 0 10px ${f};`;
+    typeof f == "string" && f.indexOf("gradient") !== -1 && (x += this._gradientSliceStyle(
+      this._fillSpan({ min: c, max: n, clampedValue: u, value: o, conf: i }),
+      e
+    ));
     let k = p``;
     const w = i.target_entity !== void 0 && i.target_entity !== "" ? i.target_entity : i.target;
     if (w !== void 0 && w !== "") {
@@ -1588,12 +1592,12 @@ class ce extends P {
     if (this._config.show_min_max && this._history[a]) {
       const m = this._history[a].min, $ = this._history[a].max;
       if (m !== void 0 && $ !== void 0 && n !== c) {
-        const Q = Math.max(c, Math.min(m, n)), it = Math.max(c, Math.min($, n)), at = (Q - c) / (n - c) * 100, ut = (it - c) / (n - c) * 100 - at;
+        const Q = Math.max(c, Math.min(m, n)), it = Math.max(c, Math.min($, n)), at = (Q - c) / (n - c) * 100, ft = (it - c) / (n - c) * 100 - at;
         let st = "";
-        e === "vertical" ? st = `bottom: ${at}%; height: ${ut}%;` : st = `left: ${at}%; width: ${ut}%;`, S = p`<div class="min-max-range" style="${st}"></div>`;
+        e === "vertical" ? st = `bottom: ${at}%; height: ${ft}%;` : st = `left: ${at}%; width: ${ft}%;`, S = p`<div class="min-max-range" style="${st}"></div>`;
       }
     }
-    const X = i.compact_mode || this._config.compact_mode || !1, I = i.show_value_in_bar || this._config.show_value_in_bar || !1, Z = i.disable_shimmer || this._config.disable_shimmer || !1, Y = i.hide_icon || this._config.hide_icon || !1, O = i.hide_zero_bar || this._config.hide_zero_bar || !1, F = !isNaN(o) && o <= c, L = isNaN(o) ? r.state : `${o.toFixed(i.value_precision ?? this._config.value_precision ?? 1)} ${l}`, J = this._gaugeStyle(i), Ht = Math.max(3, Math.min(120, parseInt(i.segment_count ?? this._config.segment_count ?? 20, 10) || 20)), gt = (i.tap_action || this._config.tap_action || { action: "more-info" }).action !== "none", Ot = this._renderVisual(J, {
+    const X = i.compact_mode || this._config.compact_mode || !1, I = i.show_value_in_bar || this._config.show_value_in_bar || !1, Z = i.disable_shimmer || this._config.disable_shimmer || !1, Y = i.hide_icon || this._config.hide_icon || !1, O = i.hide_zero_bar || this._config.hide_zero_bar || !1, F = !isNaN(o) && o <= c, L = isNaN(o) ? r.state : `${o.toFixed(i.value_precision ?? this._config.value_precision ?? 1)} ${l}`, J = this._gaugeStyle(i), Ht = Math.max(3, Math.min(120, parseInt(i.segment_count ?? this._config.segment_count ?? 20, 10) || 20)), ut = (i.tap_action || this._config.tap_action || { action: "more-info" }).action !== "none", Ot = this._renderVisual(J, {
       layout: e,
       percent: g,
       color: f,
@@ -1615,8 +1619,8 @@ class ce extends P {
     });
     return p`
       <div class="gauge-container ${b ? "pulsing" : ""} ${X ? "compact" : ""} ${I ? "value-in-bar" : ""}"
-           role="${gt ? "button" : "img"}"
-           tabindex="${gt ? "0" : "-1"}"
+           role="${ut ? "button" : "img"}"
+           tabindex="${ut ? "0" : "-1"}"
            aria-label="${s}: ${L}"
            @keydown=${(m) => this._handleKey(m, i, a)}
            @click=${(m) => this._handleAction(m, i, a)}>
@@ -1655,7 +1659,7 @@ class ce extends P {
   // Solid colour for thumbs / strokes: if the computed colour is a gradient
   // string, sample the palette at the current fraction instead.
   _solidColor(t, e) {
-    return typeof t == "string" && t.indexOf("gradient") === -1 ? t : At(this._gradientColors(), e);
+    return typeof t == "string" && t.indexOf("gradient") === -1 ? t : ct(this._gradientColors(), e);
   }
   _resolveTarget(t) {
     let e = t.target_entity !== void 0 && t.target_entity !== "" ? t.target_entity : t.target;
@@ -1822,6 +1826,13 @@ class ce extends P {
     return { start: 0, end: h, size: h, zero: 0, centered: !1, negative: !1 };
   }
   // CSS for a fill covering `span` along the track.
+  // A gradient fill must follow the value: stretch the gradient over the whole
+  // scale (or the half-scale on that side of zero in center_zero mode) and
+  // anchor it where the fill grows from, so a low value only shows the low colours.
+  _gradientSliceStyle(t, e) {
+    const i = Math.max(1e-4, t.size), a = t.centered ? t.negative ? t.zero : 100 - t.zero : 100, r = Math.max(a, i) / i * 100, s = e === "vertical", o = s ? t.negative ? 0 : 100 : t.negative ? 100 : 0, l = ct(this._gradientColors(), Math.min(1, i / a));
+    return s ? ` background-size: 100% ${r}%; background-repeat: no-repeat; background-position: 0 ${o}%; box-shadow: 0 0 10px ${l};` : ` background-size: ${r}% 100%; background-repeat: no-repeat; background-position: ${o}% 0; box-shadow: 0 0 10px ${l};`;
+  }
   _spanStyle(t, e) {
     return e === "vertical" ? `bottom: ${t.start}%; height: ${t.size}%;` : `left: ${t.start}%; width: ${t.size}%;`;
   }
@@ -1834,7 +1845,7 @@ class ce extends P {
   // Colour of the i-th element of a repeated style: a fixed colour when one is
   // configured, otherwise the gradient palette sampled at that position.
   _elementColor(t, e, i, a) {
-    return !!(t.color || t.severity || this._config.color || this._config.severity) ? e : At(this._gradientColors(), (i + 0.5) / a);
+    return !!(t.color || t.severity || this._config.color || this._config.severity) ? e : ct(this._gradientColors(), (i + 0.5) / a);
   }
   // How much of element `i` (of `count`) the fill covers, 0..1.
   _elementCoverage(t, e, i) {
@@ -2232,9 +2243,9 @@ class he extends P {
         ]
       }
     }, e = {
-      select: { mode: "dropdown", options: Et }
-    }, i = {
       select: { mode: "dropdown", options: St }
+    }, i = {
+      select: { mode: "dropdown", options: At }
     }, a = { entity: { domain: "sensor" } }, r = this._config.colors || [];
     return p`
       <div class="card-config">
@@ -2705,8 +2716,8 @@ class he extends P {
       { value: "none", label: "None" }
     ], h = [
       { value: "", label: "(inherit global)" },
-      ...Et
-    ], c = St;
+      ...St
+    ], c = At;
     return p`
         <div class="entity-details">
             <div class="row">
@@ -3101,7 +3112,7 @@ class he extends P {
     this.dispatchEvent(t);
   }
 }
-const de = "1.4.0";
+const de = "1.4.1";
 console.info(
   `%c LINEAR-GAUGE-CARD %c ${de} `,
   "color: white; background: #03a9f4; font-weight: 700;",
